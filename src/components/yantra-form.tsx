@@ -55,8 +55,8 @@ export default function YantraForm({ action }: YantraFormProps) {
             <ScrollArea className="h-96">
                 <RadioGroup name="yantra" defaultValue="samrat" className="grid grid-cols-2 gap-4 pr-4">
                 {YANTRAS.map((yantra) => (
-                    <div key={yantra.id}>
-                    <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
+                    <div key={yantra.id} className="relative">
+                    <RadioGroupItem value={yantra.id} id={yantra.id} className="sr-only peer" />
                     <Label
                         htmlFor={yantra.id}
                         className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 h-32 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 transition-all cursor-pointer"
