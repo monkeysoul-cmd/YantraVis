@@ -6,6 +6,7 @@ import type { Yantra } from "@/lib/yantras";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
+import { X } from "lucide-react";
 
 type ArModalProps = {
   isOpen: boolean;
@@ -19,6 +20,12 @@ export default function ArModal({ isOpen, onClose, yantraId }: ArModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0">
+        <DialogClose asChild>
+            <Button variant="ghost" size="icon" className="absolute top-4 right-4 z-20 bg-background/50 hover:bg-background/80">
+                <X className="h-5 w-5" />
+                <span className="sr-only">Close</span>
+            </Button>
+        </DialogClose>
         <div className="flex-grow relative overflow-hidden bg-secondary">
           {bgImage && (
             <Image 
