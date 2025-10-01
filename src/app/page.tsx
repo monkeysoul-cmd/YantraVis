@@ -46,7 +46,7 @@ export default function Home() {
                 <CardContent className="text-center text-muted-foreground p-6">
                     <Compass className="mx-auto h-16 w-16 mb-4 text-primary/50" />
                     <h2 className="font-headline text-2xl font-semibold text-foreground">Welcome to YantraVis</h2>
-                    <p className="mt-2 max-w-sm">Enter a location and select a yantra to generate its 3D model, AI-powered description, and construction dimensions.</p>
+                    <p className="mt-2 max-w-sm">Enter a location and select a yantra to generate its 3D model, description, and construction dimensions.</p>
                 </CardContent>
               </Card>
             )}
