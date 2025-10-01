@@ -1,8 +1,8 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ActionState } from '@/lib/schema/yantra';
+import type { ActionState, YantraData } from '@/lib/schema/yantra';
 import { generateYantra } from '@/app/actions';
 
 import AppHeader from '@/components/app-header';
@@ -11,6 +11,9 @@ import YantraDetails from '@/components/yantra-details';
 import { Card, CardContent } from '@/components/ui/card';
 import { Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const CACHE_KEY = 'yantravis-last-data';
 
 const initialState: ActionState = {
   data: null,
@@ -19,7 +22,22 @@ const initialState: ActionState = {
 
 export default function Home() {
   const [state, formAction] = useActionState(generateYantra, initialState);
+  const [localData, setLocalData] = useState<YantraData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Load data from localStorage on initial client-side render
+    try {
+      const cachedData = localStorage.getItem(CACHE_KEY);
+      if (cachedData) {
+        setLocalData(JSON.parse(cachedData));
+      }
+    } catch (error) {
+      console.error("Failed to load cached yantra data:", error);
+    }
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     if (state.error) {
@@ -29,7 +47,17 @@ export default function Home() {
         description: state.error,
       });
     }
+    if (state.data) {
+      // Save successful generation to localStorage
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(state.data));
+      } catch (error) {
+        console.error("Failed to cache yantra data:", error);
+      }
+    }
   }, [state, toast]);
+
+  const displayData = state.data || localData;
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -40,20 +68,33 @@ export default function Home() {
             <YantraForm action={formAction} />
           </div>
           <div className="lg:col-span-2">
-            <div className={cn("transition-opacity duration-500", state.data ? 'opacity-100' : 'opacity-0' )}>
-              {state.data && (
-                <YantraDetails data={state.data} />
-              )}
-            </div>
-            {!state.data && (
-              <Card className="min-h-[70vh] flex items-center justify-center transition-opacity duration-500 ease-in-out">
-                <CardContent className="text-center text-muted-foreground p-6">
-                    <Compass className="mx-auto h-16 w-16 mb-4 text-primary/50" />
-                    <h2 className="font-headline text-2xl font-semibold text-foreground">Welcome to YantraVis</h2>
-                    <p className="mt-2 max-w-sm">Enter a location and select a yantra to generate its 3D model, description, and construction dimensions.</p>
-                </CardContent>
-              </Card>
-            )}
+             {isLoading ? (
+                <Card>
+                    <CardContent className="p-6 space-y-4">
+                        <Skeleton className="h-8 w-1/2" />
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="aspect-video w-full" />
+                        <Skeleton className="h-24 w-full" />
+                    </CardContent>
+                </Card>
+             ) : (
+                <>
+                    <div className={cn("transition-opacity duration-500", displayData ? 'opacity-100' : 'opacity-0' )}>
+                        {displayData && (
+                            <YantraDetails data={displayData} />
+                        )}
+                    </div>
+                    {!displayData && (
+                    <Card className="min-h-[70vh] flex items-center justify-center transition-opacity duration-500 ease-in-out">
+                        <CardContent className="text-center text-muted-foreground p-6">
+                            <Compass className="mx-auto h-16 w-16 mb-4 text-primary/50" />
+                            <h2 className="font-headline text-2xl font-semibold text-foreground">Welcome to YantraVis</h2>
+                            <p className="mt-2 max-w-sm">Enter a location and select a yantra to generate its 3D model, description, and construction dimensions.</p>
+                        </CardContent>
+                    </Card>
+                    )}
+                </>
+             )}
           </div>
         </div>
       </main>
