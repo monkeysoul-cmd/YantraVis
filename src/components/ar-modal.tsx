@@ -1,6 +1,6 @@
 'use client';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import YantraViewer from "./yantra-viewer";
 import type { Yantra } from "@/lib/yantras";
 import Image from "next/image";
@@ -34,11 +34,16 @@ export default function ArModal({ isOpen, onClose, yantraId }: ArModalProps) {
             <YantraViewer yantraId={yantraId} isArMode={true} />
           </div>
         </div>
-        <DialogHeader className="p-6 border-t bg-card">
-          <DialogTitle className="font-headline">Augmented Reality Preview</DialogTitle>
-          <DialogDescription>
-            This is a simulation. On a supported mobile device, this view would use your camera to place the yantra in your environment.
-          </DialogDescription>
+        <DialogHeader className="p-6 border-t bg-card flex-row items-center justify-between">
+            <div className='space-y-1.5'>
+                <DialogTitle className="font-headline">Augmented Reality Preview</DialogTitle>
+                <DialogDescription>
+                    This is a simulation. On a supported mobile device, this view would use your camera to place the yantra in your environment.
+                </DialogDescription>
+            </div>
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
         </DialogHeader>
       </DialogContent>
     </Dialog>
