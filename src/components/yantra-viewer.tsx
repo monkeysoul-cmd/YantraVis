@@ -8,9 +8,10 @@ import type { Yantra } from '@/lib/yantras';
 type YantraViewerProps = {
   yantraId: Yantra['id'];
   isArMode?: boolean;
+  animateShadow?: boolean;
 };
 
-export default function YantraViewer({ yantraId, isArMode = false }: YantraViewerProps) {
+export default function YantraViewer({ yantraId, isArMode = false, animateShadow = false }: YantraViewerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,6 +59,8 @@ export default function YantraViewer({ yantraId, isArMode = false }: YantraViewe
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 1024;
     directionalLight.shadow.mapSize.height = 1024;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 50;
     scene.add(directionalLight);
 
     // Material
@@ -160,9 +163,23 @@ export default function YantraViewer({ yantraId, isArMode = false }: YantraViewe
     camera.lookAt(object.position);
     controls.target.copy(object.position);
 
+    const clock = new THREE.Clock();
+
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
+
+      if (animateShadow) {
+        const elapsedTime = clock.getElapsedTime();
+        const sunAngle = (elapsedTime * 0.2) % (Math.PI * 2);
+        directionalLight.position.set(
+            8 * Math.cos(sunAngle),
+            6 * Math.sin(sunAngle),
+            8 * Math.sin(sunAngle)
+        );
+        ambientLight.intensity = Math.max(0.2, Math.sin(sunAngle) * 0.7);
+      }
+
       controls.update();
       renderer.render(scene, camera);
     };
@@ -185,7 +202,7 @@ export default function YantraViewer({ yantraId, isArMode = false }: YantraViewe
         currentMount.removeChild(renderer.domElement);
       }
     };
-  }, [yantraId, isArMode]);
+  }, [yantraId, isArMode, animateShadow]);
 
   return <div ref={mountRef} className="w-full h-full" />;
 }

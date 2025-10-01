@@ -4,14 +4,17 @@ import { useState } from 'react';
 import type { YantraData } from '@/app/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Camera, Compass } from 'lucide-react';
+import { Download, Camera, Compass, Sun, Moon } from 'lucide-react';
 import YantraViewer from './yantra-viewer';
 import ArModal from './ar-modal';
 import { Separator } from './ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
 
 export default function YantraDetails({ data }: { data: YantraData }) {
   const [isArModalOpen, setIsArModalOpen] = useState(false);
+  const [animateShadow, setAnimateShadow] = useState(false);
   const { toast } = useToast();
 
   const handleCadDownload = () => {
@@ -24,7 +27,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
     a.href = url;
     a.download = `${data.yantraId}_${data.location.latitude}_${data.location.longitude}.txt`;
     document.body.appendChild(a);
-    a.click();
+a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
@@ -45,10 +48,22 @@ export default function YantraDetails({ data }: { data: YantraData }) {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-gradient-to-br from-secondary/30 to-background">
-            <YantraViewer yantraId={data.yantraId} />
-            <div className="absolute top-3 right-3 bg-card/70 backdrop-blur-sm p-2 rounded-full shadow-md">
-                <Compass className="h-6 w-6 text-foreground" />
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-xs font-bold text-primary">N</div>
+            <YantraViewer yantraId={data.yantraId} animateShadow={animateShadow} />
+            <div className="absolute top-3 right-3 flex items-center gap-2">
+                <div className="flex items-center space-x-2 bg-card/70 backdrop-blur-sm p-2 rounded-full shadow-md">
+                    <Sun className="h-5 w-5 text-yellow-500" />
+                    <Switch
+                        id="animate-shadow"
+                        checked={animateShadow}
+                        onCheckedChange={setAnimateShadow}
+                    />
+                    <Moon className="h-5 w-5 text-slate-400" />
+                    <Label htmlFor="animate-shadow" className="sr-only">Simulate Day/Night</Label>
+                </div>
+                <div className="bg-card/70 backdrop-blur-sm p-2 rounded-full shadow-md relative">
+                    <Compass className="h-6 w-6 text-foreground" />
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-xs font-bold text-primary">N</div>
+                </div>
             </div>
           </div>
 
