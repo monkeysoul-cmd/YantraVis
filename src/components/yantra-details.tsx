@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Camera, Compass, Sun, Moon, Wrench, CircleDollarSign, CheckCircle, MapPin, Scale, HardHat } from 'lucide-react';
-import YantraViewer from './yantra-viewer';
+import { Download, Camera, Compass, Sun, Moon, Wrench, CircleDollarSign, CheckCircle, MapPin, Scale, HardHat, ZoomIn, ZoomOut } from 'lucide-react';
+import YantraViewer, { type YantraViewerRef } from './yantra-viewer';
 import ArModal from './ar-modal';
 import { Separator } from './ui/separator';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 export default function YantraDetails({ data }: { data: YantraData }) {
   const [isArModalOpen, setIsArModalOpen] = useState(false);
   const [animateShadow, setAnimateShadow] = useState(false);
+  const viewerRef = useRef<YantraViewerRef>(null);
   const { toast } = useToast();
 
   const handleCadDownload = () => {
@@ -50,7 +51,7 @@ a.click();
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-gradient-to-br from-secondary/30 to-background">
-            <YantraViewer yantraId={data.yantraId} animateShadow={animateShadow} />
+            <YantraViewer ref={viewerRef} yantraId={data.yantraId} animateShadow={animateShadow} />
             <div className="absolute top-3 right-3 flex items-center gap-2">
                 <div className="flex items-center space-x-2 bg-card/70 backdrop-blur-sm p-2 rounded-full shadow-md">
                     <Sun className="h-5 w-5 text-yellow-500" />
@@ -66,6 +67,16 @@ a.click();
                     <Compass className="h-6 w-6 text-foreground" />
                     <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-xs font-bold text-primary">N</div>
                 </div>
+            </div>
+             <div className="absolute bottom-3 left-3 flex flex-col items-center gap-2">
+                <Button size="icon" variant="outline" className='bg-card/70 backdrop-blur-sm shadow-md' onClick={() => viewerRef.current?.zoomIn()}>
+                    <ZoomIn />
+                    <span className='sr-only'>Zoom In</span>
+                </Button>
+                <Button size="icon" variant="outline" className='bg-card/70 backdrop-blur-sm shadow-md' onClick={() => viewerRef.current?.zoomOut()}>
+                    <ZoomOut />
+                    <span className='sr-only'>Zoom Out</span>
+                </Button>
             </div>
           </div>
 
@@ -135,6 +146,7 @@ a.click();
                   <div className="bg-secondary/30 p-4 rounded-md border">
                     <h4 className="font-semibold text-lg flex items-center gap-2 mb-2"><Scale className="text-primary"/>Tolerance Guidance</h4>
                     <p className="text-muted-foreground">{data.analysis.orientation.toleranceGuidance}</p>
+
                   </div>
               </AccordionContent>
             </AccordionItem>
