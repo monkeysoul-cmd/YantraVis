@@ -10,11 +10,12 @@ import { YANTRAS } from '@/lib/yantras';
 import { Globe, Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { ScrollArea } from './ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full text-base py-6" disabled={pending}>
+    <Button type="submit" className={cn("w-full text-base py-6", pending && "animate-pulse")} disabled={pending}>
       {pending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Globe className="mr-2 h-5 w-5" />}
       Generate Yantra
     </Button>
