@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SAMRAT_JAIPUR_DATA } from '@/lib/pre-generated/samrat-jaipur';
 
 const CACHE_KEY = 'yantravis-last-data';
 
@@ -32,9 +33,14 @@ export default function Home() {
       const cachedData = localStorage.getItem(CACHE_KEY);
       if (cachedData) {
         setLocalData(JSON.parse(cachedData));
+      } else {
+        // If no cached data, load the pre-generated default
+        setLocalData(SAMRAT_JAIPUR_DATA);
       }
     } catch (error) {
       console.error("Failed to load cached yantra data:", error);
+      // Fallback to pre-generated data on error
+      setLocalData(SAMRAT_JAIPUR_DATA);
     }
     setIsLoading(false);
   }, []);
@@ -87,7 +93,7 @@ export default function Home() {
                     {!displayData && (
                     <Card className="min-h-[70vh] flex items-center justify-center transition-opacity duration-500 ease-in-out">
                         <CardContent className="text-center text-muted-foreground p-6">
-                            <Compass className="mx-auto h-16 w-16 mb-4 text-primary/50" />
+                            <Compass className="mx-auto h-16 w-16 text-primary/50" />
                             <h2 className="font-headline text-2xl font-semibold text-foreground">Welcome to YantraVis</h2>
                             <p className="mt-2 max-w-sm">Enter a location and select a yantra to generate its 3D model, description, and construction dimensions.</p>
                         </CardContent>
