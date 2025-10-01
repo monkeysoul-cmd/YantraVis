@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Camera, Compass, Sun, Moon, Wrench, CircleDollarSign, CheckCircle, MapPin, Scale, HardHat, ZoomIn, ZoomOut } from 'lucide-react';
+import { Download, Camera, Compass, Sun, Moon, Wrench, CircleDollarSign, CheckCircle, MapPin, Scale, HardHat } from 'lucide-react';
 import YantraViewer, { type YantraViewerRef } from './yantra-viewer';
 import ArModal from './ar-modal';
 import { Separator } from './ui/separator';
@@ -67,16 +67,6 @@ a.click();
                     <Compass className="h-6 w-6 text-foreground" />
                     <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-xs font-bold text-primary">N</div>
                 </div>
-            </div>
-             <div className="absolute bottom-3 left-3 flex flex-col items-center gap-2">
-                <Button size="icon" variant="outline" className='bg-card/70 backdrop-blur-sm shadow-md' onClick={() => viewerRef.current?.zoomIn()}>
-                    <ZoomIn />
-                    <span className='sr-only'>Zoom In</span>
-                </Button>
-                <Button size="icon" variant="outline" className='bg-card/70 backdrop-blur-sm shadow-md' onClick={() => viewerRef.current?.zoomOut()}>
-                    <ZoomOut />
-                    <span className='sr-only'>Zoom Out</span>
-                </Button>
             </div>
           </div>
 
