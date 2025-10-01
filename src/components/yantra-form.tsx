@@ -15,9 +15,18 @@ import { cn } from '@/lib/utils';
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className={cn("w-full text-base py-6", pending && "animate-pulse")} disabled={pending}>
-      {pending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Globe className="mr-2 h-5 w-5" />}
-      Generate Yantra
+    <Button type="submit" className="w-full text-base py-6 transition-all duration-300" disabled={pending}>
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          Generating...
+        </>
+      ) : (
+        <>
+          <Globe className="mr-2 h-5 w-5" />
+          Generate Yantra
+        </>
+      )}
     </Button>
   );
 }
@@ -79,7 +88,7 @@ export default function YantraForm({ action }: YantraFormProps) {
                     <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
                     <Label
                         htmlFor={yantra.id}
-                        className="relative z-10 flex h-32 flex-col items-center justify-center rounded-md border-2 border-muted bg-popover bg-gradient-to-br from-card/70 to-secondary/10 p-4 transition-all hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 cursor-pointer overflow-hidden active:scale-95"
+                        className="relative z-10 flex h-32 flex-col items-center justify-center rounded-md border-2 border-muted bg-popover bg-gradient-to-br from-card/70 to-secondary/10 p-4 transition-all hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 cursor-pointer overflow-hidden active:scale-95 duration-200"
                     >
                         <YantraGraphicBackground />
                         <div className="relative z-20 flex flex-col items-center justify-center">
