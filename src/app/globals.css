@@ -16,7 +16,7 @@
     --secondary-foreground: 220 5.9% 10%;
     --muted: 220 20% 94%;
     --muted-foreground: 220 5% 45%;
-    --accent: 45 86% 58%;
+    --accent: 45 96% 55%;
     --accent-foreground: 48 96% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -80,5 +80,8 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  button, [role="button"], input[type="submit"], input[type="button"] {
+    @apply transition-all duration-200;
   }
 }

@@ -10,6 +10,7 @@ import YantraForm from '@/components/yantra-form';
 import YantraDetails from '@/components/yantra-details';
 import { Card, CardContent } from '@/components/ui/card';
 import { Compass } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const initialState: ActionState = {
   data: null,
@@ -39,10 +40,13 @@ export default function Home() {
             <YantraForm action={formAction} />
           </div>
           <div className="lg:col-span-2">
-            {state.data ? (
-              <YantraDetails data={state.data} />
-            ) : (
-              <Card className="min-h-[70vh] flex items-center justify-center">
+            <div className={cn("transition-opacity duration-500", state.data ? 'opacity-100' : 'opacity-0' )}>
+              {state.data && (
+                <YantraDetails data={state.data} />
+              )}
+            </div>
+            {!state.data && (
+              <Card className="min-h-[70vh] flex items-center justify-center transition-opacity duration-500 ease-in-out">
                 <CardContent className="text-center text-muted-foreground p-6">
                     <Compass className="mx-auto h-16 w-16 mb-4 text-primary/50" />
                     <h2 className="font-headline text-2xl font-semibold text-foreground">Welcome to YantraVis</h2>

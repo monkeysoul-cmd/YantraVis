@@ -42,7 +42,7 @@ a.click();
 
   return (
     <>
-      <Card className="shadow-lg">
+      <Card className="shadow-lg animate-in fade-in duration-500">
         <CardHeader>
           <CardTitle className="font-headline text-4xl text-primary">{data.yantraName}</CardTitle>
           <CardDescription>
