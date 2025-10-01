@@ -24,7 +24,12 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateYantraDescriptionOutputSchema},
   prompt: `You are an expert in Indian astronomical instruments.
 
-  Provide a detailed description of the {{yantraName}} yantra, including its purpose and historical significance.
+  Provide a detailed and engaging description of the {{yantraName}} yantra.
+  
+  Structure your response with the following sections, using bullet points and relevant emojis for each:
+  - 📜 **Purpose**: Explain what the instrument is used for.
+  - 🏛️ **Historical Significance**: Describe its history and importance.
+  - ✨ **Fun Fact**: Add an interesting tidbit about the instrument.
   `,
 });
 
