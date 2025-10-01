@@ -26,10 +26,18 @@ const prompt = ai.definePrompt({
 
   Provide a detailed and engaging description of the {{yantraName}} yantra.
   
-  Structure your response with the following sections, using bullet points and relevant emojis for each:
-  - 📜 **Purpose**: Explain what the instrument is used for.
-  - 🏛️ **Historical Significance**: Describe its history and importance.
-  - ✨ **Fun Fact**: Add an interesting tidbit about the instrument.
+  Structure your response as a single string containing HTML. Use heading and paragraph tags. Use bullet points and relevant emojis for each section.
+  
+  The output should be structured in the following sections:
+
+  ### 📜 Purpose
+  Explain what the instrument is used for. Use a bulleted list for key functions.
+
+  ### 🏛️ Historical Significance
+  Describe its history and importance. Use a bulleted list for key facts.
+  
+  ### ✨ Fun Fact
+  Add an interesting tidbit about the instrument.
   `,
 });
 

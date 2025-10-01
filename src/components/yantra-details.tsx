@@ -73,8 +73,11 @@ a.click();
           <Separator />
 
           <div>
-            <h3 className="font-headline text-2xl mb-2">Cosmic Significance</h3>
-            <div className="text-muted-foreground whitespace-pre-wrap leading-relaxed" dangerouslySetInnerHTML={{ __html: data.description }}></div>
+            <h3 className="font-headline text-2xl mb-4">Cosmic Significance</h3>
+            <div 
+              className="prose prose-sm max-w-none text-muted-foreground [&_h3]:font-headline [&_h3]:text-foreground [&_h3]:text-xl [&_ul]:list-disc [&_ul]:pl-5 [&_p]:mb-4" 
+              dangerouslySetInnerHTML={{ __html: data.description }}
+            ></div>
           </div>
           
           <Separator />
