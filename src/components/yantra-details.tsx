@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 
 export default function YantraDetails({ data }: { data: YantraData }) {
   const [isArModalOpen, setIsArModalOpen] = useState(false);
-  const [animateShadow, setAnimateShadow] = useState(false);
+  const [animateShadow, setAnimateShadow] = useState(true);
   const viewerRef = useRef<YantraViewerRef>(null);
   const { toast } = useToast();
 
