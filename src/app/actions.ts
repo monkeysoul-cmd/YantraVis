@@ -1,11 +1,9 @@
 'use server';
 
 import { generateYantraDescription } from '@/ai/flows/generate-yantra-description';
-import { generateEducationalContent } from '@/ai/flows/generate-educational-content';
 import { YANTRAS } from '@/lib/yantras';
 import { YantraGenerationFormSchema } from '@/lib/schema/yantra';
 import type { ActionState, YantraData } from '@/lib/schema/yantra';
-import type { GenerateEducationalContentOutput } from '@/lib/schema/educational-content';
 
 
 export async function generateYantra(
@@ -58,19 +56,4 @@ export async function generateYantra(
     console.error(error);
     return { data: null, error: 'Failed to generate yantra description. Please try again later.' };
   }
-}
-
-
-export async function getEducationalContent(yantraData: YantraData): Promise<GenerateEducationalContentOutput | { error: string }> {
-    try {
-        const result = await generateEducationalContent({
-            yantraId: yantraData.yantraId,
-            yantraName: yantraData.yantraName,
-            dimensions: yantraData.dimensions,
-        });
-        return result;
-    } catch (error) {
-        console.error(error);
-        return { error: 'Failed to generate educational content. Please try again.' };
-    }
 }
