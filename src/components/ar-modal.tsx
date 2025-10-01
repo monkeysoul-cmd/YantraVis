@@ -41,16 +41,13 @@ export default function ArModal({ isOpen, onClose, yantraId }: ArModalProps) {
             <YantraViewer yantraId={yantraId} isArMode={true} />
           </div>
         </div>
-        <DialogHeader className="p-6 border-t bg-card flex-row items-center justify-between">
+        <DialogHeader className="p-6 border-t bg-card">
             <div className='space-y-1.5'>
                 <DialogTitle className="font-headline">Augmented Reality Preview</DialogTitle>
                 <DialogDescription>
                     This is a simulation. On a supported mobile device, this view would use your camera to place the yantra in your environment.
                 </DialogDescription>
             </div>
-            <DialogClose asChild>
-              <Button variant="outline">Close</Button>
-            </DialogClose>
         </DialogHeader>
       </DialogContent>
     </Dialog>
