@@ -1,6 +1,7 @@
 'use server';
 
 import { generateYantraDescription } from '@/ai/flows/generate-yantra-description';
+import { generateYantraAnalysis } from '@/ai/flows/generate-yantra-analysis';
 import { YANTRAS } from '@/lib/yantras';
 import { YantraGenerationFormSchema } from '@/lib/schema/yantra';
 import type { ActionState, YantraData } from '@/lib/schema/yantra';
@@ -40,20 +41,24 @@ export async function generateYantra(
         throw new Error('Invalid Yantra selected');
     }
     
-    // Using the provided AI flow to generate a rich description
-    const aiResult = await generateYantraDescription({ yantraName: selectedYantra.name });
+    // Using the provided AI flow to generate a rich description and analysis
+    const [descriptionResult, analysisResult] = await Promise.all([
+      generateYantraDescription({ yantraName: selectedYantra.name }),
+      generateYantraAnalysis({ yantraName: selectedYantra.name, dimensions: mockDimensions })
+    ]);
 
     const yantraData: YantraData = {
         yantraId: yantra,
         yantraName: selectedYantra.name,
-        description: aiResult.description,
+        description: descriptionResult.description,
         dimensions: mockDimensions,
+        analysis: analysisResult,
         location: { latitude, longitude }
     };
     
     return { data: yantraData, error: null };
   } catch (error) {
     console.error(error);
-    return { data: null, error: 'Failed to generate yantra description. Please try again later.' };
+    return { data: null, error: 'Failed to generate yantra details. Please try again later.' };
   }
 }

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Camera, Compass, Sun, Moon } from 'lucide-react';
+import { Download, Camera, Compass, Sun, Moon, Wrench, CircleDollarSign, CheckCircle } from 'lucide-react';
 import YantraViewer from './yantra-viewer';
 import ArModal from './ar-modal';
 import { Separator } from './ui/separator';
@@ -11,6 +11,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import type { YantraData } from '@/lib/schema/yantra';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Badge } from './ui/badge';
 
 export default function YantraDetails({ data }: { data: YantraData }) {
   const [isArModalOpen, setIsArModalOpen] = useState(false);
@@ -27,7 +30,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
     a.href = url;
     a.download = `${data.yantraId}_${data.location.latitude}_${data.location.longitude}.txt`;
     document.body.appendChild(a);
-    a.click();
+a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
@@ -74,6 +77,47 @@ export default function YantraDetails({ data }: { data: YantraData }) {
             <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">{data.description}</p>
           </div>
           
+          <Separator />
+          
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="analysis">
+              <AccordionTrigger className="font-headline text-2xl">
+                Construction & Accuracy Analysis
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-6">
+                <div>
+                  <h4 className="font-semibold text-lg flex items-center gap-2 mb-2"><Wrench className="text-primary"/>Bill of Materials</h4>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Item</TableHead>
+                        <TableHead className="text-right">Quantity</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data.analysis.billOfMaterials.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">{item.item}</TableCell>
+                          <TableCell className="text-right">{item.quantity}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-secondary/30 p-4 rounded-md border">
+                    <h4 className="font-semibold text-lg flex items-center gap-2 mb-2"><CircleDollarSign className="text-primary"/>Cost Estimate</h4>
+                    <p className="text-muted-foreground">{data.analysis.costEstimate}</p>
+                  </div>
+                  <div className="bg-secondary/30 p-4 rounded-md border">
+                    <h4 className="font-semibold text-lg flex items-center gap-2 mb-2"><CheckCircle className="text-primary"/>Accuracy</h4>
+                    <p className="text-muted-foreground">{data.analysis.accuracy}</p>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
           <Separator />
 
           <div>

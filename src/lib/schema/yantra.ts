@@ -1,5 +1,6 @@
 import { YANTRAS } from '@/lib/yantras';
 import { z } from 'zod';
+import { YantraAnalysisSchema } from './yantra-analysis';
 
 const yantraIds = YANTRAS.map(y => y.id) as [string, ...string[]];
 
@@ -14,6 +15,7 @@ export type YantraData = {
     yantraName: string;
     description: string;
     dimensions: Record<string, number>;
+    analysis: z.infer<typeof YantraAnalysisSchema>;
     location: {
         latitude: number;
         longitude: number;
