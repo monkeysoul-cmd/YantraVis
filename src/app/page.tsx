@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ActionState } from '@/app/actions';
+import type { ActionState } from '@/lib/schema/yantra';
 import { generateYantra } from '@/app/actions';
 
 import AppHeader from '@/components/app-header';

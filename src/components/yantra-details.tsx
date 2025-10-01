@@ -1,19 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import type { YantraData } from '@/app/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Camera, Compass, Sun, Moon } from 'lucide-react';
+import { Download, Camera, Compass, Sun, Moon, BookOpen } from 'lucide-react';
 import YantraViewer from './yantra-viewer';
 import ArModal from './ar-modal';
+import MuseumModeModal from './museum-mode-modal';
 import { Separator } from './ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
+import type { YantraData } from '@/lib/schema/yantra';
 
 export default function YantraDetails({ data }: { data: YantraData }) {
   const [isArModalOpen, setIsArModalOpen] = useState(false);
+  const [isMuseumModalOpen, setIsMuseumModalOpen] = useState(false);
   const [animateShadow, setAnimateShadow] = useState(false);
   const { toast } = useToast();
 
@@ -27,7 +29,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
     a.href = url;
     a.download = `${data.yantraId}_${data.location.latitude}_${data.location.longitude}.txt`;
     document.body.appendChild(a);
-a.click();
+    a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
@@ -89,13 +91,17 @@ a.click();
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t">
-            <Button onClick={handleCadDownload} className="w-full sm:w-auto flex-1 sm:flex-none">
+            <Button onClick={handleCadDownload} className="w-full sm:w-auto">
               <Download className="mr-2 h-4 w-4" />
               Export CAD (TXT)
             </Button>
-            <Button onClick={() => setIsArModalOpen(true)} variant="outline" className="w-full sm:w-auto flex-1 sm:flex-none">
+            <Button onClick={() => setIsArModalOpen(true)} variant="outline" className="w-full sm:w-auto">
               <Camera className="mr-2 h-4 w-4" />
               AR Preview
+            </Button>
+            <Button onClick={() => setIsMuseumModalOpen(true)} variant="secondary" className="w-full sm:w-auto flex-1">
+              <BookOpen className="mr-2 h-4 w-4" />
+              Museum Mode
             </Button>
           </div>
         </CardContent>
@@ -104,6 +110,11 @@ a.click();
         isOpen={isArModalOpen}
         onClose={() => setIsArModalOpen(false)}
         yantraId={data.yantraId}
+      />
+      <MuseumModeModal
+        isOpen={isMuseumModalOpen}
+        onClose={() => setIsMuseumModalOpen(false)}
+        yantraData={data}
       />
     </>
   );

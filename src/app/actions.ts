@@ -1,38 +1,18 @@
 'use server';
 
 import { generateYantraDescription } from '@/ai/flows/generate-yantra-description';
+import { generateEducationalContent } from '@/ai/flows/generate-educational-content';
 import { YANTRAS } from '@/lib/yantras';
-import { z } from 'zod';
+import { YantraGenerationFormSchema } from '@/lib/schema/yantra';
+import type { ActionState, YantraData } from '@/lib/schema/yantra';
+import type { GenerateEducationalContentOutput } from '@/lib/schema/educational-content';
 
-const yantraIds = YANTRAS.map(y => y.id) as [string, ...string[]];
-
-const FormSchema = z.object({
-  latitude: z.coerce.number().min(-90, 'Must be >= -90').max(90, 'Must be <= 90'),
-  longitude: z.coerce.number().min(-180, 'Must be >= -180').max(180, 'Must be <= 180'),
-  yantra: z.enum(yantraIds),
-});
-
-export type YantraData = {
-    yantraId: z.infer<typeof FormSchema>['yantra'];
-    yantraName: string;
-    description: string;
-    dimensions: Record<string, number>;
-    location: {
-        latitude: number;
-        longitude: number;
-    }
-};
-
-export type ActionState = {
-  data: YantraData | null;
-  error: string | null;
-};
 
 export async function generateYantra(
   prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const validatedFields = FormSchema.safeParse({
+  const validatedFields = YantraGenerationFormSchema.safeParse({
     latitude: formData.get('latitude'),
     longitude: formData.get('longitude'),
     yantra: formData.get('yantra'),
@@ -78,4 +58,19 @@ export async function generateYantra(
     console.error(error);
     return { data: null, error: 'Failed to generate yantra description. Please try again later.' };
   }
+}
+
+
+export async function getEducationalContent(yantraData: YantraData): Promise<GenerateEducationalContentOutput | { error: string }> {
+    try {
+        const result = await generateEducationalContent({
+            yantraId: yantraData.yantraId,
+            yantraName: yantraData.yantraName,
+            dimensions: yantraData.dimensions,
+        });
+        return result;
+    } catch (error) {
+        console.error(error);
+        return { error: 'Failed to generate educational content. Please try again.' };
+    }
 }

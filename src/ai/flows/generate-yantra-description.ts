@@ -3,22 +3,16 @@
  * @fileOverview A yantra description AI agent.
  *
  * - generateYantraDescription - A function that handles the yantra description generation process.
- * - GenerateYantraDescriptionInput - The input type for the generateYantraDescription function.
- * - GenerateYantraDescriptionOutput - The return type for the generateYantraDescription function.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {
+  GenerateYantraDescriptionInputSchema,
+  GenerateYantraDescriptionOutputSchema,
+  type GenerateYantraDescriptionInput,
+  type GenerateYantraDescriptionOutput
+} from '@/lib/schema/yantra-description';
 
-const GenerateYantraDescriptionInputSchema = z.object({
-  yantraName: z.string().describe('The name of the yantra to describe.'),
-});
-export type GenerateYantraDescriptionInput = z.infer<typeof GenerateYantraDescriptionInputSchema>;
-
-const GenerateYantraDescriptionOutputSchema = z.object({
-  description: z.string().describe('A detailed description of the yantra, including its purpose and historical significance.'),
-});
-export type GenerateYantraDescriptionOutput = z.infer<typeof GenerateYantraDescriptionOutputSchema>;
 
 export async function generateYantraDescription(input: GenerateYantraDescriptionInput): Promise<GenerateYantraDescriptionOutput> {
   return generateYantraDescriptionFlow(input);
