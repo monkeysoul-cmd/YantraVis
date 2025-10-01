@@ -56,13 +56,13 @@ export default function YantraForm({ action }: YantraFormProps) {
                 <RadioGroup name="yantra" defaultValue="samrat" className="grid grid-cols-2 gap-4 pr-4">
                 {YANTRAS.map((yantra) => (
                     <div key={yantra.id} className="relative">
-                    <RadioGroupItem value={yantra.id} id={yantra.id} className="sr-only peer" />
+                    <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
                     <Label
                         htmlFor={yantra.id}
-                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 h-32 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 transition-all cursor-pointer"
+                        className="flex h-32 flex-col items-center justify-center rounded-md border-2 border-muted bg-popover bg-gradient-to-br from-card to-secondary/20 p-4 transition-all hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 cursor-pointer"
                     >
                         <yantra.Icon className="mb-2 h-10 w-10 text-primary" />
-                        <span className="text-sm font-semibold text-center">{yantra.name}</span>
+                        <span className="text-center text-sm font-semibold">{yantra.name}</span>
                     </Label>
                     </div>
                 ))}
