@@ -44,8 +44,8 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       // Scene
       const scene = new THREE.Scene();
       if (!isArMode) {
-        scene.background = new THREE.Color(0xe6e6fa); // Light Lavender
-        scene.fog = new THREE.Fog(0xe6e6fa, 10, 25);
+        scene.background = new THREE.Color(0xFFFBEB); // Light Yellow
+        scene.fog = new THREE.Fog(0xFFFBEB, 10, 25);
       } else {
         scene.background = null;
       }
@@ -175,7 +175,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
 
       if (!isArMode) {
           const groundGeometry = new THREE.PlaneGeometry(20, 20);
-          const groundMaterial = new THREE.MeshStandardMaterial({ color: 0xd8d8f0, roughness: 0.8 });
+          const groundMaterial = new THREE.MeshStandardMaterial({ color: 0xFAF3E0, roughness: 0.8 });
           const ground = new THREE.Mesh(groundGeometry, groundMaterial);
           ground.rotation.x = -Math.PI / 2;
           ground.position.y = groundY;
