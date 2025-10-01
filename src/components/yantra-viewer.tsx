@@ -3,9 +3,10 @@
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import type { Yantra } from '@/lib/yantras';
 
 type YantraViewerProps = {
-  yantraId: 'samrat' | 'rama' | 'jai-prakash' | 'rasivalaya';
+  yantraId: Yantra['id'];
   isArMode?: boolean;
 };
 
@@ -89,6 +90,50 @@ export default function YantraViewer({ yantraId, isArMode = false }: YantraViewe
           smallGnomon.castShadow = true;
           (object as THREE.Group).add(smallGnomon);
         }
+        break;
+      case 'digamsa':
+        const digamsaCylinder = new THREE.CylinderGeometry(2, 2, 0.2, 64);
+        object = new THREE.Mesh(digamsaCylinder, material);
+        break;
+      case 'dhruva-protha-chakra':
+        const dhruvaRect = new THREE.BoxGeometry(2, 2, 0.2);
+        object = new THREE.Mesh(dhruvaRect, material);
+        break;
+      case 'yantra-samrat-combo':
+        const comboGroup = new THREE.Group();
+        const samratPart = new THREE.Mesh(new THREE.ExtrudeGeometry(new THREE.Shape().moveTo(0,0).lineTo(2.5, 0).lineTo(0, 1.5), { depth: 0.2, bevelEnabled: false }), material);
+        samratPart.geometry.center();
+        const dhruvaPart = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.5, 0.2), material);
+        dhruvaPart.position.y = -0.25;
+        comboGroup.add(samratPart);
+        comboGroup.add(dhruvaPart);
+        object = comboGroup;
+        break;
+      case 'golayantra-chakra':
+        const golaSphere = new THREE.SphereGeometry(2, 32, 32);
+        object = new THREE.Mesh(golaSphere, new THREE.MeshStandardMaterial({ ...material, wireframe: true }));
+        break;
+      case 'bhitti':
+        const bhittiWall = new THREE.BoxGeometry(3, 2, 0.2);
+        object = new THREE.Mesh(bhittiWall, material);
+        break;
+      case 'dakshinottara-bhitti':
+        const dakWall = new THREE.BoxGeometry(4, 2, 0.2);
+        object = new THREE.Mesh(dakWall, material);
+        break;
+      case 'nadi-valaya':
+        const nadiCylinder = new THREE.CylinderGeometry(2, 2, 0.4, 64);
+        nadiCylinder.rotateX(THREE.MathUtils.degToRad(23.5));
+        object = new THREE.Mesh(nadiCylinder, material);
+        break;
+      case 'palaka':
+        const palakaPlane = new THREE.BoxGeometry(3, 1.5, 0.1);
+        object = new THREE.Mesh(palakaPlane, material);
+        break;
+      case 'chaapa':
+        const chaapaArc = new THREE.TorusGeometry(1.5, 0.1, 16, 100, Math.PI);
+        object = new THREE.Mesh(chaapaArc, material);
+        object.rotation.y = Math.PI;
         break;
       default:
         object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);

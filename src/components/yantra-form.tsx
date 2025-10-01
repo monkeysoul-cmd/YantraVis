@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { YANTRAS } from '@/lib/yantras';
 import { Globe, Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { ScrollArea } from './ui/scroll-area';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -51,20 +52,22 @@ export default function YantraForm({ action }: YantraFormProps) {
 
           <div className="space-y-4">
             <h3 className="font-headline text-xl">Instrument</h3>
-            <RadioGroup name="yantra" defaultValue="samrat" className="grid grid-cols-2 gap-4">
-              {YANTRAS.map((yantra) => (
-                <div key={yantra.id}>
-                  <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
-                  <Label
-                    htmlFor={yantra.id}
-                    className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 h-32 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 transition-all cursor-pointer"
-                  >
-                    <yantra.Icon className="mb-2 h-10 w-10 text-primary" />
-                    <span className="text-sm font-semibold">{yantra.name}</span>
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
+            <ScrollArea className="h-96">
+                <RadioGroup name="yantra" defaultValue="samrat" className="grid grid-cols-2 gap-4 pr-4">
+                {YANTRAS.map((yantra) => (
+                    <div key={yantra.id}>
+                    <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
+                    <Label
+                        htmlFor={yantra.id}
+                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 h-32 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 transition-all cursor-pointer"
+                    >
+                        <yantra.Icon className="mb-2 h-10 w-10 text-primary" />
+                        <span className="text-sm font-semibold text-center">{yantra.name}</span>
+                    </Label>
+                    </div>
+                ))}
+                </RadioGroup>
+            </ScrollArea>
           </div>
           <SubmitButton />
         </form>
