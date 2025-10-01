@@ -44,7 +44,7 @@ export async function generateYantra(
     // Using the provided AI flow to generate a rich description and analysis
     const [descriptionResult, analysisResult] = await Promise.all([
       generateYantraDescription({ yantraName: selectedYantra.name }),
-      generateYantraAnalysis({ yantraName: selectedYantra.name, dimensions: mockDimensions })
+      generateYantraAnalysis({ yantraName: selectedYantra.name, dimensions: mockDimensions, location: { latitude, longitude } })
     ]);
 
     const yantraData: YantraData = {

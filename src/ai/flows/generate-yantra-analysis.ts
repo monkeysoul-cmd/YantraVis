@@ -24,16 +24,21 @@ const prompt = ai.definePrompt({
   output: {schema: YantraAnalysisSchema},
   prompt: `You are an expert in ancient Indian architecture and astronomical instrument construction.
 
-  Based on the yantra named '{{yantraName}}' with the following dimensions:
+  Based on the yantra named '{{yantraName}}' for location (lat: {{location.latitude}}, lon: {{location.longitude}}) with the following dimensions:
   {{#each dimensions}}
   - {{@key}}: {{this}}
   {{/each}}
   
-  Provide a practical analysis for its construction. Assume it's a large-scale public installation.
+  Provide a practical analysis for its construction as a large-scale public installation.
   
-  1.  **Bill of Materials**: List the primary materials needed. Be realistic for historical and modern construction (e.g., brick, marble, bronze, concrete).
-  2.  **Cost Estimate**: Provide a very rough, narrative cost estimate. Consider materials, specialized labor, and location. For example, "Likely in the range of a significant public monument, requiring substantial funding for materials like high-quality marble and expert masonry."
-  3.  **Accuracy**: Describe the factors affecting its accuracy and its expected precision. For example, "The accuracy of the Samrat Yantra is exceptional, potentially down to 2 seconds, but this is highly dependent on the precision of the gnomon's edge and the markings on the quadrants."
+  1.  **Bill of Materials**: List primary materials for historical and modern construction (e.g., brick, marble, bronze, concrete).
+  2.  **Cost Estimate**: Provide a rough, narrative cost estimate (e.g., "Likely in the range of a significant public monument...").
+  3.  **Accuracy**: Describe factors affecting its accuracy and expected precision (e.g., "The Samrat Yantra's accuracy is exceptional, potentially down to 2 seconds...").
+  4.  **Orientation**:
+      - **True North Angle**: Explain how to align it with true north and why it is critical.
+      - **Magnetic Declination**: Provide a realistic, estimated magnetic declination for the given latitude and longitude. Mention that this is an estimate and varies.
+      - **Foundation Notes**: Give advice on the foundation (e.g., "Requires a massive, stable concrete foundation...").
+      - **Tolerance Guidance**: Provide notes on construction precision (e.g., "The gnomon's edge must be perfectly sharp...").
   `,
 });
 

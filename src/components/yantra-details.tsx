@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Camera, Compass, Sun, Moon, Wrench, CircleDollarSign, CheckCircle } from 'lucide-react';
+import { Download, Camera, Compass, Sun, Moon, Wrench, CircleDollarSign, CheckCircle, MapPin, Scale, HardHat } from 'lucide-react';
 import YantraViewer from './yantra-viewer';
 import ArModal from './ar-modal';
 import { Separator } from './ui/separator';
@@ -13,7 +13,6 @@ import { Label } from './ui/label';
 import type { YantraData } from '@/lib/schema/yantra';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Badge } from './ui/badge';
 
 export default function YantraDetails({ data }: { data: YantraData }) {
   const [isArModalOpen, setIsArModalOpen] = useState(false);
@@ -79,10 +78,10 @@ a.click();
           
           <Separator />
           
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible className="w-full" defaultValue="analysis">
             <AccordionItem value="analysis">
               <AccordionTrigger className="font-headline text-2xl">
-                Construction & Accuracy Analysis
+                Construction Analysis
               </AccordionTrigger>
               <AccordionContent className="pt-4 space-y-6">
                 <div>
@@ -114,6 +113,29 @@ a.click();
                     <p className="text-muted-foreground">{data.analysis.accuracy}</p>
                   </div>
                 </div>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="orientation">
+              <AccordionTrigger className="font-headline text-2xl">
+                Orientation & Foundation
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                  <div className="bg-secondary/30 p-4 rounded-md border">
+                    <h4 className="font-semibold text-lg flex items-center gap-2 mb-2"><Compass className="text-primary"/>True North Alignment</h4>
+                    <p className="text-muted-foreground">{data.analysis.orientation.trueNorthAngle}</p>
+                  </div>
+                  <div className="bg-secondary/30 p-4 rounded-md border">
+                    <h4 className="font-semibold text-lg flex items-center gap-2 mb-2"><MapPin className="text-primary"/>Magnetic Declination</h4>
+                    <p className="text-muted-foreground">{data.analysis.orientation.magneticDeclination}</p>
+                  </div>
+                  <div className="bg-secondary/30 p-4 rounded-md border">
+                    <h4 className="font-semibold text-lg flex items-center gap-2 mb-2"><HardHat className="text-primary"/>Foundation Notes</h4>
+                    <p className="text-muted-foreground">{data.analysis.orientation.foundationNotes}</p>
+                  </div>
+                  <div className="bg-secondary/30 p-4 rounded-md border">
+                    <h4 className="font-semibold text-lg flex items-center gap-2 mb-2"><Scale className="text-primary"/>Tolerance Guidance</h4>
+                    <p className="text-muted-foreground">{data.analysis.orientation.toleranceGuidance}</p>
+                  </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
