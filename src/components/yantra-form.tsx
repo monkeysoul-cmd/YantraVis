@@ -21,6 +21,25 @@ function SubmitButton() {
   );
 }
 
+const YantraGraphicBackground = () => (
+  <svg
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 100 100"
+    className="absolute inset-0 h-full w-full text-primary/5"
+    preserveAspectRatio="none"
+  >
+    <defs>
+      <pattern id="yantra-pattern" patternUnits="userSpaceOnUse" width="14" height="14">
+        <circle cx="2" cy="2" r="1" fill="currentColor" />
+        <path d="M 2 2 l 10 10" stroke="currentColor" strokeWidth="0.5" />
+      </pattern>
+    </defs>
+    <rect width="100" height="100" fill="url(#yantra-pattern)" />
+  </svg>
+);
+
+
 type YantraFormProps = {
   action: (payload: FormData) => void;
 };
@@ -59,10 +78,13 @@ export default function YantraForm({ action }: YantraFormProps) {
                     <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
                     <Label
                         htmlFor={yantra.id}
-                        className="flex h-32 flex-col items-center justify-center rounded-md border-2 border-muted bg-popover bg-gradient-to-br from-card to-secondary/20 p-4 transition-all hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 cursor-pointer"
+                        className="relative z-10 flex h-32 flex-col items-center justify-center rounded-md border-2 border-muted bg-popover bg-gradient-to-br from-card/70 to-secondary/10 p-4 transition-all hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 cursor-pointer overflow-hidden"
                     >
-                        <yantra.Icon className="mb-2 h-10 w-10 text-primary" />
-                        <span className="text-center text-sm font-semibold">{yantra.name}</span>
+                        <YantraGraphicBackground />
+                        <div className="relative z-20 flex flex-col items-center justify-center">
+                            <yantra.Icon className="mb-2 h-10 w-10 text-primary" />
+                            <span className="text-center text-sm font-semibold">{yantra.name}</span>
+                        </div>
                     </Label>
                     </div>
                 ))}
