@@ -10,12 +10,11 @@ import { YANTRAS } from '@/lib/yantras';
 import { Globe, Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 
-function SubmitButton({ isPending }: { isPending: boolean }) {
+function SubmitButton() {
   const { pending } = useFormStatus();
-  const isLoading = isPending || pending;
   return (
-    <Button type="submit" className="w-full text-base py-6 transition-all duration-300" disabled={isLoading}>
-      {isLoading ? (
+    <Button type="submit" className="w-full text-base py-6 transition-all duration-300" disabled={pending}>
+      {pending ? (
         <>
           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           Generating...
@@ -99,7 +98,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
             ))}
             </RadioGroup>
           </div>
-          <SubmitButton isPending={isPending} />
+          <SubmitButton />
         </form>
       </CardContent>
     </Card>

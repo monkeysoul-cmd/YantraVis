@@ -11,7 +11,7 @@ import AppHeader from '@/components/app-header';
 import YantraForm from '@/components/yantra-form';
 import YantraDetails from '@/components/yantra-details';
 import { Card, CardContent } from '@/components/ui/card';
-import { Compass } from 'lucide-react';
+import { Compass, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SAMRAT_JAIPUR_DATA } from '@/lib/pre-generated/samrat-jaipur';
@@ -56,6 +56,7 @@ export default function Home() {
   const [state, formAction] = useActionState(generateYantra, initialState);
   const [localData, setLocalData] = useState<YantraData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFullScreenLoading, setIsFullScreenLoading] = useState(false);
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
 
@@ -98,35 +99,53 @@ export default function Home() {
   }, [state, toast]);
   
   const handleFormAction = (formData: FormData) => {
-    const validatedFields = YantraGenerationFormSchema.safeParse({
-        latitude: formData.get('latitude'),
-        longitude: formData.get('longitude'),
-        yantra: formData.get('yantra'),
-    });
+    setIsFullScreenLoading(true);
 
-    if (validatedFields.success) {
-        const { latitude, longitude, yantra } = validatedFields.data;
-        const preGenKey = `${yantra}-${latitude.toFixed(4)}-${longitude.toFixed(4)}`;
-        
-        if (PRE_GENERATED_DATA[preGenKey]) {
-            startTransition(() => {
-                setLocalData(PRE_GENERATED_DATA[preGenKey]);
-                localStorage.setItem(CACHE_KEY, JSON.stringify(PRE_GENERATED_DATA[preGenKey]));
-            });
-            return;
+    const processRequest = () => {
+        const validatedFields = YantraGenerationFormSchema.safeParse({
+            latitude: formData.get('latitude'),
+            longitude: formData.get('longitude'),
+            yantra: formData.get('yantra'),
+        });
+
+        if (validatedFields.success) {
+            const { latitude, longitude, yantra } = validatedFields.data;
+            const preGenKey = `${yantra}-${latitude.toFixed(4)}-${longitude.toFixed(4)}`;
+            
+            if (PRE_GENERATED_DATA[preGenKey]) {
+                startTransition(() => {
+                    setLocalData(PRE_GENERATED_DATA[preGenKey]);
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(PRE_GENERATED_DATA[preGenKey]));
+                });
+                return;
+            }
         }
-    }
-    
-    // Fallback to server action
-    startTransition(() => {
-        formAction(formData);
-    });
+        
+        // Fallback to server action
+        startTransition(() => {
+            formAction(formData);
+        });
+    };
+
+    // Show loader for 2 seconds, then process the request
+    setTimeout(() => {
+        setIsFullScreenLoading(false);
+        processRequest();
+    }, 2000);
   };
 
   const displayData = state.data || localData;
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
+      {isFullScreenLoading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-16 w-16 text-primary animate-spin" />
+            <p className="text-lg text-muted-foreground">Generating Yantra...</p>
+          </div>
+        </div>
+      )}
       <AppHeader />
       <main className="flex-grow container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start overflow-hidden">
         <aside className="lg:col-span-1 h-full max-h-[calc(100vh-120px)]">
