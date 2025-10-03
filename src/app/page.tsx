@@ -11,41 +11,16 @@ import AppHeader from '@/components/app-header';
 import YantraForm from '@/components/yantra-form';
 import YantraDetails from '@/components/yantra-details';
 import { Card, CardContent } from '@/components/ui/card';
-import { Compass, Loader2 } from 'lucide-react';
+import { Compass, Loader2, ChevronsUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { SAMRAT_JAIPUR_DATA } from '@/lib/pre-generated/samrat-jaipur';
-import { RAMA_JAIPUR_DATA } from '@/lib/pre-generated/rama-jaipur';
-import { JAI_PRAKASH_JAIPUR_DATA } from '@/lib/pre-generated/jai-prakash-jaipur';
-import { RASIVALAYA_JAIPUR_DATA } from '@/lib/pre-generated/rasivalaya-jaipur';
-import { DIGAMSA_JAIPUR_DATA } from '@/lib/pre-generated/digamsa-jaipur';
-import { DHRUVA_PROTHA_CHAKRA_JAIPUR_DATA } from '@/lib/pre-generated/dhruva-protha-chakra-jaipur';
-import { YANTRA_SAMRAT_COMBO_JAIPUR_DATA } from '@/lib/pre-generated/yantra-samrat-combo-jaipur';
-import { GOLAYANTRA_CHAKRA_JAIPUR_DATA } from '@/lib/pre-generated/golayantra-chakra-jaipur';
-import { BHITTI_JAIPUR_DATA } from '@/lib/pre-generated/bhitti-jaipur';
-import { DAKSHINOTTARA_BHITTI_JAIPUR_DATA } from '@/lib/pre-generated/dakshinottara-bhitti-jaipur';
-import { NADI_VALAYA_JAIPUR_DATA } from '@/lib/pre-generated/nadi-valaya-jaipur';
-import { PALAKA_JAIPUR_DATA } from '@/lib/pre-generated/palaka-jaipur';
-import { CHAAPA_JAIPUR_DATA } from '@/lib/pre-generated/chaapa-jaipur';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 
 const CACHE_KEY = 'yantravis-last-data';
-const PRE_GENERATED_DATA: Record<string, YantraData> = {
-    'samrat-26.9124-75.7873': SAMRAT_JAIPUR_DATA,
-    'rama-26.9124-75.7873': RAMA_JAIPUR_DATA,
-    'jai-prakash-26.9124-75.7873': JAI_PRAKASH_JAIPUR_DATA,
-    'rasivalaya-26.9124-75.7873': RASIVALAYA_JAIPUR_DATA,
-    'digamsa-26.9124-75.7873': DIGAMSA_JAIPUR_DATA,
-    'dhruva-protha-chakra-26.9124-75.7873': DHRUVA_PROTHA_CHAKRA_JAIPUR_DATA,
-    'yantra-samrat-combo-26.9124-75.7873': YANTRA_SAMRAT_COMBO_JAIPUR_DATA,
-    'golayantra-chakra-26.9124-75.7873': GOLAYANTRA_CHAKRA_JAIPUR_DATA,
-    'bhitti-26.9124-75.7873': BHITTI_JAIPUR_DATA,
-    'dakshinottara-bhitti-26.9124-75.7873': DAKSHINOTTARA_BHITTI_JAIPUR_DATA,
-    'nadi-valaya-26.9124-75.7873': NADI_VALAYA_JAIPUR_DATA,
-    'palaka-26.9124-75.7873': PALAKA_JAIPUR_DATA,
-    'chaapa-26.9124-75.7873': CHAAPA_JAIPUR_DATA,
-};
-
 
 const initialState: ActionState = {
   data: null,
@@ -57,10 +32,13 @@ export default function Home() {
   const [localData, setLocalData] = useState<YantraData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFullScreenLoading, setIsFullScreenLoading] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
+    // Only run on client-side
     setIsLoading(false);
   }, []);
 
@@ -71,67 +49,67 @@ export default function Home() {
         title: 'Error',
         description: state.error,
       });
+      setIsSheetOpen(false);
     }
     if (state.data) {
       setLocalData(state.data);
-      // Save successful generation to localStorage
+      if (isMobile) {
+        setIsSheetOpen(true);
+      }
       try {
         localStorage.setItem(CACHE_KEY, JSON.stringify(state.data));
       } catch (error) {
         console.error("Failed to cache yantra data:", error);
       }
     }
-  }, [state, toast]);
+  }, [state, toast, isMobile]);
   
   const handleFormAction = (formData: FormData) => {
-    setIsFullScreenLoading(true);
+    startTransition(() => {
+      setIsFullScreenLoading(true);
 
-    const processRequest = () => {
-        const validatedFields = YantraGenerationFormSchema.safeParse({
-            latitude: formData.get('latitude'),
-            longitude: formData.get('longitude'),
-            yantra: formData.get('yantra'),
-        });
+      const processRequest = () => {
+          formAction(formData);
+      };
 
-        if (validatedFields.success) {
-            const { latitude, longitude, yantra } = validatedFields.data;
-            const preGenKey = `${yantra}-${latitude.toFixed(4)}-${longitude.toFixed(4)}`;
-            
-            if (PRE_GENERATED_DATA[preGenKey]) {
-                startTransition(() => {
-                    setLocalData(PRE_GENERATED_DATA[preGenKey]);
-                    localStorage.setItem(CACHE_KEY, JSON.stringify(PRE_GENERATED_DATA[preGenKey]));
-                });
-                return;
-            }
-        }
-        
-        // Fallback to server action
-        startTransition(() => {
-            formAction(formData);
-        });
-    };
-
-    // Show loader for 2 seconds, then process the request
-    setTimeout(() => {
-        setIsFullScreenLoading(false);
-        processRequest();
-    }, 2000);
+      setTimeout(() => {
+          setIsFullScreenLoading(false);
+          processRequest();
+      }, 2000);
+    });
   };
 
   const displayData = state.data || localData;
 
-  return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
-      {isFullScreenLoading && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-16 w-16 text-primary animate-spin" />
-            <p className="text-lg text-muted-foreground">Generating Yantra...</p>
-          </div>
+  const renderContent = () => {
+    if (isMobile) {
+      return (
+        <div className="container mx-auto p-4 flex-grow overflow-hidden">
+            <ScrollArea className="h-full">
+              <YantraForm action={handleFormAction} isPending={isPending} />
+            </ScrollArea>
+            {displayData && (
+              <>
+                <div className="fixed bottom-4 right-4 z-20">
+                  <Button onClick={() => setIsSheetOpen(true)} className="rounded-full h-14 w-14 shadow-lg animate-in fade-in zoom-in-90">
+                    <ChevronsUp />
+                    <span className="sr-only">Show Details</span>
+                  </Button>
+                </div>
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                  <SheetContent side="bottom" className="h-[95vh]">
+                    <ScrollArea className="h-full">
+                      <YantraDetails data={displayData} />
+                    </ScrollArea>
+                  </SheetContent>
+                </Sheet>
+              </>
+            )}
         </div>
-      )}
-      <AppHeader />
+      );
+    }
+
+    return (
       <main className="flex-grow container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start overflow-hidden">
         <aside className="lg:col-span-1 h-full max-h-[calc(100vh-120px)]">
             <ScrollArea className="h-full pr-6">
@@ -170,6 +148,21 @@ export default function Home() {
             </div>
         </ScrollArea>
       </main>
+    );
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-background text-foreground">
+      {isFullScreenLoading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-16 w-16 text-primary animate-spin" />
+            <p className="text-lg text-muted-foreground">Generating Yantra...</p>
+          </div>
+        </div>
+      )}
+      <AppHeader />
+      {renderContent()}
     </div>
   );
 }
