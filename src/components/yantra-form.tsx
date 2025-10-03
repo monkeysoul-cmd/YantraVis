@@ -82,25 +82,23 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
 
           <div className="space-y-4">
             <h3 className="font-headline text-xl">Instrument</h3>
-            <ScrollArea className="h-[calc(100vh-480px)] min-h-60">
-                <RadioGroup name="yantra" defaultValue="samrat" className="grid grid-cols-2 gap-4 pr-4">
-                {YANTRAS.map((yantra) => (
-                    <div key={yantra.id} className="relative">
-                    <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
-                    <Label
-                        htmlFor={yantra.id}
-                        className="relative z-10 flex h-32 flex-col items-center justify-center rounded-md border-2 border-muted bg-popover bg-gradient-to-br from-card/70 to-secondary/10 p-4 transition-all hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 cursor-pointer overflow-hidden active:scale-95 duration-200"
-                    >
-                        <YantraGraphicBackground />
-                        <div className="relative z-20 flex flex-col items-center justify-center">
-                            <yantra.Icon className="mb-2 h-10 w-10 text-primary" />
-                            <span className="text-center text-sm font-semibold">{yantra.name}</span>
-                        </div>
-                    </Label>
+            <RadioGroup name="yantra" defaultValue="samrat" className="grid grid-cols-2 gap-4">
+            {YANTRAS.map((yantra) => (
+                <div key={yantra.id} className="relative">
+                <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
+                <Label
+                    htmlFor={yantra.id}
+                    className="relative z-10 flex h-32 flex-col items-center justify-center rounded-md border-2 border-muted bg-popover bg-gradient-to-br from-card/70 to-secondary/10 p-4 transition-all hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/80 cursor-pointer overflow-hidden active:scale-95 duration-200"
+                >
+                    <YantraGraphicBackground />
+                    <div className="relative z-20 flex flex-col items-center justify-center">
+                        <yantra.Icon className="mb-2 h-10 w-10 text-primary" />
+                        <span className="text-center text-sm font-semibold">{yantra.name}</span>
                     </div>
-                ))}
-                </RadioGroup>
-            </ScrollArea>
+                </Label>
+                </div>
+            ))}
+            </RadioGroup>
           </div>
           <SubmitButton isPending={isPending} />
         </form>

@@ -129,8 +129,10 @@ export default function Home() {
     <div className="flex flex-col h-screen bg-background text-foreground">
       <AppHeader />
       <main className="flex-grow container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start overflow-hidden">
-        <aside className="lg:col-span-1 h-full overflow-y-auto">
-            <YantraForm action={handleFormAction} isPending={isPending} />
+        <aside className="lg:col-span-1 h-full">
+            <ScrollArea className="h-full pr-6">
+                <YantraForm action={handleFormAction} isPending={isPending} />
+            </ScrollArea>
         </aside>
         <ScrollArea className="lg:col-span-2 h-full">
             <div className="pr-6">
