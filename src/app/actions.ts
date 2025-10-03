@@ -38,6 +38,30 @@ export async function generateYantra(
   
   const { latitude, longitude, yantra } = validatedFields.data;
 
+  // Pre-generated data for Jaipur (26.9124, 75.7873)
+  const isJaipurDefaults = latitude === 26.9124 && longitude === 75.7873;
+  if (isJaipurDefaults) {
+    let preGeneratedData: YantraData | undefined;
+    switch(yantra) {
+        case 'samrat': preGeneratedData = SAMRAT_JAIPUR_DATA; break;
+        case 'rama': preGeneratedData = RAMA_JAIPUR_DATA; break;
+        case 'jai-prakash': preGeneratedData = JAI_PRAKASH_JAIPUR_DATA; break;
+        case 'rasivalaya': preGeneratedData = RASIVALAYA_JAIPUR_DATA; break;
+        case 'digamsa': preGeneratedData = DIGAMSA_JAIPUR_DATA; break;
+        case 'dhruva-protha-chakra': preGeneratedData = DHRUVA_PROTHA_CHAKRA_JAIPUR_DATA; break;
+        case 'yantra-samrat-combo': preGeneratedData = YANTRA_SAMRAT_COMBO_JAIPUR_DATA; break;
+        case 'golayantra-chakra': preGeneratedData = GOLAYANTRA_CHAKRA_JAIPUR_DATA; break;
+        case 'bhitti': preGeneratedData = BHITTI_JAIPUR_DATA; break;
+        case 'dakshinottara-bhitti': preGeneratedData = DAKSHINOTTARA_BHITTI_JAIPUR_DATA; break;
+        case 'nadi-valaya': preGeneratedData = NADI_VALAYA_JAIPUR_DATA; break;
+        case 'palaka': preGeneratedData = PALAKA_JAIPUR_DATA; break;
+        case 'chaapa': preGeneratedData = CHAAPA_JAIPUR_DATA; break;
+    }
+    if (preGeneratedData) {
+        return { data: preGeneratedData, error: null };
+    }
+  }
+
   // Since I can't use external astronomy libraries, this is a mock calculation.
   // A real implementation would use solar position algorithms here.
   const mockDimensions: Record<string, number> = {
