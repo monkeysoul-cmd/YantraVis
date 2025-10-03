@@ -189,6 +189,8 @@ a.click();
         onClose={() => setIsFullScreenModalOpen(false)}
         yantraId={data.yantraId}
         yantraName={data.yantraName}
+        animateShadow={animateShadow}
+        setAnimateShadow={setAnimateShadow}
       />
     </>
   );
