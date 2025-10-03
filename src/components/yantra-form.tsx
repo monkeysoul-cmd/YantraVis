@@ -9,7 +9,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { YANTRAS } from '@/lib/yantras';
 import { Globe, Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
-import { ScrollArea } from './ui/scroll-area';
 
 function SubmitButton({ isPending }: { isPending: boolean }) {
   const { pending } = useFormStatus();
