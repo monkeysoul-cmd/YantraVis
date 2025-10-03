@@ -10,13 +10,13 @@ import { YANTRAS } from '@/lib/yantras';
 import { Globe, Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { ScrollArea } from './ui/scroll-area';
-import { cn } from '@/lib/utils';
 
-function SubmitButton() {
+function SubmitButton({ isPending }: { isPending: boolean }) {
   const { pending } = useFormStatus();
+  const isLoading = isPending || pending;
   return (
-    <Button type="submit" className="w-full text-base py-6 transition-all duration-300" disabled={pending}>
-      {pending ? (
+    <Button type="submit" className="w-full text-base py-6 transition-all duration-300" disabled={isLoading}>
+      {isLoading ? (
         <>
           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           Generating...
@@ -52,9 +52,10 @@ const YantraGraphicBackground = () => (
 
 type YantraFormProps = {
   action: (payload: FormData) => void;
+  isPending: boolean;
 };
 
-export default function YantraForm({ action }: YantraFormProps) {
+export default function YantraForm({ action, isPending }: YantraFormProps) {
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -101,7 +102,7 @@ export default function YantraForm({ action }: YantraFormProps) {
                 </RadioGroup>
             </ScrollArea>
           </div>
-          <SubmitButton />
+          <SubmitButton isPending={isPending} />
         </form>
       </CardContent>
     </Card>

@@ -1,9 +1,11 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useState, useTransition } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import type { ActionState, YantraData } from '@/lib/schema/yantra';
 import { generateYantra } from '@/app/actions';
+import { YantraGenerationFormSchema } from '@/lib/schema/yantra';
+
 
 import AppHeader from '@/components/app-header';
 import YantraForm from '@/components/yantra-form';
@@ -19,10 +21,10 @@ import { RASIVALAYA_JAIPUR_DATA } from '@/lib/pre-generated/rasivalaya-jaipur';
 
 const CACHE_KEY = 'yantravis-last-data';
 const PRE_GENERATED_DATA: Record<string, YantraData> = {
-    'samrat': SAMRAT_JAIPUR_DATA,
-    'rama': RAMA_JAIPUR_DATA,
-    'jai-prakash': JAI_PRAKASH_JAIPUR_DATA,
-    'rasivalaya': RASIVALAYA_JAIPUR_DATA
+    'samrat-26.9124-75.7873': SAMRAT_JAIPUR_DATA,
+    'rama-26.9124-75.7873': RAMA_JAIPUR_DATA,
+    'jai-prakash-26.9124-75.7873': JAI_PRAKASH_JAIPUR_DATA,
+    'rasivalaya-26.9124-75.7873': RASIVALAYA_JAIPUR_DATA,
 };
 
 
@@ -36,6 +38,7 @@ export default function Home() {
   const [localData, setLocalData] = useState<YantraData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     // Load data from localStorage on initial client-side render
@@ -74,6 +77,32 @@ export default function Home() {
       }
     }
   }, [state, toast]);
+  
+  const handleFormAction = (formData: FormData) => {
+    const validatedFields = YantraGenerationFormSchema.safeParse({
+        latitude: formData.get('latitude'),
+        longitude: formData.get('longitude'),
+        yantra: formData.get('yantra'),
+    });
+
+    if (validatedFields.success) {
+        const { latitude, longitude, yantra } = validatedFields.data;
+        const preGenKey = `${yantra}-${latitude.toFixed(4)}-${longitude.toFixed(4)}`;
+        
+        if (PRE_GENERATED_DATA[preGenKey]) {
+            startTransition(() => {
+                setLocalData(PRE_GENERATED_DATA[preGenKey]);
+                localStorage.setItem(CACHE_KEY, JSON.stringify(PRE_GENERATED_DATA[preGenKey]));
+            });
+            return;
+        }
+    }
+    
+    // Fallback to server action
+    startTransition(() => {
+        formAction(formData);
+    });
+  };
 
   const displayData = state.data || localData;
 
@@ -83,7 +112,7 @@ export default function Home() {
       <main className="flex-grow container mx-auto p-4 md:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-1 sticky top-8">
-            <YantraForm action={formAction} />
+            <YantraForm action={handleFormAction} isPending={isPending} />
           </div>
           <div className="lg:col-span-2">
              {isLoading ? (
