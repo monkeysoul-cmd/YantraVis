@@ -9,14 +9,15 @@ import { SAMRAT_JAIPUR_DATA } from '@/lib/pre-generated/samrat-jaipur';
 import { RAMA_JAIPUR_DATA } from '@/lib/pre-generated/rama-jaipur';
 import { JAI_PRAKASH_JAIPUR_DATA } from '@/lib/pre-generated/jai-prakash-jaipur';
 import { RASIVALAYA_JAIPUR_DATA } from '@/lib/pre-generated/rasivalaya-jaipur';
-
-const PRE_GENERATED_DATA: Record<string, YantraData> = {
-    'samrat-26.9124-75.7873': SAMRAT_JAIPUR_DATA,
-    'rama-26.9124-75.7873': RAMA_JAIPUR_DATA,
-    'jai-prakash-26.9124-75.7873': JAI_PRAKASH_JAIPUR_DATA,
-    'rasivalaya-26.9124-75.7873': RASIVALAYA_JAIPUR_DATA,
-};
-
+import { DIGAMSA_JAIPUR_DATA } from '@/lib/pre-generated/digamsa-jaipur';
+import { DHRUVA_PROTHA_CHAKRA_JAIPUR_DATA } from '@/lib/pre-generated/dhruva-protha-chakra-jaipur';
+import { YANTRA_SAMRAT_COMBO_JAIPUR_DATA } from '@/lib/pre-generated/yantra-samrat-combo-jaipur';
+import { GOLAYANTRA_CHAKRA_JAIPUR_DATA } from '@/lib/pre-generated/golayantra-chakra-jaipur';
+import { BHITTI_JAIPUR_DATA } from '@/lib/pre-generated/bhitti-jaipur';
+import { DAKSHINOTTARA_BHITTI_JAIPUR_DATA } from '@/lib/pre-generated/dakshinottara-bhitti-jaipur';
+import { NADI_VALAYA_JAIPUR_DATA } from '@/lib/pre-generated/nadi-valaya-jaipur';
+import { PALAKA_JAIPUR_DATA } from '@/lib/pre-generated/palaka-jaipur';
+import { CHAAPA_JAIPUR_DATA } from '@/lib/pre-generated/chaapa-jaipur';
 
 export async function generateYantra(
   prevState: ActionState,
@@ -36,13 +37,6 @@ export async function generateYantra(
   }
   
   const { latitude, longitude, yantra } = validatedFields.data;
-
-  // Check if pre-generated data exists for this combination
-  const preGenKey = `${yantra}-${latitude.toFixed(4)}-${longitude.toFixed(4)}`;
-  if (PRE_GENERATED_DATA[preGenKey]) {
-      return { data: PRE_GENERATED_DATA[preGenKey], error: null };
-  }
-
 
   // Since I can't use external astronomy libraries, this is a mock calculation.
   // A real implementation would use solar position algorithms here.

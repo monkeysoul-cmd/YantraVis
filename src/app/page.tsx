@@ -18,6 +18,15 @@ import { SAMRAT_JAIPUR_DATA } from '@/lib/pre-generated/samrat-jaipur';
 import { RAMA_JAIPUR_DATA } from '@/lib/pre-generated/rama-jaipur';
 import { JAI_PRAKASH_JAIPUR_DATA } from '@/lib/pre-generated/jai-prakash-jaipur';
 import { RASIVALAYA_JAIPUR_DATA } from '@/lib/pre-generated/rasivalaya-jaipur';
+import { DIGAMSA_JAIPUR_DATA } from '@/lib/pre-generated/digamsa-jaipur';
+import { DHRUVA_PROTHA_CHAKRA_JAIPUR_DATA } from '@/lib/pre-generated/dhruva-protha-chakra-jaipur';
+import { YANTRA_SAMRAT_COMBO_JAIPUR_DATA } from '@/lib/pre-generated/yantra-samrat-combo-jaipur';
+import { GOLAYANTRA_CHAKRA_JAIPUR_DATA } from '@/lib/pre-generated/golayantra-chakra-jaipur';
+import { BHITTI_JAIPUR_DATA } from '@/lib/pre-generated/bhitti-jaipur';
+import { DAKSHINOTTARA_BHITTI_JAIPUR_DATA } from '@/lib/pre-generated/dakshinottara-bhitti-jaipur';
+import { NADI_VALAYA_JAIPUR_DATA } from '@/lib/pre-generated/nadi-valaya-jaipur';
+import { PALAKA_JAIPUR_DATA } from '@/lib/pre-generated/palaka-jaipur';
+import { CHAAPA_JAIPUR_DATA } from '@/lib/pre-generated/chaapa-jaipur';
 
 const CACHE_KEY = 'yantravis-last-data';
 const PRE_GENERATED_DATA: Record<string, YantraData> = {
@@ -25,6 +34,15 @@ const PRE_GENERATED_DATA: Record<string, YantraData> = {
     'rama-26.9124-75.7873': RAMA_JAIPUR_DATA,
     'jai-prakash-26.9124-75.7873': JAI_PRAKASH_JAIPUR_DATA,
     'rasivalaya-26.9124-75.7873': RASIVALAYA_JAIPUR_DATA,
+    'digamsa-26.9124-75.7873': DIGAMSA_JAIPUR_DATA,
+    'dhruva-protha-chakra-26.9124-75.7873': DHRUVA_PROTHA_CHAKRA_JAIPUR_DATA,
+    'yantra-samrat-combo-26.9124-75.7873': YANTRA_SAMRAT_COMBO_JAIPUR_DATA,
+    'golayantra-chakra-26.9124-75.7873': GOLAYANTRA_CHAKRA_JAIPUR_DATA,
+    'bhitti-26.9124-75.7873': BHITTI_JAIPUR_DATA,
+    'dakshinottara-bhitti-26.9124-75.7873': DAKSHINOTTARA_BHITTI_JAIPUR_DATA,
+    'nadi-valaya-26.9124-75.7873': NADI_VALAYA_JAIPUR_DATA,
+    'palaka-26.9124-75.7873': PALAKA_JAIPUR_DATA,
+    'chaapa-26.9124-75.7873': CHAAPA_JAIPUR_DATA,
 };
 
 
