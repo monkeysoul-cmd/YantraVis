@@ -82,7 +82,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
 
           <div className="space-y-4">
             <h3 className="font-headline text-xl">Instrument</h3>
-            <ScrollArea className="h-96">
+            <ScrollArea className="h-[calc(100vh-480px)] min-h-60">
                 <RadioGroup name="yantra" defaultValue="samrat" className="grid grid-cols-2 gap-4 pr-4">
                 {YANTRAS.map((yantra) => (
                     <div key={yantra.id} className="relative">

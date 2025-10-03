@@ -27,6 +27,7 @@ import { DAKSHINOTTARA_BHITTI_JAIPUR_DATA } from '@/lib/pre-generated/dakshinott
 import { NADI_VALAYA_JAIPUR_DATA } from '@/lib/pre-generated/nadi-valaya-jaipur';
 import { PALAKA_JAIPUR_DATA } from '@/lib/pre-generated/palaka-jaipur';
 import { CHAAPA_JAIPUR_DATA } from '@/lib/pre-generated/chaapa-jaipur';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const CACHE_KEY = 'yantravis-last-data';
 const PRE_GENERATED_DATA: Record<string, YantraData> = {
@@ -125,43 +126,43 @@ export default function Home() {
   const displayData = state.data || localData;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col h-screen bg-background text-foreground">
       <AppHeader />
-      <main className="flex-grow container mx-auto p-4 md:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          <div className="lg:col-span-1 sticky top-8">
+      <main className="flex-grow container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start overflow-hidden">
+        <aside className="lg:col-span-1 h-full overflow-y-auto">
             <YantraForm action={handleFormAction} isPending={isPending} />
-          </div>
-          <div className="lg:col-span-2">
-             {isLoading ? (
-                <Card>
-                    <CardContent className="p-6 space-y-4">
-                        <Skeleton className="h-8 w-1/2" />
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="aspect-video w-full" />
-                        <Skeleton className="h-24 w-full" />
+        </aside>
+        <ScrollArea className="lg:col-span-2 h-full">
+            <div className="pr-6">
+            {isLoading ? (
+            <Card>
+                <CardContent className="p-6 space-y-4">
+                    <Skeleton className="h-8 w-1/2" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="aspect-video w-full" />
+                    <Skeleton className="h-24 w-full" />
+                </CardContent>
+            </Card>
+            ) : (
+            <>
+                <div className={cn("transition-opacity duration-500", displayData ? 'opacity-100' : 'opacity-0' )}>
+                    {displayData && (
+                        <YantraDetails data={displayData} />
+                    )}
+                </div>
+                {!displayData && (
+                <Card className="min-h-[70vh] flex items-center justify-center transition-opacity duration-500 ease-in-out">
+                    <CardContent className="text-center text-muted-foreground p-6">
+                        <Compass className="mx-auto h-16 w-16 text-primary/50" />
+                        <h2 className="font-headline text-2xl font-semibold text-foreground">Welcome to YantraVis</h2>
+                        <p className="mt-2 max-w-sm">Enter a location and select a yantra to generate its 3D model, description, and construction dimensions.</p>
                     </CardContent>
                 </Card>
-             ) : (
-                <>
-                    <div className={cn("transition-opacity duration-500", displayData ? 'opacity-100' : 'opacity-0' )}>
-                        {displayData && (
-                            <YantraDetails data={displayData} />
-                        )}
-                    </div>
-                    {!displayData && (
-                    <Card className="min-h-[70vh] flex items-center justify-center transition-opacity duration-500 ease-in-out">
-                        <CardContent className="text-center text-muted-foreground p-6">
-                            <Compass className="mx-auto h-16 w-16 text-primary/50" />
-                            <h2 className="font-headline text-2xl font-semibold text-foreground">Welcome to YantraVis</h2>
-                            <p className="mt-2 max-w-sm">Enter a location and select a yantra to generate its 3D model, description, and construction dimensions.</p>
-                        </CardContent>
-                    </Card>
-                    )}
-                </>
-             )}
-          </div>
-        </div>
+                )}
+            </>
+            )}
+            </div>
+        </ScrollArea>
       </main>
     </div>
   );
