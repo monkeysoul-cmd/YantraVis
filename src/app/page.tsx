@@ -13,8 +13,18 @@ import { Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SAMRAT_JAIPUR_DATA } from '@/lib/pre-generated/samrat-jaipur';
+import { RAMA_JAIPUR_DATA } from '@/lib/pre-generated/rama-jaipur';
+import { JAI_PRAKASH_JAIPUR_DATA } from '@/lib/pre-generated/jai-prakash-jaipur';
+import { RASIVALAYA_JAIPUR_DATA } from '@/lib/pre-generated/rasivalaya-jaipur';
 
 const CACHE_KEY = 'yantravis-last-data';
+const PRE_GENERATED_DATA: Record<string, YantraData> = {
+    'samrat': SAMRAT_JAIPUR_DATA,
+    'rama': RAMA_JAIPUR_DATA,
+    'jai-prakash': JAI_PRAKASH_JAIPUR_DATA,
+    'rasivalaya': RASIVALAYA_JAIPUR_DATA
+};
+
 
 const initialState: ActionState = {
   data: null,
@@ -32,7 +42,8 @@ export default function Home() {
     try {
       const cachedData = localStorage.getItem(CACHE_KEY);
       if (cachedData) {
-        setLocalData(JSON.parse(cachedData));
+        const parsedData = JSON.parse(cachedData);
+        setLocalData(parsedData);
       } else {
         // If no cached data, load the pre-generated default
         setLocalData(SAMRAT_JAIPUR_DATA);
@@ -54,6 +65,7 @@ export default function Home() {
       });
     }
     if (state.data) {
+      setLocalData(state.data);
       // Save successful generation to localStorage
       try {
         localStorage.setItem(CACHE_KEY, JSON.stringify(state.data));
