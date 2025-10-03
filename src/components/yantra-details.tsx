@@ -3,9 +3,10 @@
 import { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Camera, Compass, Sun, Moon, Wrench, CircleDollarSign, CheckCircle, MapPin, Scale, HardHat } from 'lucide-react';
+import { Download, Camera, Compass, Sun, Moon, Wrench, CircleDollarSign, CheckCircle, MapPin, Scale, HardHat, Expand } from 'lucide-react';
 import YantraViewer, { type YantraViewerRef } from './yantra-viewer';
 import ArModal from './ar-modal';
+import FullScreenModal from './full-screen-modal';
 import { Separator } from './ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from './ui/switch';
@@ -16,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 
 export default function YantraDetails({ data }: { data: YantraData }) {
   const [isArModalOpen, setIsArModalOpen] = useState(false);
+  const [isFullScreenModalOpen, setIsFullScreenModalOpen] = useState(false);
   const [animateShadow, setAnimateShadow] = useState(true);
   const viewerRef = useRef<YantraViewerRef>(null);
   const { toast } = useToast();
@@ -164,6 +166,10 @@ a.click();
               <Download className="mr-2 h-4 w-4" />
               Export CAD (TXT)
             </Button>
+             <Button onClick={() => setIsFullScreenModalOpen(true)} variant="outline" className="w-full sm:w-auto">
+              <Expand className="mr-2 h-4 w-4" />
+              Full Screen
+            </Button>
             <Button onClick={() => setIsArModalOpen(true)} variant="outline" className="w-full sm:w-auto">
               <Camera className="mr-2 h-4 w-4" />
               AR Preview
@@ -175,6 +181,12 @@ a.click();
         isOpen={isArModalOpen}
         onClose={() => setIsArModalOpen(false)}
         yantraId={data.yantraId}
+      />
+      <FullScreenModal
+        isOpen={isFullScreenModalOpen}
+        onClose={() => setIsFullScreenModalOpen(false)}
+        yantraId={data.yantraId}
+        yantraName={data.yantraName}
       />
     </>
   );
