@@ -61,21 +61,6 @@ export default function Home() {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    // Load data from localStorage on initial client-side render
-    try {
-      const cachedData = localStorage.getItem(CACHE_KEY);
-      if (cachedData) {
-        const parsedData = JSON.parse(cachedData);
-        setLocalData(parsedData);
-      } else {
-        // If no cached data, load the pre-generated default
-        setLocalData(SAMRAT_JAIPUR_DATA);
-      }
-    } catch (error) {
-      console.error("Failed to load cached yantra data:", error);
-      // Fallback to pre-generated data on error
-      setLocalData(SAMRAT_JAIPUR_DATA);
-    }
     setIsLoading(false);
   }, []);
 
