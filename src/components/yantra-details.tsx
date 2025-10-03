@@ -54,6 +54,12 @@ a.click();
         <CardContent className="space-y-6">
           <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-gradient-to-br from-secondary/30 to-background">
             <YantraViewer ref={viewerRef} yantraId={data.yantraId} animateShadow={animateShadow} />
+            <div className="absolute top-3 left-3">
+              <Button onClick={() => setIsFullScreenModalOpen(true)} variant="ghost" size="icon" className="bg-card/70 backdrop-blur-sm shadow-md h-9 w-9">
+                <Expand className="h-5 w-5" />
+                <span className="sr-only">Full Screen</span>
+              </Button>
+            </div>
             <div className="absolute top-3 right-3 flex items-center gap-2">
                 <div className="flex items-center space-x-2 bg-card/70 backdrop-blur-sm p-2 rounded-full shadow-md">
                     <Sun className="h-5 w-5 text-yellow-500" />
@@ -165,10 +171,6 @@ a.click();
             <Button onClick={handleCadDownload} className="w-full sm:w-auto">
               <Download className="mr-2 h-4 w-4" />
               Export CAD (TXT)
-            </Button>
-             <Button onClick={() => setIsFullScreenModalOpen(true)} variant="outline" className="w-full sm:w-auto">
-              <Expand className="mr-2 h-4 w-4" />
-              Full Screen
             </Button>
             <Button onClick={() => setIsArModalOpen(true)} variant="outline" className="w-full sm:w-auto">
               <Camera className="mr-2 h-4 w-4" />
