@@ -20,8 +20,8 @@ export async function generateYantraDescription(input: GenerateYantraDescription
 
 const prompt = ai.definePrompt({
   name: 'generateYantraDescriptionPrompt',
-  input: {schema: GenerateYantraDescriptionInputSchema},
-  output: {schema: GenerateYantraDescriptionOutputSchema},
+  input: {schema: GenerateYantraDescriptionInputSchema as any},
+  output: {schema: GenerateYantraDescriptionOutputSchema as any},
   prompt: `You are an expert in Indian astronomical instruments.
 
   Provide a detailed and engaging description of the {{yantraName}} yantra.
@@ -38,14 +38,17 @@ const prompt = ai.definePrompt({
   
   ### ✨ Fun Fact
   Add an interesting tidbit about the instrument.
+
+  ### 🌌 Cosmic Connection
+  Explain the deep philosophical connection between this instrument and the cosmos in traditional Indian astronomy.
   `,
 });
 
 const generateYantraDescriptionFlow = ai.defineFlow(
   {
     name: 'generateYantraDescriptionFlow',
-    inputSchema: GenerateYantraDescriptionInputSchema,
-    outputSchema: GenerateYantraDescriptionOutputSchema,
+    inputSchema: GenerateYantraDescriptionInputSchema as any,
+    outputSchema: GenerateYantraDescriptionOutputSchema as any,
   },
   async input => {
     const {output} = await prompt(input);

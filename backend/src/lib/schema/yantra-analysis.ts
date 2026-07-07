@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const YantraAnalysisInputSchema = z.object({
   yantraName: z.string().describe('The name of the yantra to analyze.'),
-  dimensions: z.record(z.number()).describe('The calculated dimensions of the yantra.'),
+  dimensions: z.record(z.string(), z.number()).describe('The calculated dimensions of the yantra.'),
   location: z.object({
     latitude: z.number(),
     longitude: z.number(),

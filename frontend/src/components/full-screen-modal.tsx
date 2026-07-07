@@ -22,12 +22,7 @@ export default function FullScreenModal({ isOpen, onClose, yantraId, yantraName,
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-none w-screen h-screen flex flex-col p-0 gap-0 border-0">
-        <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="absolute top-4 right-4 z-20 bg-background/50 hover:bg-background/80">
-                <X className="h-5 w-5" />
-                <span className="sr-only">Close</span>
-            </Button>
-        </DialogClose>
+
         <div className="flex-grow relative overflow-hidden bg-background">
             <YantraViewer yantraId={yantraId} animateShadow={animateShadow}/>
             <div className="absolute top-4 left-4 flex items-center gap-2 z-10">

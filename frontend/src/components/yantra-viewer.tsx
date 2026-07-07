@@ -12,8 +12,7 @@ type YantraViewerProps = {
 };
 
 export type YantraViewerRef = {
-  zoomIn: () => void;
-  zoomOut: () => void;
+  // Empty ref for now
 };
 
 const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
@@ -22,18 +21,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
     const controlsRef = useRef<OrbitControls>();
 
     useImperativeHandle(ref, () => ({
-      zoomIn: () => {
-        if (controlsRef.current) {
-          controlsRef.current.dollyIn(1.2);
-          controlsRef.current.update();
-        }
-      },
-      zoomOut: () => {
-        if (controlsRef.current) {
-          controlsRef.current.dollyOut(1.2);
-          controlsRef.current.update();
-        }
-      },
+      // Removed zoom functions as they were unused and throwing TS errors with OrbitControls
     }));
 
     useEffect(() => {
@@ -43,13 +31,8 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
 
       // Scene
       const scene = new THREE.Scene();
-      if (!isArMode) {
-        scene.background = new THREE.Color(0xfefdfa); // Warmer background
-        scene.fog = new THREE.Fog(0xfefdfa, 10, 25);
-      } else {
-        scene.background = null;
-      }
-
+      // Keep background transparent to let the CSS mesh gradient show through
+      scene.background = null;
 
       // Camera
       const camera = new THREE.PerspectiveCamera(50, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
@@ -58,7 +41,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       // Renderer
       const renderer = new THREE.WebGLRenderer({ 
           antialias: true,
-          alpha: isArMode
+          alpha: true // Always true to show elegant UI gradient behind model
       });
       renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
@@ -86,8 +69,12 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       directionalLight.shadow.camera.far = 50;
       scene.add(directionalLight);
 
-      // Material
-      const material = new THREE.MeshStandardMaterial({ color: 0x5808a2, roughness: 0.5, metalness: 0.1 });
+      // Material - Traditional Jaipur Sandstone / Terracotta
+      const material = new THREE.MeshStandardMaterial({ 
+        color: 0xc96d53, 
+        roughness: 0.8, 
+        metalness: 0.1 
+      });
 
       // Geometry
       let object: THREE.Object3D;
@@ -105,8 +92,9 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
           break;
         case 'jai-prakash':
           const hemisphereGeometry = new THREE.SphereGeometry(2, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-          object = new THREE.Mesh(hemisphereGeometry, material);
-          object.material.side = THREE.DoubleSide;
+          const doubleSidedMaterial = material.clone();
+          doubleSidedMaterial.side = THREE.DoubleSide;
+          object = new THREE.Mesh(hemisphereGeometry, doubleSidedMaterial);
           break;
         case 'rasivalaya':
           object = new THREE.Group();
@@ -137,7 +125,9 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
           break;
         case 'golayantra-chakra':
           const golaSphere = new THREE.SphereGeometry(2, 32, 32);
-          object = new THREE.Mesh(golaSphere, new THREE.MeshStandardMaterial({ ...material, wireframe: true }));
+          const wireframeMaterial = material.clone();
+          wireframeMaterial.wireframe = true;
+          object = new THREE.Mesh(golaSphere, wireframeMaterial);
           break;
         case 'bhitti':
           const bhittiWall = new THREE.BoxGeometry(3, 2, 0.2);
@@ -175,7 +165,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
 
       if (!isArMode) {
           const groundGeometry = new THREE.PlaneGeometry(20, 20);
-          const groundMaterial = new THREE.MeshStandardMaterial({ color: 0xF3F4F6, roughness: 0.8 });
+          const groundMaterial = new THREE.ShadowMaterial({ opacity: 0.6, color: 0x000000 });
           const ground = new THREE.Mesh(groundGeometry, groundMaterial);
           ground.rotation.x = -Math.PI / 2;
           ground.position.y = groundY;
@@ -194,13 +184,14 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
 
         if (animateShadow) {
           const elapsedTime = clock.getElapsedTime();
-          const sunAngle = (elapsedTime * 0.2) % (Math.PI * 2);
+          const sunAngle = (elapsedTime * 0.1) % (Math.PI * 2); // Slow, majestic shadow movement
           directionalLight.position.set(
-              8 * Math.cos(sunAngle),
-              6 * Math.sin(sunAngle),
-              8 * Math.sin(sunAngle)
+              15 * Math.cos(sunAngle),
+              10 * Math.abs(Math.sin(sunAngle)) + 5, // Keep light high above to cast proper shadows
+              15 * Math.sin(sunAngle)
           );
-          ambientLight.intensity = Math.max(0.2, Math.sin(sunAngle) * 0.7);
+          // Darken ambient slightly during 'sunset' (when y is low)
+          ambientLight.intensity = Math.max(0.3, Math.abs(Math.sin(sunAngle)) * 0.8);
         }
 
         controls.update();

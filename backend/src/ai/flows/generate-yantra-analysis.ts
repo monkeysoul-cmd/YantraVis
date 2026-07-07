@@ -20,8 +20,8 @@ export async function generateYantraAnalysis(input: YantraAnalysisInput): Promis
 
 const prompt = ai.definePrompt({
   name: 'generateYantraAnalysisPrompt',
-  input: {schema: YantraAnalysisInputSchema},
-  output: {schema: YantraAnalysisSchema},
+  input: {schema: YantraAnalysisInputSchema as any},
+  output: {schema: YantraAnalysisSchema as any},
   prompt: `You are an expert in ancient Indian architecture and astronomical instrument construction.
 
   Based on the yantra named '{{yantraName}}' for location (lat: {{location.latitude}}, lon: {{location.longitude}}) with the following dimensions:
@@ -45,8 +45,8 @@ const prompt = ai.definePrompt({
 const generateYantraAnalysisFlow = ai.defineFlow(
   {
     name: 'generateYantraAnalysisFlow',
-    inputSchema: YantraAnalysisInputSchema,
-    outputSchema: YantraAnalysisSchema,
+    inputSchema: YantraAnalysisInputSchema as any,
+    outputSchema: YantraAnalysisSchema as any,
   },
   async input => {
     const {output} = await prompt(input);

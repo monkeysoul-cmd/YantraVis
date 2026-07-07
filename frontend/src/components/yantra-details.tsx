@@ -52,8 +52,8 @@ a.click();
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-gradient-to-br from-secondary/30 to-background">
-            <YantraViewer ref={viewerRef} yantraId={data.yantraId} animateShadow={animateShadow} />
+          <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-white/20 bg-transparent shadow-inner">
+            <YantraViewer ref={viewerRef} yantraId={data.yantraId as import('@/lib/yantras').Yantra['id']} animateShadow={animateShadow} />
             <div className="absolute top-3 left-3">
               <Button onClick={() => setIsFullScreenModalOpen(true)} variant="ghost" size="icon" className="bg-card/70 backdrop-blur-sm shadow-md h-9 w-9">
                 <Expand className="h-5 w-5" />
@@ -182,12 +182,12 @@ a.click();
       <ArModal
         isOpen={isArModalOpen}
         onClose={() => setIsArModalOpen(false)}
-        yantraId={data.yantraId}
+        yantraId={data.yantraId as import('@/lib/yantras').Yantra['id']}
       />
       <FullScreenModal
         isOpen={isFullScreenModalOpen}
         onClose={() => setIsFullScreenModalOpen(false)}
-        yantraId={data.yantraId}
+        yantraId={data.yantraId as import('@/lib/yantras').Yantra['id']}
         yantraName={data.yantraName}
         animateShadow={animateShadow}
         setAnimateShadow={setAnimateShadow}
