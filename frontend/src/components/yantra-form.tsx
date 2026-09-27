@@ -61,7 +61,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
   return (
     <Card className="shadow-2xl glass-card border-none">
       <CardHeader>
-        <CardTitle className="font-headline text-3xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+        <CardTitle className="font-headline text-3xl bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-300 to-accent">
           Configuration
         </CardTitle>
         <CardDescription className="text-foreground/70">
