@@ -126,7 +126,9 @@ export default function YantraDetails({ data }: { data: YantraData }) {
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <CardTitle className="font-headline text-4xl text-primary font-bold">{data.yantraName}</CardTitle>
+              <CardTitle className="font-headline text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-300 to-accent">
+                {data.yantraName}
+              </CardTitle>
               <CardDescription className="text-foreground/70 mt-1">
                 Calibrated for Latitude: {data.location.latitude.toFixed(4)}° N, Longitude: {data.location.longitude.toFixed(4)}° E
               </CardDescription>
