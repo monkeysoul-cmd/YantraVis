@@ -141,7 +141,7 @@ export default function Home() {
                             <Compass className="h-24 w-24 text-primary animate-pulse" />
                             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full -z-10" />
                           </div>
-                          <h2 className="font-headline text-3xl font-bold text-foreground bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-300 to-accent">
+                          <h2 className="font-headline text-3xl font-bold text-foreground bg-clip-text text-transparent bg-gradient-to-r from-primary via-amber-400 to-accent">
                             Welcome to YantraVis
                           </h2>
                           <p className="mt-4 text-foreground/80 leading-relaxed text-sm md:text-base">
