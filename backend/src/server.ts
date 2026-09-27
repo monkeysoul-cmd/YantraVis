@@ -18,6 +18,7 @@ import { DAKSHINOTTARA_BHITTI_JAIPUR_DATA } from './lib/pre-generated/dakshinott
 import { NADI_VALAYA_JAIPUR_DATA } from './lib/pre-generated/nadi-valaya-jaipur';
 import { PALAKA_JAIPUR_DATA } from './lib/pre-generated/palaka-jaipur';
 import { CHAAPA_JAIPUR_DATA } from './lib/pre-generated/chaapa-jaipur';
+import { generateParametricYantraData, calculateParametricDimensions } from './lib/yantra-calculator';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.post('/api/yantra', async (req: express.Request, res: express.Response) => {
     
     const { latitude, longitude, yantra } = validatedFields.data;
 
+    // Check for Jaipur defaults
     const isJaipurDefaults = latitude === 26.9124 && longitude === 75.7873;
     if (isJaipurDefaults) {
       let preGeneratedData: YantraData | undefined;
@@ -63,35 +65,42 @@ app.post('/api/yantra', async (req: express.Request, res: express.Response) => {
       }
     }
 
-    const mockDimensions: Record<string, number> = {
-      'Base Width': 10 + latitude / 9,
-      'Height': 20 + Math.abs(longitude) / 18,
-      'Gnomon Angle': latitude,
-      'North Alignment': 0.5 - (longitude / 360),
-    };
-
     const selectedYantra = YANTRAS.find((y: any) => y.id === yantra);
     if (!selectedYantra) {
         return res.status(400).json({ data: null, error: 'Invalid Yantra selected' });
     }
-    
-    const [descriptionResult, analysisResult] = await Promise.all([
-      generateYantraDescription({ yantraName: selectedYantra.name }),
-      generateYantraAnalysis({ yantraName: selectedYantra.name, dimensions: mockDimensions, location: { latitude, longitude } })
-    ]);
 
-    const yantraData: YantraData = {
-        yantraId: yantra as any,
-        yantraName: selectedYantra.name,
-        description: descriptionResult.description,
-        dimensions: mockDimensions,
-        analysis: analysisResult,
-        location: { latitude, longitude }
-    };
-    
-    return res.json({ data: yantraData, error: null });
+    // Generate accurate parametric data for this location
+    const fallbackData = generateParametricYantraData(yantra, latitude, longitude);
+    const parametricDimensions = calculateParametricDimensions(yantra, latitude, longitude);
+
+    // If Google AI API key is available, attempt AI generation with graceful fallback
+    if (process.env.GEMINI_API_KEY) {
+      try {
+        const [descriptionResult, analysisResult] = await Promise.all([
+          generateYantraDescription({ yantraName: selectedYantra.name }),
+          generateYantraAnalysis({ yantraName: selectedYantra.name, dimensions: parametricDimensions, location: { latitude, longitude } })
+        ]);
+
+        const yantraData: YantraData = {
+          yantraId: yantra as any,
+          yantraName: selectedYantra.name,
+          description: descriptionResult?.description || fallbackData.description,
+          dimensions: parametricDimensions,
+          analysis: analysisResult || fallbackData.analysis,
+          location: { latitude, longitude }
+        };
+
+        return res.json({ data: yantraData, error: null });
+      } catch (aiError) {
+        console.warn('Genkit AI flow unavailable or timed out, using parametric astronomical model:', aiError);
+      }
+    }
+
+    // Return the high-accuracy parametric astronomical data
+    return res.json({ data: fallbackData, error: null });
   } catch (error) {
-    console.error(error);
+    console.error('Error generating yantra data:', error);
     return res.status(500).json({ data: null, error: 'Failed to generate yantra details. Please try again later.' });
   }
 });

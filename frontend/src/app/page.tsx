@@ -1,11 +1,9 @@
 'use client';
 
-import { useActionState, useEffect, useState, useTransition } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import type { ActionState, YantraData } from '@/lib/schema/yantra';
 import { generateYantra } from '@/app/actions';
-import { YantraGenerationFormSchema } from '@/lib/schema/yantra';
-
 
 import AppHeader from '@/components/app-header';
 import YantraForm from '@/components/yantra-form';
@@ -16,7 +14,6 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
@@ -28,17 +25,26 @@ const initialState: ActionState = {
 };
 
 export default function Home() {
-  const [state, formAction] = useActionState(generateYantra, initialState);
+  const [state, formAction, isPending] = useActionState(generateYantra, initialState);
   const [localData, setLocalData] = useState<YantraData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isFullScreenLoading, setIsFullScreenLoading] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
-  const [isPending, startTransition] = useTransition();
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Only run on client-side
+    // Check if there is cached data from previous session
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.yantraId) {
+          setLocalData(parsed);
+        }
+      }
+    } catch {
+      // Ignore cache parse error
+    }
     setIsLoading(false);
   }, []);
 
@@ -46,7 +52,7 @@ export default function Home() {
     if (state.error) {
       toast({
         variant: 'destructive',
-        title: 'Error',
+        title: 'Input Error',
         description: state.error,
       });
       setIsSheetOpen(false);
@@ -63,42 +69,36 @@ export default function Home() {
       }
     }
   }, [state, toast, isMobile]);
-  
-  const handleFormAction = (formData: FormData) => {
-    startTransition(() => {
-      setIsFullScreenLoading(true);
-
-      const processRequest = () => {
-          formAction(formData);
-      };
-
-      setTimeout(() => {
-          setIsFullScreenLoading(false);
-          processRequest();
-      }, 2000);
-    });
-  };
 
   const displayData = state.data || localData;
 
   const renderContent = () => {
     if (isMobile) {
       return (
-        <div className="container mx-auto p-4 flex-grow overflow-hidden">
-            <ScrollArea className="h-full">
-              <YantraForm action={handleFormAction} isPending={isPending} />
+        <div className="container mx-auto p-4 flex-grow overflow-hidden flex flex-col">
+            <ScrollArea className="flex-grow">
+              <YantraForm action={formAction} isPending={isPending} />
             </ScrollArea>
             {displayData && (
               <>
-                <div className="fixed bottom-4 right-4 z-20">
-                  <Button onClick={() => setIsSheetOpen(true)} className="rounded-full h-14 w-14 shadow-lg animate-in fade-in zoom-in-90">
-                    <ChevronsUp />
-                    <span className="sr-only">Show Details</span>
+                <div className="fixed bottom-6 right-6 z-20">
+                  <Button 
+                    onClick={() => setIsSheetOpen(true)} 
+                    className="rounded-full h-14 w-14 shadow-xl shadow-primary/30 flex items-center justify-center animate-bounce"
+                    aria-label="Show Details"
+                  >
+                    <ChevronsUp className="h-6 w-6" />
                   </Button>
                 </div>
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                  <SheetContent side="bottom" className="h-[95vh]">
-                    <ScrollArea className="h-full">
+                  <SheetContent side="bottom" className="h-[92vh] p-0">
+                    <SheetHeader className="p-4 border-b">
+                      <SheetTitle className="font-headline text-xl text-primary">{displayData.yantraName}</SheetTitle>
+                      <SheetDescription className="text-xs">
+                        Lat: {displayData.location.latitude.toFixed(4)}°, Lon: {displayData.location.longitude.toFixed(4)}°
+                      </SheetDescription>
+                    </SheetHeader>
+                    <ScrollArea className="h-[calc(92vh-80px)] p-4">
                       <YantraDetails data={displayData} />
                     </ScrollArea>
                   </SheetContent>
@@ -112,38 +112,50 @@ export default function Home() {
     return (
       <main className="flex-grow container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start overflow-hidden">
         <aside className="lg:col-span-1 h-full max-h-[calc(100vh-120px)]">
-            <ScrollArea className="h-full pr-6">
-                <YantraForm action={handleFormAction} isPending={isPending} />
+            <ScrollArea className="h-full pr-4">
+                <YantraForm action={formAction} isPending={isPending} />
             </ScrollArea>
         </aside>
         <ScrollArea className="lg:col-span-2 h-full max-h-[calc(100vh-120px)]">
-            <div className="pr-6">
+            <div className="pr-4">
             {isLoading ? (
-            <Card className="glass-card border-none">
-                <CardContent className="p-6 space-y-4">
-                    <Skeleton className="h-8 w-1/2 bg-white/10" />
-                    <Skeleton className="h-4 w-3/4 bg-white/10" />
-                    <Skeleton className="aspect-video w-full bg-white/10" />
-                    <Skeleton className="h-24 w-full bg-white/10" />
-                </CardContent>
-            </Card>
+              <Card className="glass-card border-none">
+                  <CardContent className="p-6 space-y-4">
+                      <Skeleton className="h-8 w-1/2 bg-white/10" />
+                      <Skeleton className="h-4 w-3/4 bg-white/10" />
+                      <Skeleton className="aspect-video w-full bg-white/10" />
+                      <Skeleton className="h-24 w-full bg-white/10" />
+                  </CardContent>
+              </Card>
             ) : (
-            <>
+              <>
                 <div className={cn("transition-opacity duration-500", displayData ? 'opacity-100' : 'opacity-0' )}>
                     {displayData && (
                         <YantraDetails data={displayData} />
                     )}
                 </div>
                 {!displayData && (
-                <Card className="min-h-[70vh] flex items-center justify-center transition-opacity duration-500 ease-in-out glass-card border-none">
-                    <CardContent className="text-center text-muted-foreground p-6">
-                        <Compass className="mx-auto h-20 w-20 text-primary/70 drop-shadow-md mb-4" />
-                        <h2 className="font-headline text-3xl font-bold text-foreground bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">Welcome to YantraVis</h2>
-                        <p className="mt-4 max-w-md text-foreground/80">Enter a location and select a yantra to generate its 3D model, description, and construction dimensions.</p>
-                    </CardContent>
-                </Card>
+                  <Card className="min-h-[70vh] flex items-center justify-center transition-opacity duration-500 ease-in-out glass-card border border-white/5">
+                      <CardContent className="text-center text-muted-foreground p-8 max-w-lg">
+                          <div className="relative inline-block mb-6">
+                            <Compass className="h-24 w-24 text-primary animate-pulse" />
+                            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full -z-10" />
+                          </div>
+                          <h2 className="font-headline text-3xl font-bold text-foreground bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+                            Welcome to YantraVis
+                          </h2>
+                          <p className="mt-4 text-foreground/80 leading-relaxed text-sm md:text-base">
+                            Select an ancient astronomical instrument and specify any location in India. YantraVis calculates real-time parametric dimensions, true meridian alignment, and interactive 3D solar simulations.
+                          </p>
+                          <div className="mt-6 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
+                            <span className="px-3 py-1 rounded-full bg-secondary/50 border border-white/5">✨ Parametric CAD</span>
+                            <span className="px-3 py-1 rounded-full bg-secondary/50 border border-white/5">☀️ Solar Shadow</span>
+                            <span className="px-3 py-1 rounded-full bg-secondary/50 border border-white/5">🧭 True North</span>
+                          </div>
+                      </CardContent>
+                  </Card>
                 )}
-            </>
+              </>
             )}
             </div>
         </ScrollArea>
@@ -152,12 +164,18 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
-      {isFullScreenLoading && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-16 w-16 text-primary animate-spin" />
-            <p className="text-lg text-muted-foreground">Generating Yantra...</p>
+    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+      {isPending && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in duration-300">
+          <div className="flex flex-col items-center gap-4 text-center p-8 rounded-2xl glass-card border border-primary/30 shadow-2xl max-w-md mx-4">
+            <div className="relative">
+              <Loader2 className="h-16 w-16 text-primary animate-spin" />
+              <Compass className="h-8 w-8 text-accent absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-xl font-headline font-semibold text-foreground">Computing Astronomical Alignments</p>
+              <p className="text-sm text-muted-foreground">Generating parametric dimensions, true north angles & solar geometry...</p>
+            </div>
           </div>
         </div>
       )}
