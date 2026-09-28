@@ -126,7 +126,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <CardTitle className="font-headline text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-amber-400 to-accent">
+              <CardTitle className="font-headline text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-300 to-accent">
                 {data.yantraName}
               </CardTitle>
               <CardDescription className="text-foreground/70 mt-1">
@@ -140,7 +140,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-black/20 shadow-inner">
+          <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-inner">
             <YantraViewer 
               ref={viewerRef} 
               yantraId={data.yantraId as import('@/lib/yantras').Yantra['id']} 

@@ -17,17 +17,21 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
+import { generateParametricYantraData } from '@/lib/yantra-calculator';
+
 const CACHE_KEY = 'yantravis-last-data';
 
+const defaultYantra = generateParametricYantraData('samrat', 26.9124, 75.7873);
+
 const initialState: ActionState = {
-  data: null,
+  data: defaultYantra,
   error: null,
 };
 
 export default function Home() {
   const [state, formAction, isPending] = useActionState(generateYantra, initialState);
-  const [localData, setLocalData] = useState<YantraData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [localData, setLocalData] = useState<YantraData>(defaultYantra);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -45,14 +49,13 @@ export default function Home() {
     } catch {
       // Ignore cache parse error
     }
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
     if (state.error) {
       toast({
         variant: 'destructive',
-        title: 'Input Error',
+        title: 'Notice',
         description: state.error,
       });
       setIsSheetOpen(false);
@@ -70,7 +73,7 @@ export default function Home() {
     }
   }, [state, toast, isMobile]);
 
-  const displayData = state.data || localData;
+  const displayData = state.data || localData || defaultYantra;
 
   const renderContent = () => {
     if (isMobile) {
@@ -84,15 +87,15 @@ export default function Home() {
                 <div className="fixed bottom-6 right-6 z-20">
                   <Button 
                     onClick={() => setIsSheetOpen(true)} 
-                    className="rounded-full h-14 w-14 shadow-xl shadow-primary/30 flex items-center justify-center animate-bounce"
+                    className="rounded-full h-14 w-14 shadow-xl shadow-primary/40 flex items-center justify-center animate-bounce bg-primary text-primary-foreground hover:bg-primary/90"
                     aria-label="Show Details"
                   >
                     <ChevronsUp className="h-6 w-6" />
                   </Button>
                 </div>
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                  <SheetContent side="bottom" className="h-[92vh] p-0">
-                    <SheetHeader className="p-4 border-b">
+                  <SheetContent side="bottom" className="h-[92vh] p-0 bg-background/95 backdrop-blur-xl border-t border-white/10">
+                    <SheetHeader className="p-4 border-b border-white/10">
                       <SheetTitle className="font-headline text-xl text-primary">{displayData.yantraName}</SheetTitle>
                       <SheetDescription className="text-xs">
                         Lat: {displayData.location.latitude.toFixed(4)}°, Lon: {displayData.location.longitude.toFixed(4)}°
@@ -110,14 +113,14 @@ export default function Home() {
     }
 
     return (
-      <main className="flex-grow container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start overflow-hidden">
-        <aside className="lg:col-span-1 h-full max-h-[calc(100vh-120px)]">
-            <ScrollArea className="h-full pr-4">
+      <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start min-h-0 overflow-y-auto lg:overflow-hidden">
+        <aside className="lg:col-span-1 lg:h-full lg:max-h-[calc(100vh-110px)]">
+            <ScrollArea className="h-full pr-2 lg:pr-4">
                 <YantraForm action={formAction} isPending={isPending} />
             </ScrollArea>
         </aside>
-        <ScrollArea className="lg:col-span-2 h-full max-h-[calc(100vh-120px)]">
-            <div className="pr-4">
+        <ScrollArea className="lg:col-span-2 lg:h-full lg:max-h-[calc(100vh-110px)]">
+            <div className="pr-2 lg:pr-4">
             {isLoading ? (
               <Card className="glass-card border-none">
                   <CardContent className="p-6 space-y-4">
@@ -141,7 +144,7 @@ export default function Home() {
                             <Compass className="h-24 w-24 text-primary animate-pulse" />
                             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full -z-10" />
                           </div>
-                          <h2 className="font-headline text-3xl font-bold text-foreground bg-clip-text text-transparent bg-gradient-to-r from-primary via-amber-400 to-accent">
+                          <h2 className="font-headline text-3xl font-bold text-foreground bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-300 to-accent">
                             Welcome to YantraVis
                           </h2>
                           <p className="mt-4 text-foreground/80 leading-relaxed text-sm md:text-base">
