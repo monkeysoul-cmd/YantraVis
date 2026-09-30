@@ -6,8 +6,8 @@ export default function AppHeader() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <Telescope className="h-8 w-8 text-primary drop-shadow-[0_0_14px_rgba(212,92,61,0.5)]" />
-            <h1 className="font-headline text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-amber-400 to-accent">
+            <Telescope className="h-8 w-8 text-primary drop-shadow-[0_0_14px_rgba(139,92,246,0.65)]" />
+            <h1 className="font-headline text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-indigo-300 to-accent">
               YantraVis
             </h1>
           </div>

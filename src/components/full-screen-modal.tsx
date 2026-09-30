@@ -33,18 +33,18 @@ export default function FullScreenModal({
           <YantraViewer yantraId={yantraId} latitude={latitude} animateShadow={animateShadow}/>
           <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
             <div className="flex items-center space-x-2 bg-card/80 backdrop-blur-md p-2 rounded-full shadow-md border border-white/10">
-              <Sun className="h-4 w-4 text-amber-400" />
+              <Sun className="h-4 w-4 text-accent" />
               <Switch
                 id="animate-shadow-fullscreen"
                 checked={animateShadow}
                 onCheckedChange={setAnimateShadow}
               />
-              <Moon className="h-4 w-4 text-slate-300" />
+              <Moon className="h-4 w-4 text-indigo-200" />
               <Label htmlFor="animate-shadow-fullscreen" className="sr-only">Simulate Day/Night</Label>
             </div>
             <div className="bg-card/80 backdrop-blur-md p-2 rounded-full shadow-md relative border border-white/10" title="True Meridian Alignment">
               <Compass className="h-5 w-5 text-foreground" />
-              <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-[10px] font-bold text-primary">N</div>
+              <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-[10px] font-bold text-accent">N</div>
             </div>
           </div>
         </div>
