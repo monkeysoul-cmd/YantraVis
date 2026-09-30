@@ -5,13 +5,13 @@
  * - generateYantraAnalysis - A function that handles the yantra analysis generation process.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai} from '../genkit';
 import {
   YantraAnalysisInputSchema,
   YantraAnalysisSchema,
   type YantraAnalysisInput,
   type YantraAnalysisOutput
-} from '@/lib/schema/yantra-analysis';
+} from '../../lib/schema/yantra-analysis';
 
 
 export async function generateYantraAnalysis(input: YantraAnalysisInput): Promise<YantraAnalysisOutput> {

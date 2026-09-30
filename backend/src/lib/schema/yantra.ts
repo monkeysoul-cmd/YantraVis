@@ -1,4 +1,4 @@
-import { YANTRAS } from '@/lib/yantras';
+import { YANTRAS } from '../yantras';
 import { z } from 'zod';
 import { YantraAnalysisSchema } from './yantra-analysis';
 

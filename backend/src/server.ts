@@ -25,18 +25,42 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Error handling middleware for malformed JSON
+app.use((err: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({ data: null, error: 'Invalid JSON payload received.' });
+  }
+  next(err);
+});
 
 const port = process.env.PORT || 4000;
 
-app.get('/', (_req: express.Request, res: express.Response) => {
-  res.json({ status: 'ok', service: 'YantraVis Backend API', version: '1.0.0' });
+app.get(['/', '/api'], (_req: express.Request, res: express.Response) => {
+  res.json({
+    status: 'ok',
+    service: 'YantraVis Backend API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      yantra: 'POST /api/yantra',
+    },
+  });
 });
 
 app.get(['/health', '/api/health'], (_req: express.Request, res: express.Response) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
-app.post('/api/yantra', async (req: express.Request, res: express.Response) => {
+app.get(['/api/yantra', '/yantra'], (_req: express.Request, res: express.Response) => {
+  res.json({
+    status: 'ok',
+    message: 'Yantra Calculation API is operational. Send a POST request with { latitude, longitude, yantra } to calculate dimensions.',
+  });
+});
+
+app.post(['/api/yantra', '/yantra'], async (req: express.Request, res: express.Response) => {
   try {
     const validatedFields = YantraGenerationFormSchema.safeParse(req.body);
 
@@ -82,13 +106,19 @@ app.post('/api/yantra', async (req: express.Request, res: express.Response) => {
     const fallbackData = generateParametricYantraData(yantra, latitude, longitude);
     const parametricDimensions = calculateParametricDimensions(yantra, latitude, longitude);
 
-    // If Google AI API key is available, attempt AI generation with graceful fallback
-    if (process.env.GEMINI_API_KEY) {
+    // If Google AI API key is available, attempt AI generation with graceful fallback and strict timeout
+    if (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY) {
       try {
-        const [descriptionResult, analysisResult] = await Promise.all([
+        const aiPromise = Promise.all([
           generateYantraDescription({ yantraName: selectedYantra.name }),
           generateYantraAnalysis({ yantraName: selectedYantra.name, dimensions: parametricDimensions, location: { latitude, longitude } })
         ]);
+
+        const timeoutPromise = new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('AI generation timed out')), 4500)
+        );
+
+        const [descriptionResult, analysisResult] = await Promise.race([aiPromise, timeoutPromise]);
 
         const yantraData: YantraData = {
           yantraId: yantra as any,
@@ -113,6 +143,12 @@ app.post('/api/yantra', async (req: express.Request, res: express.Response) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Backend server listening on port ${port}`);
-});
+// Start HTTP server only if executed as standalone process (not on Vercel serverless)
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`Backend server listening on port ${port}`);
+  });
+}
+
+export default app;
+module.exports = app;

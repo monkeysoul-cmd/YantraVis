@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
 config();
 
-import '@/ai/flows/generate-yantra-description';
-import '@/ai/flows/generate-yantra-analysis';
+import './flows/generate-yantra-description';
+import './flows/generate-yantra-analysis';

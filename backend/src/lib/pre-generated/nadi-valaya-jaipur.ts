@@ -1,4 +1,4 @@
-import type { YantraData } from '@/lib/schema/yantra';
+import type { YantraData } from '../schema/yantra';
 
 export const NADI_VALAYA_JAIPUR_DATA: YantraData = {
   yantraId: 'nadi-valaya',

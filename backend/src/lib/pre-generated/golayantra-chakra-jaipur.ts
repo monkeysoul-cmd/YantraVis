@@ -1,4 +1,4 @@
-import type { YantraData } from '@/lib/schema/yantra';
+import type { YantraData } from '../schema/yantra';
 
 export const GOLAYANTRA_CHAKRA_JAIPUR_DATA: YantraData = {
   yantraId: 'golayantra-chakra',

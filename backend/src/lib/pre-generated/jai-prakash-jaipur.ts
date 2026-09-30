@@ -1,4 +1,4 @@
-import type { YantraData } from '@/lib/schema/yantra';
+import type { YantraData } from '../schema/yantra';
 
 export const JAI_PRAKASH_JAIPUR_DATA: YantraData = {
   yantraId: 'jai-prakash',

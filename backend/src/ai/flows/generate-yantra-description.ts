@@ -5,13 +5,13 @@
  * - generateYantraDescription - A function that handles the yantra description generation process.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai} from '../genkit';
 import {
   GenerateYantraDescriptionInputSchema,
   GenerateYantraDescriptionOutputSchema,
   type GenerateYantraDescriptionInput,
   type GenerateYantraDescriptionOutput
-} from '@/lib/schema/yantra-description';
+} from '../../lib/schema/yantra-description';
 
 
 export async function generateYantraDescription(input: GenerateYantraDescriptionInput): Promise<GenerateYantraDescriptionOutput> {
