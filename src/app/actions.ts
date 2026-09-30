@@ -1,5 +1,3 @@
-'use server';
-
 import { YantraGenerationFormSchema, type ActionState } from '@/lib/schema/yantra';
 import { generateParametricYantraData } from '@/lib/yantra-calculator';
 
