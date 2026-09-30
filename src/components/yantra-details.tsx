@@ -126,7 +126,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <CardTitle className="font-headline text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-amber-400 to-accent">
+              <CardTitle className="font-headline text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-indigo-300 to-accent">
                 {data.yantraName}
               </CardTitle>
               <CardDescription className="text-foreground/70 mt-1">
@@ -161,18 +161,18 @@ export default function YantraDetails({ data }: { data: YantraData }) {
             </div>
             <div className="absolute top-3 right-3 flex items-center gap-2 z-10">
               <div className="flex items-center space-x-2 bg-card/80 backdrop-blur-md p-2 rounded-full shadow-md border border-white/10">
-                <Sun className="h-4 w-4 text-amber-400" />
+                <Sun className="h-4 w-4 text-accent" />
                 <Switch
                   id="animate-shadow"
                   checked={animateShadow}
                   onCheckedChange={setAnimateShadow}
                   aria-label="Simulate Day/Night Shadow Movement"
                 />
-                <Moon className="h-4 w-4 text-slate-300" />
+                <Moon className="h-4 w-4 text-indigo-200" />
               </div>
               <div className="bg-card/80 backdrop-blur-md p-2 rounded-full shadow-md border border-white/10 relative" title="True Meridian Alignment (North)">
                 <Compass className="h-5 w-5 text-foreground" />
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-[10px] font-bold text-primary">N</div>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-[10px] font-bold text-accent">N</div>
               </div>
             </div>
           </div>
