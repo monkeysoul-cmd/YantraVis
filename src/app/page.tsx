@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import type { ActionState, YantraData } from '@/lib/schema/yantra';
 import { generateYantra } from '@/app/actions';
@@ -29,12 +29,32 @@ const initialState: ActionState = {
 };
 
 export default function Home() {
-  const [state, formAction, isPending] = useActionState(generateYantra, initialState);
+  const [state, setState] = useState<ActionState>(initialState);
+  const [isPending, startTransition] = useTransition();
   const [localData, setLocalData] = useState<YantraData>(defaultYantra);
   const [isLoading, setIsLoading] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  const handleFormAction = (formData: FormData) => {
+    setIsLoading(true);
+    startTransition(async () => {
+      try {
+        const res = await generateYantra(state, formData);
+        setState(res);
+      } catch (err) {
+        console.error("Form action failed:", err);
+        toast({
+          variant: 'destructive',
+          title: 'Notice',
+          description: 'Failed to calculate instrument data. Falling back to local model.',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    });
+  };
 
   useEffect(() => {
     // Check if there is cached data from previous session
@@ -80,7 +100,7 @@ export default function Home() {
       return (
         <div className="container mx-auto p-4 flex-grow overflow-hidden flex flex-col">
             <ScrollArea className="flex-grow">
-              <YantraForm action={formAction} isPending={isPending} />
+              <YantraForm action={handleFormAction} isPending={isPending || isLoading} />
             </ScrollArea>
             {displayData && (
               <>
@@ -116,12 +136,12 @@ export default function Home() {
       <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start min-h-0 overflow-y-auto lg:overflow-hidden">
         <aside className="lg:col-span-1 lg:h-full lg:max-h-[calc(100vh-110px)]">
             <ScrollArea className="h-full pr-2 lg:pr-4">
-                <YantraForm action={formAction} isPending={isPending} />
+                <YantraForm action={handleFormAction} isPending={isPending || isLoading} />
             </ScrollArea>
         </aside>
         <ScrollArea className="lg:col-span-2 lg:h-full lg:max-h-[calc(100vh-110px)]">
             <div className="pr-2 lg:pr-4">
-            {isLoading ? (
+            {isLoading || isPending ? (
               <Card className="glass-card border-none">
                   <CardContent className="p-6 space-y-4">
                       <Skeleton className="h-8 w-1/2 bg-white/10" />

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,8 +11,7 @@ import { Globe, Loader2, MapPin } from 'lucide-react';
 import { Separator } from './ui/separator';
 
 function SubmitButton({ isPending }: { isPending: boolean }) {
-  const { pending } = useFormStatus();
-  const loading = isPending || pending;
+  const loading = isPending;
 
   return (
     <Button 
@@ -59,6 +57,12 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
     setLon(presetLon.toString());
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    action(formData);
+  };
+
   return (
     <Card className="shadow-2xl glass-card border-none">
       <CardHeader>
@@ -70,7 +74,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={action} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Explicit hidden input ensuring selected yantra is always sent in form data */}
           <input type="hidden" name="yantra" value={selectedYantra} />
           

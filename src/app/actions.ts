@@ -37,11 +37,11 @@ export async function generateYantra(
       targetYantra = validation.data.yantra;
     }
 
+    const isDev = process.env.NODE_ENV === 'development';
     const candidateUrls = [
       process.env.BACKEND_URL,
       process.env.NEXT_PUBLIC_BACKEND_URL,
-      'http://127.0.0.1:4000',
-      'http://127.0.0.1:3001',
+      ...(isDev ? ['http://127.0.0.1:4000', 'http://127.0.0.1:3001'] : []),
     ].filter(Boolean) as string[];
 
     for (const baseUrl of candidateUrls) {
