@@ -41,6 +41,7 @@ const PRESET_LOCATIONS = [
   { name: 'New Delhi', lat: 28.6271, lon: 77.2166, title: 'Jantar Mantar (Connaught Place)' },
   { name: 'Ujjain', lat: 23.1765, lon: 75.7885, title: 'Vedh Shala' },
   { name: 'Varanasi', lat: 25.3109, lon: 83.0107, title: 'Maan Mandir Observatory' },
+  { name: 'Mathura', lat: 27.4924, lon: 77.6737, title: 'Jantar Mantar (Historic Observatory)' },
 ];
 
 type YantraFormProps = {

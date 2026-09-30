@@ -61,7 +61,9 @@ export default function YantraDetails({ data }: { data: YantraData }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${data.yantraId}_${data.location.latitude.toFixed(2)}N_${data.location.longitude.toFixed(2)}E.stl`;
+    const latLabel = data.location.latitude >= 0 ? `${data.location.latitude.toFixed(2)}N` : `${Math.abs(data.location.latitude).toFixed(2)}S`;
+    const lonLabel = data.location.longitude >= 0 ? `${data.location.longitude.toFixed(2)}E` : `${Math.abs(data.location.longitude).toFixed(2)}W`;
+    a.download = `${data.yantraId}_${latLabel}_${lonLabel}.stl`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -79,7 +81,9 @@ export default function YantraDetails({ data }: { data: YantraData }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${data.yantraId}_${data.location.latitude.toFixed(2)}N_${data.location.longitude.toFixed(2)}E.dxf`;
+    const latLabel = data.location.latitude >= 0 ? `${data.location.latitude.toFixed(2)}N` : `${Math.abs(data.location.latitude).toFixed(2)}S`;
+    const lonLabel = data.location.longitude >= 0 ? `${data.location.longitude.toFixed(2)}E` : `${Math.abs(data.location.longitude).toFixed(2)}W`;
+    a.download = `${data.yantraId}_${latLabel}_${lonLabel}.dxf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -186,7 +190,13 @@ export default function YantraDetails({ data }: { data: YantraData }) {
               {Object.entries(data.dimensions).map(([key, value]) => (
                 <div key={key} className="bg-secondary/30 p-3 rounded-lg border border-white/5 text-center">
                   <p className="text-muted-foreground capitalize text-xs line-clamp-1">{key}</p>
-                  <p className="font-semibold text-lg text-primary mt-0.5">{typeof value === 'number' ? value.toFixed(2) : value}</p>
+                  <p className="font-semibold text-lg text-primary mt-0.5">
+                    {typeof value === 'number' 
+                      ? (key.toLowerCase().includes('angle') || key.toLowerCase().includes('tilt') 
+                          ? `${value.toFixed(2)}°` 
+                          : value.toFixed(2)) 
+                      : value}
+                  </p>
                 </div>
               ))}
             </div>

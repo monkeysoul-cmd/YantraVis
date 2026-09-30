@@ -460,10 +460,14 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       };
       window.addEventListener('resize', handleResize);
 
+      const resizeObserver = new ResizeObserver(() => handleResize());
+      resizeObserver.observe(currentMount);
+
       // Thorough cleanup to prevent WebGL leaks and runaway requestAnimationFrames
       return () => {
         cancelAnimationFrame(animationFrameId);
         window.removeEventListener('resize', handleResize);
+        resizeObserver.disconnect();
 
         controls.dispose();
         renderer.dispose();

@@ -37,34 +37,41 @@ export async function generateYantra(
       targetYantra = validation.data.yantra;
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://127.0.0.1:4000';
+    const candidateUrls = [
+      process.env.BACKEND_URL,
+      process.env.NEXT_PUBLIC_BACKEND_URL,
+      'http://127.0.0.1:4000',
+      'http://127.0.0.1:3001',
+    ].filter(Boolean) as string[];
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1200);
+    for (const baseUrl of candidateUrls) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1200);
 
-      const response = await fetch(`${baseUrl}/api/yantra`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ latitude: targetLat, longitude: targetLon, yantra: targetYantra }),
-        signal: controller.signal,
-      });
+        const response = await fetch(`${baseUrl}/api/yantra`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ latitude: targetLat, longitude: targetLon, yantra: targetYantra }),
+          signal: controller.signal,
+        });
 
-      clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result && result.data) {
-          return {
-            data: result.data,
-            error: null,
-          };
+        if (response.ok) {
+          const result = await response.json();
+          if (result && result.data) {
+            return {
+              data: result.data,
+              error: null,
+            };
+          }
         }
+      } catch {
+        // Backend candidate offline or timed out, proceed to next candidate or fallback
       }
-    } catch {
-      // Backend offline or unreachable, seamlessly using local parametric engine
     }
 
     // High-precision parametric astronomical calculation engine

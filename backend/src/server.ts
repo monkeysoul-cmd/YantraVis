@@ -28,6 +28,14 @@ app.use(express.json());
 
 const port = process.env.PORT || 4000;
 
+app.get('/', (_req: express.Request, res: express.Response) => {
+  res.json({ status: 'ok', service: 'YantraVis Backend API', version: '1.0.0' });
+});
+
+app.get(['/health', '/api/health'], (_req: express.Request, res: express.Response) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
 app.post('/api/yantra', async (req: express.Request, res: express.Response) => {
   try {
     const validatedFields = YantraGenerationFormSchema.safeParse(req.body);

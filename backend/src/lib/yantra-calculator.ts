@@ -6,6 +6,7 @@ export function calculateMagneticDeclination(latitude: number, longitude: number
   direction: 'East' | 'West';
   formatted: string;
 } {
+  // Empirical approximation for Indian subcontinent
   const declination = Number((0.5 + (longitude - 75.0) * 0.04 - (latitude - 20.0) * 0.02).toFixed(2));
   const direction = declination >= 0 ? 'East' : 'West';
   const absAngle = Math.abs(declination);
@@ -20,6 +21,7 @@ export function calculateSolarNoonOffset(longitude: number): {
   minutes: number;
   formatted: string;
 } {
+  // IST is based on 82.5° East
   const diffDegrees = longitude - 82.5;
   const minutes = Number((diffDegrees * 4).toFixed(1));
   const sign = minutes >= 0 ? '+' : '';
