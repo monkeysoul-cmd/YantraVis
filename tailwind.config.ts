@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Lato', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        body: ['Plus Jakarta Sans', 'sans-serif'],
+        headline: ['Cinzel', 'serif'],
         code: ['monospace'],
       },
       colors: {
