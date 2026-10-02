@@ -1,11 +1,6 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import { Telescope, Star } from 'lucide-react';
 
 export default function AppHeader() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   return (
     <header className="relative border-b bg-card/60 backdrop-blur-2xl sticky top-0 z-30 overflow-hidden"

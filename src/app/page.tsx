@@ -8,7 +8,7 @@ import { generateYantra } from '@/app/actions';
 import AppHeader from '@/components/app-header';
 import YantraForm from '@/components/yantra-form';
 import YantraDetails from '@/components/yantra-details';
-import { Compass, Loader2, Telescope, Star, Sun } from 'lucide-react';
+import { Compass, Telescope, Star, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -39,7 +39,7 @@ function MandalaBg() {
       <div className="absolute top-20 right-20 w-2 h-2 rounded-full animate-twinkle" style={{ background: 'hsl(43, 100%, 65%)', boxShadow: '0 0 12px hsl(43, 100%, 65%)' }} />
       <div className="absolute bottom-32 left-16 w-1.5 h-1.5 rounded-full animate-twinkle delay-300" style={{ background: 'hsl(24, 90%, 65%)', boxShadow: '0 0 10px hsl(24, 90%, 65%)' }} />
       <div className="absolute top-1/3 right-1/4 w-1 h-1 rounded-full animate-twinkle delay-600" style={{ background: 'hsl(43, 100%, 70%)', boxShadow: '0 0 8px hsl(43, 100%, 70%)' }} />
-      <div className="absolute top-2/3 left-1/5 w-1 h-1 rounded-full animate-twinkle delay-200" style={{ background: 'hsl(24, 90%, 70%)', boxShadow: '0 0 8px hsl(24, 90%, 70%)' }} />
+      <div className="absolute top-2/3 left-[20%] w-1 h-1 rounded-full animate-twinkle delay-200" style={{ background: 'hsl(24, 90%, 70%)', boxShadow: '0 0 8px hsl(24, 90%, 70%)' }} />
     </div>
   );
 }

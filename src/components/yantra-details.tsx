@@ -192,7 +192,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                     {data.location.latitude.toFixed(3)}° N
                   </span>
                 </div>
-                <h2 className="font-headline text-3xl sm:text-4xl font-bold leading-tight"
+                <h2 className="font-headline text-2xl sm:text-3xl font-bold leading-tight"
                   style={{
                     background: 'linear-gradient(135deg, hsl(24, 90%, 68%), hsl(38, 95%, 62%), hsl(43, 100%, 56%))',
                     WebkitBackgroundClip: 'text',
@@ -240,8 +240,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
         </div>
 
         {/* ── 3D Viewer ── */}
-        <div className="relative rounded-2xl overflow-hidden viewer-frame"
-          style={{ aspectRatio: '16/9', minHeight: '280px', maxHeight: '380px' }}>
+        <div className="relative rounded-2xl overflow-hidden viewer-frame h-[300px] sm:h-[360px]">
           <YantraViewer
             ref={viewerRef}
             yantraId={data.yantraId as import('@/lib/yantras').Yantra['id']}
@@ -293,13 +292,13 @@ export default function YantraDetails({ data }: { data: YantraData }) {
               }}
             >
               <Icon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{label}</span>
+              <span>{label}</span>
             </button>
           ))}
         </div>
 
         {/* ── Tab Content ── */}
-        <div className="rounded-2xl overflow-hidden glass-card animate-rise-fade" key={activeTab}>
+        <div className="rounded-2xl overflow-hidden glass-card" key={activeTab}>
           <div className="p-5 sm:p-6">
 
             {/* ABOUT TAB */}
@@ -417,7 +416,10 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                     <div key={label} className="flex gap-3 p-4 rounded-xl"
                       style={{ background: 'hsla(220, 28%, 8%, 0.6)', border: '1px solid hsla(220, 25%, 14%, 0.8)' }}>
                       <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mt-0.5"
-                        style={{ background: `${color}18`, border: `1px solid ${color}30` }}>
+                        style={{ 
+                          background: 'hsla(220, 28%, 14%, 0.8)',
+                          border: '1px solid hsla(220, 25%, 22%, 1)'
+                        }}>
                         <Icon className="h-3.5 w-3.5" style={{ color }} />
                       </div>
                       <div className="space-y-1">

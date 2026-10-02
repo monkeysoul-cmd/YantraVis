@@ -205,7 +205,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
             <RadioGroup
               value={selectedYantra}
               onValueChange={setSelectedYantra}
-              className="grid grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-0.5"
+              className="grid grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-1"
             >
               {YANTRAS.map((yantra) => (
                 <div key={yantra.id} className="relative" onClick={() => setSelectedYantra(yantra.id)}>
@@ -214,7 +214,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
                     htmlFor={yantra.id}
                     className={cn(
                       "relative flex h-[90px] flex-col items-center justify-center rounded-xl p-3 cursor-pointer",
-                      "transition-all duration-250 select-none",
+                      "transition-all duration-200 select-none",
                       "border backdrop-blur-sm"
                     )}
                     style={{
