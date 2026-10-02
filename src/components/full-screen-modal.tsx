@@ -55,7 +55,7 @@ export default function FullScreenModal({
               <Label htmlFor="animate-shadow-fullscreen" className="sr-only">Simulate Day/Night</Label>
             </div>
 
-            {/* Compass */}
+            {/* Compass badge aligned */}
             <div className="w-9 h-9 rounded-full flex items-center justify-center relative"
               style={{
                 background: 'hsla(220, 32%, 7%, 0.85)',
@@ -63,9 +63,11 @@ export default function FullScreenModal({
                 border: '1px solid hsla(43, 100%, 52%, 0.2)'
               }}
               title="True Meridian — North">
-              <Compass className="h-4 w-4 text-foreground/80" />
-              <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[8px] font-bold leading-none"
-                style={{ color: 'hsl(43, 100%, 55%)' }}>N</span>
+              <div className="relative flex items-center justify-center">
+                <Compass className="h-4 w-4 text-foreground/80" />
+                <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[8px] font-bold leading-none"
+                  style={{ color: 'hsl(43, 100%, 55%)' }}>N</span>
+              </div>
             </div>
           </div>
 
