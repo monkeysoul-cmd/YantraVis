@@ -19,28 +19,38 @@ export default function ArModal({ isOpen, onClose, yantraId }: ArModalProps) {
     
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0"
+        style={{ background: 'hsl(222, 35%, 5%)', border: '1px solid hsla(24, 85%, 42%, 0.2)' }}>
 
-        <div className="flex-grow relative overflow-hidden bg-secondary">
+        <div className="flex-grow relative overflow-hidden" style={{ background: 'hsl(222, 40%, 4%)' }}>
           {bgImage && (
             <Image 
                 src={bgImage.imageUrl} 
                 alt="Outdoor site for AR preview" 
                 fill
-                className="object-cover"
+                className="object-cover opacity-60"
                 data-ai-hint={bgImage.imageHint}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           )}
-          <div className="absolute inset-0 bg-black/10">
+          <div className="absolute inset-0">
             <YantraViewer yantraId={yantraId} isArMode={true} />
           </div>
+          {/* AR overlay badge */}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium"
+            style={{ background: 'hsla(220, 32%, 7%, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid hsla(24, 90%, 55%, 0.25)', color: 'hsl(24, 90%, 60%)' }}>
+            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'hsl(24, 90%, 55%)' }} />
+            AR Simulation
+          </div>
         </div>
-        <DialogHeader className="p-6 border-t bg-card">
-            <div className='space-y-1.5'>
-                <DialogTitle className="font-headline">Augmented Reality Preview</DialogTitle>
-                <DialogDescription>
-                    This is a simulation. On a supported mobile device, this view would use your camera to place the yantra in your environment.
+
+        <DialogHeader className="p-5 flex-shrink-0"
+          style={{ borderTop: '1px solid hsla(24, 85%, 42%, 0.15)', background: 'hsla(220, 32%, 7%, 0.95)' }}>
+            <div className='space-y-1'>
+                <DialogTitle className="font-headline text-base"
+                  style={{ color: 'hsl(24, 90%, 62%)' }}>Augmented Reality Preview</DialogTitle>
+                <DialogDescription className="text-xs">
+                    Simulation mode. On supported mobile devices, this view uses your camera to place the yantra in your real environment.
                 </DialogDescription>
             </div>
         </DialogHeader>
