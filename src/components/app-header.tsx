@@ -16,39 +16,40 @@ export default function AppHeader() {
           background: 'radial-gradient(ellipse 60% 100% at 50% -50%, hsla(24, 90%, 55%, 0.06) 0%, transparent 70%)'
         }} />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           
-          {/* Logo + Title */}
-          <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center">
-              {/* Orbit ring */}
-              <div className="absolute w-12 h-12 rounded-full border border-primary/20 animate-spin-slow" />
-              <div className="absolute w-8 h-8 rounded-full border border-accent/15 animate-counter-spin" />
-              {/* Icon */}
-              <div className="relative w-10 h-10 flex items-center justify-center rounded-xl"
+          {/* Logo + Title (Aligned with page sidebar grid) */}
+          <div className="flex items-center gap-3.5">
+            <div className="relative w-11 h-11 flex-shrink-0 flex items-center justify-center">
+              {/* Outer Orbit ring */}
+              <div className="absolute inset-0 rounded-full border border-primary/25 animate-spin-slow pointer-events-none" />
+              {/* Inner Orbit ring */}
+              <div className="absolute inset-1.5 rounded-full border border-accent/20 animate-counter-spin pointer-events-none" />
+              {/* Center Icon */}
+              <div className="relative w-8 h-8 flex items-center justify-center rounded-lg"
                 style={{
-                  background: 'linear-gradient(135deg, hsla(24, 85%, 42%, 0.2), hsla(43, 100%, 52%, 0.15))',
-                  border: '1px solid hsla(43, 100%, 52%, 0.3)',
-                  boxShadow: '0 0 20px hsla(24, 90%, 55%, 0.2), inset 0 1px 0 hsla(255, 100%, 100%, 0.1)'
+                  background: 'linear-gradient(135deg, hsla(24, 85%, 42%, 0.25), hsla(43, 100%, 52%, 0.18))',
+                  border: '1px solid hsla(43, 100%, 52%, 0.35)',
+                  boxShadow: '0 0 16px hsla(24, 90%, 55%, 0.25), inset 0 1px 0 hsla(255, 100%, 100%, 0.12)'
                 }}>
-                <Telescope className="h-5 w-5" style={{ color: 'hsl(24, 90%, 60%)' }} />
+                <Telescope className="h-4.5 w-4.5" style={{ color: 'hsl(24, 90%, 62%)' }} />
               </div>
             </div>
             
-            <div>
-              <h1 className="font-headline text-2xl font-bold tracking-widest leading-none"
+            <div className="flex flex-col justify-center">
+              <h1 className="font-headline text-xl sm:text-2xl font-bold tracking-wider leading-none"
                 style={{
                   background: 'linear-gradient(135deg, hsl(24, 90%, 65%), hsl(38, 95%, 58%), hsl(43, 100%, 55%))',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
                   textShadow: 'none',
-                  filter: 'drop-shadow(0 0 12px hsla(43, 100%, 52%, 0.3))'
+                  filter: 'drop-shadow(0 0 12px hsla(43, 100%, 52%, 0.25))'
                 }}>
                 YantraVis
               </h1>
-              <p className="text-[10px] font-body tracking-[0.25em] uppercase text-muted-foreground leading-none mt-0.5">
+              <p className="text-[9.5px] font-body font-medium tracking-[0.22em] uppercase text-muted-foreground/80 leading-none mt-1">
                 Observational Astronomy
               </p>
             </div>

@@ -219,9 +219,11 @@ export default function Home() {
         <MandalaBg />
         {isProcessing && <LoadingOverlay />}
         <AppHeader />
-        <div className="container mx-auto p-4 flex-grow overflow-hidden flex flex-col relative z-10">
+        <div className="w-full p-4 flex-grow overflow-hidden flex flex-col relative z-10">
           <ScrollArea className="flex-grow">
-            <YantraForm action={handleFormAction} isPending={isProcessing} />
+            <div className="max-w-md mx-auto w-full pb-16">
+              <YantraForm action={handleFormAction} isPending={isProcessing} />
+            </div>
           </ScrollArea>
           {displayData && (
             <>
@@ -260,7 +262,7 @@ export default function Home() {
                       Lat {displayData.location.latitude.toFixed(4)}° · Lon {displayData.location.longitude.toFixed(4)}°
                     </SheetDescription>
                   </SheetHeader>
-                  <ScrollArea className="h-[calc(93vh-80px)] p-4">
+                  <ScrollArea className="h-[calc(93vh-80px)] p-3 sm:p-4">
                     <YantraDetails data={displayData} />
                   </ScrollArea>
                 </SheetContent>
@@ -280,7 +282,7 @@ export default function Home() {
       <AppHeader />
 
       <main className="flex-grow relative z-10 overflow-hidden">
-        <div className="h-full grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-0">
+        <div className="h-full grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-0">
           
           {/* Left panel — Config */}
           <div className="relative h-full overflow-hidden"
@@ -301,7 +303,7 @@ export default function Home() {
             <div className="absolute inset-0 pointer-events-none"
               style={{ background: 'radial-gradient(ellipse 60% 50% at 80% 10%, hsla(43, 100%, 52%, 0.04) 0%, transparent 60%)' }} />
             <ScrollArea className="h-full">
-              <div className="p-5 lg:p-6 relative z-10">
+              <div className="p-5 lg:p-6 max-w-5xl mx-auto w-full relative z-10">
                 {isProcessing ? (
                   <LoadingSkeleton />
                 ) : displayData ? (

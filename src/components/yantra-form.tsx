@@ -82,9 +82,9 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
   };
 
   return (
-    <Card className="glass-card border-none shadow-none">
+    <Card className="glass-card border-none shadow-none bg-transparent">
       {/* Header */}
-      <CardHeader className="pb-4">
+      <CardHeader className="p-0 pb-4">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, hsla(24, 85%, 42%, 0.2), hsla(43, 100%, 52%, 0.15))', border: '1px solid hsla(43, 100%, 52%, 0.3)' }}>
@@ -104,7 +104,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="pt-0">
+      <CardContent className="p-0">
         <form onSubmit={handleSubmit} className="space-y-5">
           <input type="hidden" name="yantra" value={selectedYantra} />
 
@@ -207,55 +207,63 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
               onValueChange={setSelectedYantra}
               className="grid grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-1"
             >
-              {YANTRAS.map((yantra) => (
-                <div key={yantra.id} className="relative" onClick={() => setSelectedYantra(yantra.id)}>
-                  <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
-                  <Label
-                    htmlFor={yantra.id}
-                    className={cn(
-                      "relative flex h-[90px] flex-col items-center justify-center rounded-xl p-3 cursor-pointer",
-                      "transition-all duration-200 select-none",
-                      "border backdrop-blur-sm"
-                    )}
-                    style={{
-                      background: selectedYantra === yantra.id
-                        ? 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.15), hsla(43, 100%, 52%, 0.1))'
-                        : 'hsla(220, 28%, 8%, 0.7)',
-                      borderColor: selectedYantra === yantra.id
-                        ? 'hsla(43, 100%, 52%, 0.5)'
-                        : 'hsla(220, 25%, 14%, 1)',
-                      boxShadow: selectedYantra === yantra.id
-                        ? '0 0 0 1px hsla(43, 100%, 52%, 0.3), 0 0 16px hsla(43, 100%, 52%, 0.2)'
-                        : 'none',
-                    }}
+              {YANTRAS.map((yantra, index) => {
+                const isLast = index === YANTRAS.length - 1;
+                return (
+                  <div
+                    key={yantra.id}
+                    className={cn("relative", isLast && "col-span-2")}
+                    onClick={() => setSelectedYantra(yantra.id)}
                   >
-                    <div className="flex flex-col items-center gap-1.5">
-                      <yantra.Icon
-                        className="h-6 w-6 transition-all duration-250"
-                        style={{
-                          color: selectedYantra === yantra.id
-                            ? 'hsl(43, 100%, 55%)'
-                            : 'hsl(24, 60%, 50%)',
-                          filter: selectedYantra === yantra.id
-                            ? 'drop-shadow(0 0 6px hsla(43, 100%, 52%, 0.5))'
-                            : 'none'
-                        }}
-                      />
-                      <span className="text-center text-[10px] font-medium tracking-wide line-clamp-2 leading-tight"
-                        style={{
-                          color: selectedYantra === yantra.id ? 'hsl(38, 25%, 90%)' : 'hsl(38, 15%, 58%)'
-                        }}>
-                        {yantra.name}
-                      </span>
-                    </div>
-                    {/* Active dot indicator */}
-                    {selectedYantra === yantra.id && (
-                      <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full animate-pulse"
-                        style={{ background: 'hsl(43, 100%, 52%)' }} />
-                    )}
-                  </Label>
-                </div>
-              ))}
+                    <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
+                    <Label
+                      htmlFor={yantra.id}
+                      className={cn(
+                        "relative flex items-center justify-center rounded-xl p-2.5 cursor-pointer",
+                        isLast ? "h-[64px] flex-row gap-3 px-4" : "h-[90px] flex-col",
+                        "transition-all duration-200 select-none",
+                        "border backdrop-blur-sm"
+                      )}
+                      style={{
+                        background: selectedYantra === yantra.id
+                          ? 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.15), hsla(43, 100%, 52%, 0.1))'
+                          : 'hsla(220, 28%, 8%, 0.7)',
+                        borderColor: selectedYantra === yantra.id
+                          ? 'hsla(43, 100%, 52%, 0.5)'
+                          : 'hsla(220, 25%, 14%, 1)',
+                        boxShadow: selectedYantra === yantra.id
+                          ? '0 0 0 1px hsla(43, 100%, 52%, 0.3), 0 0 16px hsla(43, 100%, 52%, 0.2)'
+                          : 'none',
+                      }}
+                    >
+                      <div className={cn("flex items-center", isLast ? "flex-row gap-2.5" : "flex-col gap-1.5")}>
+                        <yantra.Icon
+                          className="h-5 w-5 flex-shrink-0 transition-all duration-200"
+                          style={{
+                            color: selectedYantra === yantra.id
+                              ? 'hsl(43, 100%, 55%)'
+                              : 'hsl(24, 60%, 50%)',
+                            filter: selectedYantra === yantra.id
+                              ? 'drop-shadow(0 0 6px hsla(43, 100%, 52%, 0.5))'
+                              : 'none'
+                          }}
+                        />
+                        <span className={cn("text-[10px] font-medium tracking-wide leading-tight", isLast ? "text-left" : "text-center line-clamp-2")}
+                          style={{
+                            color: selectedYantra === yantra.id ? 'hsl(38, 25%, 90%)' : 'hsl(38, 15%, 58%)'
+                          }}>
+                          {yantra.name}
+                        </span>
+                      </div>
+                      {/* Active dot indicator */}
+                      {selectedYantra === yantra.id && (
+                        <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full animate-pulse"
+                          style={{ background: 'hsl(43, 100%, 52%)' }} />
+                      )}
+                    </Label>
+                  </div>
+                );
+              })}
             </RadioGroup>
           </div>
 

@@ -81,7 +81,7 @@ function StatCard({ label, value, icon: Icon, accent = false }: { label: string;
       <div className="flex items-center gap-1.5">
         {Icon && <Icon className="h-3 w-3 text-muted-foreground/60" />}
         <p className="text-[9px] font-medium uppercase tracking-widest text-muted-foreground capitalize leading-none">
-          {label.replace(/([A-Z])/g, ' $1').trim()}
+          {label.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim()}
         </p>
       </div>
       <p className="font-headline text-base font-semibold leading-tight"
@@ -180,7 +180,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
             style={{ background: 'radial-gradient(ellipse at top right, hsla(43, 100%, 52%, 0.08) 0%, transparent 70%)' }} />
           
           <div className="relative p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="info-pill flex items-center gap-1">
@@ -208,8 +208,8 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                 </p>
               </div>
 
-              {/* Quick action controls */}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Quick action controls (vertically centered) */}
+              <div className="flex items-center gap-2.5 flex-shrink-0">
                 {/* Day/Night toggle */}
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
                   style={{ background: 'hsla(220, 25%, 12%, 0.8)', border: '1px solid hsla(220, 25%, 18%, 1)' }}>
@@ -240,7 +240,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
         </div>
 
         {/* ── 3D Viewer ── */}
-        <div className="relative rounded-2xl overflow-hidden viewer-frame h-[300px] sm:h-[360px]">
+        <div className="relative rounded-2xl overflow-hidden viewer-frame h-[320px] sm:h-[380px]">
           <YantraViewer
             ref={viewerRef}
             yantraId={data.yantraId as import('@/lib/yantras').Yantra['id']}
@@ -256,10 +256,10 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
             style={{ background: 'linear-gradient(to top, hsla(222, 40%, 4%, 0.6) 0%, transparent 100%)' }} />
 
-          {/* Compass badge */}
+          {/* Compass badge aligned */}
           <div className="absolute top-3 right-3 flex items-center justify-center w-9 h-9 rounded-full"
             style={{ background: 'hsla(220, 32%, 7%, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid hsla(43, 100%, 52%, 0.25)' }}>
-            <div className="relative">
+            <div className="relative flex items-center justify-center">
               <Compass className="h-4 w-4 text-foreground/80" />
               <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[8px] font-bold leading-none"
                 style={{ color: 'hsl(43, 100%, 55%)' }}>N</div>
@@ -274,14 +274,14 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           </div>
         </div>
 
-        {/* ── Tab Navigation ── */}
-        <div className="flex gap-1 rounded-xl p-1"
+        {/* ── Tab Navigation (Balanced grid for mobile & desktop) ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 rounded-xl p-1.5"
           style={{ background: 'hsla(220, 28%, 8%, 0.7)', border: '1px solid hsla(220, 25%, 14%, 1)' }}>
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-xs font-medium transition-all duration-200"
+              className="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all duration-200"
               style={{
                 background: activeTab === key
                   ? 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.2), hsla(43, 100%, 52%, 0.15))'
@@ -435,11 +435,11 @@ export default function YantraDetails({ data }: { data: YantraData }) {
         </div>
 
         {/* ── Action Buttons ── */}
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap sm:flex-nowrap gap-3 items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                className="flex-1 sm:flex-none gap-2 text-sm font-medium"
+                className="flex-1 sm:flex-none gap-2 text-sm font-medium h-10 px-5"
                 style={{
                   background: 'linear-gradient(135deg, hsl(24, 85%, 42%), hsl(24, 90%, 52%))',
                   boxShadow: '0 4px 16px hsla(24, 90%, 55%, 0.3)',
@@ -492,7 +492,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           <Button
             onClick={() => setIsArModalOpen(true)}
             variant="outline"
-            className="flex-1 sm:flex-none gap-2 text-sm"
+            className="flex-1 sm:flex-none gap-2 text-sm h-10 px-5"
             style={{
               background: 'hsla(220, 28%, 9%, 0.8)',
               border: '1px solid hsla(24, 90%, 55%, 0.25)',
