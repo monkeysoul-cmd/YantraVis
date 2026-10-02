@@ -29,5 +29,10 @@
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3"
+  },
+  "allowScripts": {
+    "@firebase/util": true,
+    "esbuild": true,
+    "protobufjs": true
   }
 }
