@@ -15,11 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { generateParametricYantraData } from '@/lib/yantra-calculator';
-
-const CACHE_KEY = 'yantravis-last-data';
-const defaultYantra = generateParametricYantraData('samrat', 26.9124, 75.7873);
-const initialState: ActionState = { data: defaultYantra, error: null };
+const initialState: ActionState = { data: null, error: null };
 
 // Decorative background mandala
 function MandalaBg() {
@@ -162,7 +158,7 @@ function LoadingSkeleton() {
 export default function Home() {
   const [state, setState] = useState<ActionState>(initialState);
   const [isPending, startTransition] = useTransition();
-  const [localData, setLocalData] = useState<YantraData>(defaultYantra);
+  const [localData, setLocalData] = useState<YantraData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
@@ -188,16 +184,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed?.yantraId) setLocalData(parsed);
-      }
-    } catch { /* ignore */ }
-  }, []);
-
-  useEffect(() => {
     if (state.error) {
       toast({ variant: 'destructive', title: 'Notice', description: state.error });
       setIsSheetOpen(false);
@@ -205,11 +191,10 @@ export default function Home() {
     if (state.data) {
       setLocalData(state.data);
       if (isMobile) setIsSheetOpen(true);
-      try { localStorage.setItem(CACHE_KEY, JSON.stringify(state.data)); } catch { /* ignore */ }
     }
   }, [state, toast, isMobile]);
 
-  const displayData = state.data || localData || defaultYantra;
+  const displayData = state.data || localData;
   const isProcessing = isLoading || isPending;
 
   // Mobile layout
@@ -219,7 +204,7 @@ export default function Home() {
         <MandalaBg />
         {isProcessing && <LoadingOverlay />}
         <AppHeader />
-        <div className="w-full p-4 flex-grow overflow-hidden flex flex-col relative z-10">
+        <div className="w-full p-4 flex-1 min-h-0 overflow-hidden flex flex-col relative z-10">
           <ScrollArea className="flex-grow">
             <div className="max-w-md mx-auto w-full pb-16">
               <YantraForm action={handleFormAction} isPending={isProcessing} />
@@ -281,7 +266,7 @@ export default function Home() {
       {isProcessing && <LoadingOverlay />}
       <AppHeader />
 
-      <main className="flex-grow relative z-10 overflow-hidden">
+      <main className="flex-1 min-h-0 relative z-10 overflow-hidden">
         <div className="h-full grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-0">
           
           {/* Left panel — Config */}
