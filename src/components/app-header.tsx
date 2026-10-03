@@ -62,6 +62,22 @@ const OBSERVATORIES = [
 
 export default function AppHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [instrumentsOpen, setInstrumentsOpen] = useState(false);
+  const [observatoriesOpen, setObservatoriesOpen] = useState(false);
+
+  const handleSelectYantra = (id: string) => {
+    window.dispatchEvent(new CustomEvent('select-yantra', { detail: { yantraId: id } }));
+    setInstrumentsOpen(false);
+  };
+
+  const handleSelectObservatory = (obs: typeof OBSERVATORIES[0]) => {
+    window.dispatchEvent(
+      new CustomEvent('select-location', {
+        detail: { lat: obs.lat, lon: obs.lon, name: obs.name.split(',')[1]?.trim() || obs.name }
+      })
+    );
+    setObservatoriesOpen(false);
+  };
 
   return (
     <header className="shrink-0 w-full z-40 bg-[#070c18]/95 backdrop-blur-2xl border-b border-amber-500/20 relative shadow-[0_4px_24px_rgba(0,0,0,0.6)] select-none">
@@ -127,11 +143,11 @@ export default function AppHeader() {
           <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
             
             {/* Instruments Directory Dialog */}
-            <Dialog>
+            <Dialog open={instrumentsOpen} onOpenChange={setInstrumentsOpen}>
               <DialogTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-foreground/80 hover:text-foreground hover:bg-white/5 transition-all border border-transparent hover:border-amber-500/20"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-foreground/80 hover:text-foreground hover:bg-white/5 transition-all border border-transparent hover:border-amber-500/20 cursor-pointer"
                 >
                   <Layers className="h-3.5 w-3.5 text-amber-400" />
                   <span>Instruments</span>
@@ -147,26 +163,33 @@ export default function AppHeader() {
                     13 Ancient Indian Astronomical Yantras
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground">
-                    Historical instruments designed by Maharaja Sawai Jai Singh II and Indian astronomers for planetary, lunar, and solar observations.
+                    Click any instrument below to instantly render its parametric 3D model and celestial mathematics.
                   </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="flex-1 p-6 pt-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-4">
                     {YANTRAS.map((yantra) => (
-                      <div
+                      <button
                         key={yantra.id}
-                        className="p-3.5 rounded-xl border border-white/10 bg-white/[0.03] hover:border-amber-500/30 transition-all flex flex-col gap-1.5"
+                        type="button"
+                        onClick={() => handleSelectYantra(yantra.id)}
+                        className="p-3.5 rounded-xl border border-white/10 bg-white/[0.03] hover:border-amber-500/50 hover:bg-amber-500/[0.08] transition-all flex flex-col gap-1.5 text-left group cursor-pointer"
                       >
-                        <div className="flex items-center gap-2">
-                          <yantra.Icon className="h-4 w-4 text-amber-400 shrink-0" />
-                          <h4 className="font-headline text-sm font-semibold text-foreground/95">
-                            {yantra.name}
-                          </h4>
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <yantra.Icon className="h-4 w-4 text-amber-400 shrink-0 group-hover:scale-110 transition-transform" />
+                            <h4 className="font-headline text-sm font-semibold text-foreground/95 group-hover:text-amber-300 transition-colors">
+                              {yantra.name}
+                            </h4>
+                          </div>
+                          <span className="text-[10px] text-amber-400/80 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
+                            View 3D →
+                          </span>
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                           {yantra.description}
                         </p>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </ScrollArea>
@@ -174,11 +197,11 @@ export default function AppHeader() {
             </Dialog>
 
             {/* Observatories Dialog */}
-            <Dialog>
+            <Dialog open={observatoriesOpen} onOpenChange={setObservatoriesOpen}>
               <DialogTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-foreground/80 hover:text-foreground hover:bg-white/5 transition-all border border-transparent hover:border-amber-500/20"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-foreground/80 hover:text-foreground hover:bg-white/5 transition-all border border-transparent hover:border-amber-500/20 cursor-pointer"
                 >
                   <Landmark className="h-3.5 w-3.5 text-amber-400" />
                   <span>Observatories</span>
@@ -194,18 +217,20 @@ export default function AppHeader() {
                     Historic Jantar Mantar Observatories
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground">
-                    Constructed between 1724 and 1735 CE across North & Central India for celestial observation.
+                    Click any observatory below to recalibrate the instruments for its exact geographic coordinates.
                   </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="flex-1 p-6 pt-3">
                   <div className="space-y-3 pb-4">
                     {OBSERVATORIES.map((obs) => (
-                      <div
+                      <button
                         key={obs.name}
-                        className="p-4 rounded-xl border border-white/10 bg-white/[0.03] space-y-1.5"
+                        type="button"
+                        onClick={() => handleSelectObservatory(obs)}
+                        className="w-full text-left p-4 rounded-xl border border-white/10 bg-white/[0.03] hover:border-amber-500/50 hover:bg-amber-500/[0.08] transition-all space-y-1.5 group cursor-pointer"
                       >
                         <div className="flex items-center justify-between">
-                          <h4 className="font-headline text-sm font-semibold text-foreground">
+                          <h4 className="font-headline text-sm font-semibold text-foreground group-hover:text-amber-300 transition-colors">
                             {obs.name}
                           </h4>
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
@@ -215,7 +240,7 @@ export default function AppHeader() {
                         <p className="text-xs text-muted-foreground leading-relaxed">
                           {obs.highlight}
                         </p>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </ScrollArea>

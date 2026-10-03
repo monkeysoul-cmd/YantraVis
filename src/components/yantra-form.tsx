@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { YANTRAS } from '@/lib/yantras';
-import { Globe, Loader2, MapPin, Navigation } from 'lucide-react';
+import { Globe, Loader2, MapPin, Navigation, Sparkles } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +14,7 @@ function SubmitButton({ isPending }: { isPending: boolean }) {
   return (
     <Button
       type="submit"
-      className="w-full text-sm py-5 font-medium tracking-wide transition-all duration-300 relative overflow-hidden group"
+      className="w-full text-sm py-5 font-medium tracking-wide transition-all duration-300 relative overflow-hidden group cursor-pointer"
       disabled={isPending}
       style={{
         background: isPending
@@ -33,7 +32,7 @@ function SubmitButton({ isPending }: { isPending: boolean }) {
           backgroundSize: '200% 100%',
           animation: isPending ? 'none' : 'shimmer 1.5s infinite'
         }} />
-      <span className="relative flex items-center justify-center gap-2">
+      <span className="relative flex items-center justify-center gap-2 font-medium">
         {isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -42,7 +41,7 @@ function SubmitButton({ isPending }: { isPending: boolean }) {
         ) : (
           <>
             <Globe className="h-4 w-4" />
-            Generate Yantra Model
+            Generate / Recalibrate Model
           </>
         )}
       </span>
@@ -50,7 +49,7 @@ function SubmitButton({ isPending }: { isPending: boolean }) {
   );
 }
 
-const PRESET_LOCATIONS = [
+export const PRESET_LOCATIONS = [
   { name: 'Jaipur', lat: 26.9124, lon: 75.7873, title: 'Jantar Mantar (Main)', emoji: '🏛️' },
   { name: 'New Delhi', lat: 28.6271, lon: 77.2166, title: 'Jantar Mantar (Connaught Place)', emoji: '🕌' },
   { name: 'Ujjain', lat: 23.1765, lon: 75.7885, title: 'Vedh Shala', emoji: '⭐' },
@@ -58,26 +57,92 @@ const PRESET_LOCATIONS = [
   { name: 'Mathura', lat: 27.4924, lon: 77.6737, title: 'Historic Observatory', emoji: '🪷' },
 ];
 
-type YantraFormProps = {
+export type YantraFormProps = {
   action: (payload: FormData) => void;
   isPending: boolean;
+  activeYantraId?: string;
+  onYantraChange?: (yantraId: string, lat: number, lon: number) => void;
+  onCoordinatesChange?: (lat: number, lon: number) => void;
 };
 
-export default function YantraForm({ action, isPending }: YantraFormProps) {
+export default function YantraForm({
+  action,
+  isPending,
+  activeYantraId,
+  onYantraChange,
+  onCoordinatesChange,
+}: YantraFormProps) {
   const [lat, setLat] = useState('26.9124');
   const [lon, setLon] = useState('75.7873');
-  const [selectedYantra, setSelectedYantra] = useState('samrat');
+  const [selectedYantra, setSelectedYantra] = useState(activeYantraId || 'samrat');
   const [activePreset, setActivePreset] = useState<string>('Jaipur');
 
-  const applyPreset = (preset: typeof PRESET_LOCATIONS[0]) => {
-    setLat(preset.lat.toString());
-    setLon(preset.lon.toString());
-    setActivePreset(preset.name);
+  // Keep selectedYantra in sync with external changes (e.g., from top nav dialog)
+  useEffect(() => {
+    if (activeYantraId && activeYantraId !== selectedYantra) {
+      setSelectedYantra(activeYantraId);
+    }
+  }, [activeYantraId]);
+
+  // Handle instant selection of a Yantra
+  const handleSelectYantra = (yantraId: string) => {
+    setSelectedYantra(yantraId);
+    const numLat = Number(lat) || 26.9124;
+    const numLon = Number(lon) || 75.7873;
+    if (onYantraChange) {
+      onYantraChange(yantraId, numLat, numLon);
+    }
   };
+
+  const applyPreset = (preset: typeof PRESET_LOCATIONS[0]) => {
+    const latStr = preset.lat.toString();
+    const lonStr = preset.lon.toString();
+    setLat(latStr);
+    setLon(lonStr);
+    setActivePreset(preset.name);
+
+    if (onCoordinatesChange) {
+      onCoordinatesChange(preset.lat, preset.lon);
+    }
+    if (onYantraChange && selectedYantra) {
+      onYantraChange(selectedYantra, preset.lat, preset.lon);
+    }
+  };
+
+  // Listen for global custom events from the top navigation bar dialogs
+  useEffect(() => {
+    const handleGlobalSelectYantra = (e: Event) => {
+      const customEvent = e as CustomEvent<{ yantraId: string }>;
+      if (customEvent.detail?.yantraId) {
+        handleSelectYantra(customEvent.detail.yantraId);
+      }
+    };
+
+    const handleGlobalSelectLocation = (e: Event) => {
+      const customEvent = e as CustomEvent<{ lat: number; lon: number; name?: string }>;
+      if (customEvent.detail) {
+        const { lat: newLat, lon: newLon, name: newName } = customEvent.detail;
+        setLat(newLat.toString());
+        setLon(newLon.toString());
+        if (newName) setActivePreset(newName);
+        if (onYantraChange && selectedYantra) {
+          onYantraChange(selectedYantra, newLat, newLon);
+        }
+      }
+    };
+
+    window.addEventListener('select-yantra', handleGlobalSelectYantra);
+    window.addEventListener('select-location', handleGlobalSelectLocation);
+    return () => {
+      window.removeEventListener('select-yantra', handleGlobalSelectYantra);
+      window.removeEventListener('select-location', handleGlobalSelectLocation);
+    };
+  }, [lat, lon, selectedYantra, onYantraChange]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    formData.set('yantra', selectedYantra);
     action(formData);
   };
 
@@ -86,7 +151,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
       {/* Header */}
       <CardHeader className="p-0 pb-4">
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
             style={{ background: 'linear-gradient(135deg, hsla(24, 85%, 42%, 0.2), hsla(43, 100%, 52%, 0.15))', border: '1px solid hsla(43, 100%, 52%, 0.3)' }}>
             <Navigation className="h-3.5 w-3.5" style={{ color: 'hsl(24, 90%, 60%)' }} />
           </div>
@@ -100,7 +165,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
           </CardTitle>
         </div>
         <CardDescription className="text-xs leading-relaxed text-muted-foreground">
-          Select a geographic location and ancient instrument to generate a parametric 3D model calibrated by celestial mathematics.
+          Select an ancient instrument to instantly render its calibrated 3D model and astronomical parameters.
         </CardDescription>
       </CardHeader>
 
@@ -111,7 +176,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
           {/* Geolocation Section */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" style={{ color: 'hsl(24, 90%, 55%)' }} />
+              <MapPin className="h-4 w-4 shrink-0" style={{ color: 'hsl(24, 90%, 55%)' }} />
               <span className="font-headline text-sm tracking-wider text-foreground/90">Geolocation</span>
             </div>
 
@@ -126,7 +191,7 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
                     title={preset.title}
                     onClick={() => applyPreset(preset)}
                     className={cn(
-                      "flex items-center gap-1 h-7 px-2.5 rounded-lg text-xs font-medium transition-all duration-200",
+                      "flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer",
                       activePreset === preset.name
                         ? "text-accent-foreground"
                         : "text-muted-foreground hover:text-foreground"
@@ -167,7 +232,10 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
                   placeholder="26.9124"
                   required
                   value={lat}
-                  onChange={(e) => { setLat(e.target.value); setActivePreset(''); }}
+                  onChange={(e) => {
+                    setLat(e.target.value);
+                    setActivePreset('');
+                  }}
                   className="h-9 text-sm bg-background/50 border-border/60 focus-visible:ring-0 focus-visible:border-primary/60 transition-colors"
                   style={{ boxShadow: 'inset 0 2px 4px hsla(0,0%,0%,0.08)' }}
                 />
@@ -186,7 +254,10 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
                   placeholder="75.7873"
                   required
                   value={lon}
-                  onChange={(e) => { setLon(e.target.value); setActivePreset(''); }}
+                  onChange={(e) => {
+                    setLon(e.target.value);
+                    setActivePreset('');
+                  }}
                   className="h-9 text-sm bg-background/50 border-border/60 focus-visible:ring-0 focus-visible:border-primary/60 transition-colors"
                   style={{ boxShadow: 'inset 0 2px 4px hsla(0,0%,0%,0.08)' }}
                 />
@@ -199,75 +270,81 @@ export default function YantraForm({ action, isPending }: YantraFormProps) {
           {/* Instrument Selection */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="font-headline text-sm tracking-wider text-foreground/90">Select Instrument</span>
-              <span className="text-[10px] text-muted-foreground">13 Yantras</span>
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 55%)' }} />
+                <span className="font-headline text-sm tracking-wider text-foreground/90">Select Instrument</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground font-mono bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
+                13 Yantras
+              </span>
             </div>
-            <RadioGroup
-              value={selectedYantra}
-              onValueChange={setSelectedYantra}
-              className="grid grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-1"
-            >
-              {YANTRAS.map((yantra, index) => {
-                const isLast = index === YANTRAS.length - 1;
+
+            {/* Direct-click instrument buttons (instant responsiveness, no lag) */}
+            <div className="grid grid-cols-2 gap-2">
+              {YANTRAS.map((yantra) => {
+                const isSelected = selectedYantra === yantra.id;
                 return (
-                  <div
+                  <button
                     key={yantra.id}
-                    className={cn("relative", isLast && "col-span-2")}
-                    onClick={() => setSelectedYantra(yantra.id)}
+                    type="button"
+                    id={`btn-yantra-${yantra.id}`}
+                    onClick={() => handleSelectYantra(yantra.id)}
+                    className={cn(
+                      "relative flex flex-col items-center justify-center rounded-xl p-2.5 h-[84px] text-center cursor-pointer",
+                      "transition-all duration-200 select-none group border backdrop-blur-sm",
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                    )}
+                    style={{
+                      background: isSelected
+                        ? 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.20), hsla(43, 100%, 52%, 0.12))'
+                        : 'hsla(220, 28%, 8%, 0.7)',
+                      borderColor: isSelected
+                        ? 'hsla(43, 100%, 52%, 0.55)'
+                        : 'hsla(220, 25%, 14%, 0.9)',
+                      boxShadow: isSelected
+                        ? '0 0 0 1px hsla(43, 100%, 52%, 0.35), 0 0 18px hsla(43, 100%, 52%, 0.22)'
+                        : 'none',
+                    }}
                   >
-                    <RadioGroupItem value={yantra.id} id={yantra.id} className="peer sr-only" />
-                    <Label
-                      htmlFor={yantra.id}
-                      className={cn(
-                        "relative flex items-center justify-center rounded-xl p-2.5 cursor-pointer",
-                        isLast ? "h-[64px] flex-row gap-3 px-4" : "h-[90px] flex-col",
-                        "transition-all duration-200 select-none",
-                        "border backdrop-blur-sm"
-                      )}
-                      style={{
-                        background: selectedYantra === yantra.id
-                          ? 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.15), hsla(43, 100%, 52%, 0.1))'
-                          : 'hsla(220, 28%, 8%, 0.7)',
-                        borderColor: selectedYantra === yantra.id
-                          ? 'hsla(43, 100%, 52%, 0.5)'
-                          : 'hsla(220, 25%, 14%, 1)',
-                        boxShadow: selectedYantra === yantra.id
-                          ? '0 0 0 1px hsla(43, 100%, 52%, 0.3), 0 0 16px hsla(43, 100%, 52%, 0.2)'
-                          : 'none',
-                      }}
-                    >
-                      <div className={cn("flex items-center", isLast ? "flex-row gap-2.5" : "flex-col gap-1.5")}>
-                        <yantra.Icon
-                          className="h-5 w-5 flex-shrink-0 transition-all duration-200"
-                          style={{
-                            color: selectedYantra === yantra.id
-                              ? 'hsl(43, 100%, 55%)'
-                              : 'hsl(24, 60%, 50%)',
-                            filter: selectedYantra === yantra.id
-                              ? 'drop-shadow(0 0 6px hsla(43, 100%, 52%, 0.5))'
-                              : 'none'
-                          }}
-                        />
-                        <span className={cn("text-[10px] font-medium tracking-wide leading-tight", isLast ? "text-left" : "text-center line-clamp-2")}
-                          style={{
-                            color: selectedYantra === yantra.id ? 'hsl(38, 25%, 90%)' : 'hsl(38, 15%, 58%)'
-                          }}>
-                          {yantra.name}
-                        </span>
-                      </div>
-                      {/* Active dot indicator */}
-                      {selectedYantra === yantra.id && (
-                        <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full animate-pulse"
-                          style={{ background: 'hsl(43, 100%, 52%)' }} />
-                      )}
-                    </Label>
-                  </div>
+                    <div className="flex flex-col items-center gap-1.5 w-full">
+                      <yantra.Icon
+                        className="h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
+                        style={{
+                          color: isSelected
+                            ? 'hsl(43, 100%, 55%)'
+                            : 'hsl(24, 60%, 50%)',
+                          filter: isSelected
+                            ? 'drop-shadow(0 0 6px hsla(43, 100%, 52%, 0.5))'
+                            : 'none'
+                        }}
+                      />
+                      <span
+                        className="text-[11px] font-medium tracking-wide leading-tight line-clamp-2"
+                        style={{
+                          color: isSelected ? 'hsl(38, 25%, 95%)' : 'hsl(38, 15%, 62%)'
+                        }}
+                      >
+                        {yantra.name}
+                      </span>
+                    </div>
+
+                    {/* Active dot indicator */}
+                    {isSelected && (
+                      <div
+                        className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full animate-pulse"
+                        style={{ background: 'hsl(43, 100%, 52%)' }}
+                      />
+                    )}
+                  </button>
                 );
               })}
-            </RadioGroup>
+            </div>
           </div>
 
-          <SubmitButton isPending={isPending} />
+          {/* Sticky action bar: guaranteed visibility, never pushed out of sight */}
+          <div className="pt-2 sticky bottom-0 z-10 bg-gradient-to-t from-[#070c18] via-[#070c18]/95 to-transparent pb-1">
+            <SubmitButton isPending={isPending} />
+          </div>
         </form>
       </CardContent>
     </Card>

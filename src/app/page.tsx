@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import type { ActionState, YantraData } from '@/lib/schema/yantra';
 import { generateYantra } from '@/app/actions';
 
+import { generateParametricYantraData } from '@/lib/yantra-calculator';
+
 import AppHeader from '@/components/app-header';
 import YantraForm from '@/components/yantra-form';
 import YantraDetails from '@/components/yantra-details';
@@ -183,6 +185,15 @@ export default function Home() {
     });
   };
 
+  const handleSelectYantra = (yantraId: string, lat?: number, lon?: number) => {
+    const targetLat = lat ?? (displayData?.location.latitude ?? 26.9124);
+    const targetLon = lon ?? (displayData?.location.longitude ?? 75.7873);
+    const newData = generateParametricYantraData(yantraId, targetLat, targetLon);
+    setLocalData(newData);
+    setState({ data: newData, error: null });
+    if (isMobile) setIsSheetOpen(true);
+  };
+
   useEffect(() => {
     if (state.error) {
       toast({ variant: 'destructive', title: 'Notice', description: state.error });
@@ -207,7 +218,12 @@ export default function Home() {
         <div className="w-full p-4 flex-1 min-h-0 overflow-hidden flex flex-col relative z-10">
           <ScrollArea className="flex-grow">
             <div className="max-w-md mx-auto w-full pb-16">
-              <YantraForm action={handleFormAction} isPending={isProcessing} />
+              <YantraForm
+                action={handleFormAction}
+                isPending={isProcessing}
+                activeYantraId={displayData?.yantraId}
+                onYantraChange={handleSelectYantra}
+              />
             </div>
           </ScrollArea>
           {displayData && (
@@ -215,7 +231,7 @@ export default function Home() {
               <div className="fixed bottom-6 right-6 z-20">
                 <Button
                   onClick={() => setIsSheetOpen(true)}
-                  className="rounded-full h-14 w-14 shadow-2xl flex items-center justify-center"
+                  className="rounded-full h-14 w-14 shadow-2xl flex items-center justify-center cursor-pointer"
                   style={{
                     background: 'linear-gradient(135deg, hsl(24, 85%, 42%), hsl(43, 100%, 52%))',
                     boxShadow: '0 8px 30px hsla(24, 90%, 55%, 0.5)',
@@ -276,8 +292,13 @@ export default function Home() {
             <div className="absolute inset-0 pointer-events-none"
               style={{ background: 'radial-gradient(ellipse 80% 40% at 50% 0%, hsla(24, 90%, 55%, 0.04) 0%, transparent 60%)' }} />
             <ScrollArea className="h-full">
-              <div className="p-5 lg:p-6 relative z-10">
-                <YantraForm action={handleFormAction} isPending={isProcessing} />
+              <div className="p-4 sm:p-5 lg:p-6 relative z-10">
+                <YantraForm
+                  action={handleFormAction}
+                  isPending={isProcessing}
+                  activeYantraId={displayData?.yantraId}
+                  onYantraChange={handleSelectYantra}
+                />
               </div>
             </ScrollArea>
           </div>
