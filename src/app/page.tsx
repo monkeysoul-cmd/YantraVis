@@ -264,7 +264,7 @@ export default function Home() {
                     </SheetDescription>
                   </SheetHeader>
                   <ScrollArea className="h-[calc(93vh-80px)] p-3 sm:p-4">
-                    <YantraDetails data={displayData} />
+                    <YantraDetails key={`mobile-${displayData.yantraId}-${displayData.location.latitude}-${displayData.location.longitude}`} data={displayData} />
                   </ScrollArea>
                 </SheetContent>
               </Sheet>
@@ -314,7 +314,7 @@ export default function Home() {
                   <LoadingSkeleton />
                 ) : displayData ? (
                   <div className={cn("transition-opacity duration-500", displayData ? 'opacity-100' : 'opacity-0')}>
-                    <YantraDetails data={displayData} />
+                    <YantraDetails key={`desktop-${displayData.yantraId}-${displayData.location.latitude}-${displayData.location.longitude}`} data={displayData} />
                   </div>
                 ) : (
                   <WelcomeState />

@@ -730,6 +730,265 @@ function buildNadiValaya(latRad: number): THREE.Group {
   return group;
 }
 
+function buildDhruvaProthaChakra(latRad: number): THREE.Group {
+  const group = new THREE.Group();
+  const sandstone = createSandstoneMaterial();
+  const marble = createMarbleMaterial();
+  const bronze = createBronzeMaterial();
+
+  // Tiered foundation
+  [2.4, 2.0, 1.6].forEach((s, i) => {
+    const step = new THREE.Mesh(new THREE.BoxGeometry(s, 0.22, s * 0.7), sandstone);
+    step.position.y = 0.11 + i * 0.22;
+    step.castShadow = true;
+    step.receiveShadow = true;
+    group.add(step);
+  });
+
+  const baseH = 0.66;
+  const pillarH = 2.2;
+  const pillarSpacing = 1.1;
+
+  // Twin meridian upright masonry pillars
+  for (const side of [-1, 1]) {
+    const pillarGeo = new THREE.BoxGeometry(0.24, pillarH, 0.45);
+    const pillar = new THREE.Mesh(pillarGeo, createWeatheredSandstoneMaterial());
+    pillar.position.set(side * (pillarSpacing / 2), baseH + pillarH / 2, 0);
+    pillar.castShadow = true;
+    group.add(pillar);
+
+    // Marble top cap
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.12, 0.5), marble);
+    cap.position.set(side * (pillarSpacing / 2), baseH + pillarH + 0.06, 0);
+    group.add(cap);
+  }
+
+  // Cross axle between pillars
+  const axleY = baseH + pillarH * 0.65;
+  const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, pillarSpacing + 0.2, 16), bronze);
+  axle.rotation.z = Math.PI / 2;
+  axle.position.y = axleY;
+  group.add(axle);
+
+  // Rotating polar chakra ring assembly (tilted towards celestial pole = latRad)
+  const chakraGroup = new THREE.Group();
+  chakraGroup.position.set(0, axleY, 0);
+  chakraGroup.rotation.x = latRad - Math.PI / 2;
+
+  // Outer brass graduated ring
+  const ringGeo = new THREE.TorusGeometry(0.85, 0.045, 12, 64);
+  const ring = new THREE.Mesh(ringGeo, bronze);
+  ring.castShadow = true;
+  chakraGroup.add(ring);
+
+  // Inner sighting quadrant cross
+  for (const rot of [0, Math.PI / 2]) {
+    const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.7, 8), bronze);
+    spoke.rotation.z = rot;
+    chakraGroup.add(spoke);
+  }
+
+  // Polar sight aperture tube
+  const sightTube = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 16), marble);
+  sightTube.rotation.x = Math.PI / 2;
+  chakraGroup.add(sightTube);
+
+  group.add(chakraGroup);
+  return group;
+}
+
+function buildSamratCombo(latRad: number): THREE.Group {
+  const group = new THREE.Group();
+  const sandstone = createSandstoneMaterial();
+  const marble = createMarbleMaterial();
+  const bronze = createBronzeMaterial();
+
+  const baseL = 3.2;
+  const gH = baseL * Math.tan(latRad);
+
+  // Foundation
+  [3.6, 3.2].forEach((w, i) => {
+    const step = new THREE.Mesh(new THREE.BoxGeometry(w, 0.22, 1.4 - i * 0.2), sandstone);
+    step.position.y = 0.11 + i * 0.22;
+    step.castShadow = true;
+    group.add(step);
+  });
+
+  // Triangular gnomon
+  const gnomonShape = new THREE.Shape();
+  gnomonShape.moveTo(-baseL / 2, 0);
+  gnomonShape.lineTo(baseL / 2, 0);
+  gnomonShape.lineTo(-baseL / 2, gH);
+  gnomonShape.closePath();
+
+  const gnomonGeo = new THREE.ExtrudeGeometry(gnomonShape, { depth: 0.3, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03 });
+  gnomonGeo.translate(0, 0, -0.15);
+  const gnomon = new THREE.Mesh(gnomonGeo, sandstone);
+  gnomon.position.set(0, 0.44, 0);
+  gnomon.castShadow = true;
+  group.add(gnomon);
+
+  // Marble hypotenuse ramp
+  const hypoLen = Math.sqrt(baseL * baseL + gH * gH);
+  const hypo = new THREE.Mesh(new THREE.BoxGeometry(hypoLen, 0.06, 0.34), marble);
+  hypo.position.set(0, 0.44 + gH * 0.5, 0);
+  hypo.rotation.z = -Math.atan2(gH, baseL);
+  group.add(hypo);
+
+  // Dual quadrant arcs
+  const arcR = Math.max(1.8, gH * 0.9);
+  for (const side of [-1, 1]) {
+    const arcGeo = new THREE.CylinderGeometry(arcR, arcR + 0.1, 0.4, 36, 1, true, 0, Math.PI * 0.5);
+    arcGeo.rotateX(Math.PI / 2);
+    arcGeo.rotateZ(latRad - Math.PI / 2 + 0.05);
+    const arcMesh = new THREE.Mesh(arcGeo, marble);
+    arcMesh.position.set(side * 0.6, 0.44 + gH * 0.38, 0);
+    arcMesh.scale.x = side;
+    arcMesh.castShadow = true;
+    group.add(arcMesh);
+  }
+
+  // Integrated southern sighting chakra ring (the "combo" celestial unit)
+  const chakraGroup = new THREE.Group();
+  chakraGroup.position.set(-baseL / 2 - 0.5, 0.44 + 0.4, 0);
+  const chakraRing = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.04, 12, 48), bronze);
+  chakraRing.rotation.y = Math.PI / 2;
+  chakraRing.rotation.x = latRad;
+  chakraRing.castShadow = true;
+  chakraGroup.add(chakraRing);
+
+  const chakraPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.8, 16), createWeatheredSandstoneMaterial());
+  chakraPillar.position.y = -0.4;
+  chakraGroup.add(chakraPillar);
+
+  group.add(chakraGroup);
+  return group;
+}
+
+function buildChaapa(latRad: number): THREE.Group {
+  const group = new THREE.Group();
+  const sandstone = createSandstoneMaterial();
+  const marble = createMarbleMaterial();
+  const bronze = createBronzeMaterial();
+
+  // Circular tiered masonry base
+  [2.2, 1.8, 1.4].forEach((r, i) => {
+    const step = new THREE.Mesh(new THREE.CylinderGeometry(r, r + 0.1, 0.22, 36), sandstone);
+    step.position.y = 0.11 + i * 0.22;
+    step.castShadow = true;
+    step.receiveShadow = true;
+    group.add(step);
+  });
+
+  const baseH = 0.66;
+  const pierH = 1.8;
+
+  // Central meridian support pier
+  const pier = new THREE.Mesh(new THREE.BoxGeometry(0.5, pierH, 0.5), createWeatheredSandstoneMaterial());
+  pier.position.y = baseH + pierH / 2;
+  pier.castShadow = true;
+  group.add(pier);
+
+  // Large curved bow-shaped arc (Chaapa / Dhanur arc)
+  const arcRadius = 1.5;
+  const arcTube = 0.055;
+  const arcGeo = new THREE.TorusGeometry(arcRadius, arcTube, 16, 64, Math.PI * 0.667);
+  arcGeo.rotateZ(-Math.PI * 0.333);
+  const arcMesh = new THREE.Mesh(arcGeo, bronze);
+  arcMesh.position.set(0, baseH + pierH * 0.7, 0.28);
+  arcMesh.castShadow = true;
+  group.add(arcMesh);
+
+  // Marble graduated scale facing plate attached to arc
+  const scaleGeo = new THREE.TorusGeometry(arcRadius - 0.02, 0.02, 8, 64, Math.PI * 0.667);
+  scaleGeo.rotateZ(-Math.PI * 0.333);
+  const scaleMesh = new THREE.Mesh(scaleGeo, marble);
+  scaleMesh.position.set(0, baseH + pierH * 0.7, 0.29);
+  group.add(scaleMesh);
+
+  // Bronze central sighting pin
+  const gnomonPin = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.6, 12), bronze);
+  gnomonPin.rotation.x = Math.PI / 2;
+  gnomonPin.position.set(0, baseH + pierH * 0.7, 0.32);
+  group.add(gnomonPin);
+
+  // Vernier cursor traveler on arc
+  const cursor = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.08), bronze);
+  const curAngle = Math.PI * 0.15;
+  cursor.position.set(Math.cos(curAngle) * arcRadius, baseH + pierH * 0.7 + Math.sin(curAngle) * arcRadius, 0.28);
+  group.add(cursor);
+
+  return group;
+}
+
+function buildPalaka(): THREE.Group {
+  const group = new THREE.Group();
+  const sandstone = createSandstoneMaterial();
+  const marble = createMarbleMaterial();
+  const bronze = createBronzeMaterial();
+
+  // Stepped masonry pedestal
+  const pedGeo = new THREE.CylinderGeometry(1.2, 1.4, 0.7, 32);
+  const ped = new THREE.Mesh(pedGeo, createWeatheredSandstoneMaterial());
+  ped.position.y = 0.35;
+  ped.castShadow = true;
+  ped.receiveShadow = true;
+  group.add(ped);
+
+  // Rectangular calculating board (Palaka)
+  const boardL = 2.4;
+  const boardW = 1.6;
+  const boardH = 0.12;
+
+  const board = new THREE.Mesh(new THREE.BoxGeometry(boardL, boardH, boardW), sandstone);
+  board.position.y = 0.7 + boardH / 2;
+  board.castShadow = true;
+  board.receiveShadow = true;
+  group.add(board);
+
+  // Polished marble face inlay
+  const face = new THREE.Mesh(new THREE.BoxGeometry(boardL * 0.92, 0.02, boardW * 0.9), marble);
+  face.position.y = 0.7 + boardH + 0.01;
+  group.add(face);
+
+  // Central gnomon rod (Shanku)
+  const shanku = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.04, 0.65, 16), bronze);
+  shanku.position.y = 0.7 + boardH + 0.325;
+  shanku.castShadow = true;
+  group.add(shanku);
+
+  // Coordinate grid lines etched on the board
+  for (let i = -4; i <= 4; i++) {
+    const x = (i / 4) * (boardL * 0.42);
+    const linePts = [
+      new THREE.Vector3(x, 0.7 + boardH + 0.022, -boardW * 0.42),
+      new THREE.Vector3(x, 0.7 + boardH + 0.022, boardW * 0.42),
+    ];
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
+    group.add(new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x906040, transparent: true, opacity: i === 0 ? 0.9 : 0.4 })));
+  }
+  for (let j = -3; j <= 3; j++) {
+    const z = (j / 3) * (boardW * 0.42);
+    const linePts = [
+      new THREE.Vector3(-boardL * 0.42, 0.7 + boardH + 0.022, z),
+      new THREE.Vector3(boardL * 0.42, 0.7 + boardH + 0.022, z),
+    ];
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
+    group.add(new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x906040, transparent: true, opacity: j === 0 ? 0.9 : 0.4 })));
+  }
+
+  // Concentric shadow circles on board
+  for (const r of [0.35, 0.7, 1.05]) {
+    const circGeo = new THREE.RingGeometry(r - 0.008, r + 0.008, 48);
+    circGeo.rotateX(-Math.PI / 2);
+    const circMesh = new THREE.Mesh(circGeo, bronze);
+    circMesh.position.y = 0.7 + boardH + 0.022;
+    group.add(circMesh);
+  }
+
+  return group;
+}
+
 function buildDefault(): THREE.Group {
   const group = new THREE.Group();
   const sandstone = createSandstoneMaterial();
@@ -737,9 +996,6 @@ function buildDefault(): THREE.Group {
   const bronze = createBronzeMaterial();
 
   // Stepped base: 3 steps of 0.25 height each
-  // Step 0: 0.00 to 0.25 (center 0.125)
-  // Step 1: 0.25 to 0.50 (center 0.375)
-  // Step 2: 0.50 to 0.75 (center 0.625)
   [2.0, 1.6, 1.2].forEach((s, i) => {
     const step = new THREE.Mesh(new THREE.BoxGeometry(s, 0.25, s), sandstone);
     step.position.y = 0.125 + i * 0.25;
@@ -748,18 +1004,18 @@ function buildDefault(): THREE.Group {
     group.add(step);
   });
 
-  // Main body: height 1.2, sits on step 2 (top at 0.75)
+  // Main body
   const body = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.2, 1.0), sandstone);
   body.position.y = 1.35;
   body.castShadow = true;
   group.add(body);
 
-  // Marble cap: height 0.18, sits on top of body (top at 1.95)
+  // Marble cap
   const cap = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.18, 1.1), marble);
   cap.position.y = 2.04;
   group.add(cap);
 
-  // Bronze indicator sphere: sits on top of cap (top at 2.13)
+  // Bronze indicator sphere
   const indicator = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 8), bronze);
   indicator.position.y = 2.25;
   group.add(indicator);
@@ -821,6 +1077,11 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.2;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
+      
+      // Clear any previous nodes before mounting canvas
+      while (currentMount.firstChild) {
+        currentMount.removeChild(currentMount.firstChild);
+      }
       currentMount.appendChild(renderer.domElement);
 
       // Controls
@@ -872,7 +1133,8 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
 
       // ─── Build Instrument ───────────────────────────────────────────────────
 
-      const latRad = (Math.max(5, Math.min(85, Math.abs(latitude))) * Math.PI) / 180;
+      const safeLat = typeof latitude === 'number' && !isNaN(latitude) ? latitude : 26.9124;
+      const latRad = (Math.max(5, Math.min(85, Math.abs(safeLat))) * Math.PI) / 180;
       let object: THREE.Group;
 
       switch (yantraId) {
@@ -881,9 +1143,13 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
         case 'jai-prakash': object = buildJaiPrakash(latRad); break;
         case 'rasivalaya': object = buildRasivalaya(latRad); break;
         case 'digamsa': object = buildDigamsa(latRad); break;
+        case 'dhruva-protha-chakra': object = buildDhruvaProthaChakra(latRad); break;
+        case 'yantra-samrat-combo': object = buildSamratCombo(latRad); break;
         case 'golayantra-chakra': object = buildGolayantra(latRad); break;
         case 'bhitti': case 'dakshinottara-bhitti': object = buildBhitti(); break;
         case 'nadi-valaya': object = buildNadiValaya(latRad); break;
+        case 'palaka': object = buildPalaka(); break;
+        case 'chaapa': object = buildChaapa(latRad); break;
         default: object = buildDefault(); break;
       }
 
@@ -993,7 +1259,6 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
         window.removeEventListener('resize', handleResize);
         resizeObserver.disconnect();
         controls.dispose();
-        renderer.dispose();
         scene.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             child.geometry?.dispose();
@@ -1004,8 +1269,13 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
             }
           }
         });
+        renderer.dispose();
+        renderer.forceContextLoss();
         if (renderer.domElement?.parentNode) {
           renderer.domElement.parentNode.removeChild(renderer.domElement);
+        }
+        while (currentMount.firstChild) {
+          currentMount.removeChild(currentMount.firstChild);
         }
         objectRef.current = null;
       };

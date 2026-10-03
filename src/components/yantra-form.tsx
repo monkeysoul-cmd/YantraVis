@@ -74,18 +74,22 @@ export default function YantraForm({
 }: YantraFormProps) {
   const [lat, setLat] = useState('26.9124');
   const [lon, setLon] = useState('75.7873');
-  const [selectedYantra, setSelectedYantra] = useState(activeYantraId || 'samrat');
+  const [selectedYantra, setSelectedYantra] = useState<string>(activeYantraId || '');
   const [activePreset, setActivePreset] = useState<string>('Jaipur');
 
-  // Keep selectedYantra in sync with external changes (e.g., from top nav dialog)
+  // Keep selectedYantra in sync with external changes (e.g., from top nav dialog or model generation)
   useEffect(() => {
-    if (activeYantraId && activeYantraId !== selectedYantra) {
+    if (activeYantraId) {
       setSelectedYantra(activeYantraId);
     }
   }, [activeYantraId]);
 
-  // Handle instant selection of a Yantra
-  const handleSelectYantra = (yantraId: string) => {
+  // Handle instant selection of a Yantra (both with and without direct DOM click event)
+  const handleSelectYantra = (yantraId: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setSelectedYantra(yantraId);
     const numLat = Number(lat) || 26.9124;
     const numLon = Number(lon) || 75.7873;
@@ -104,8 +108,9 @@ export default function YantraForm({
     if (onCoordinatesChange) {
       onCoordinatesChange(preset.lat, preset.lon);
     }
-    if (onYantraChange && selectedYantra) {
-      onYantraChange(selectedYantra, preset.lat, preset.lon);
+    const currentYantra = activeYantraId || selectedYantra;
+    if (onYantraChange && currentYantra) {
+      onYantraChange(currentYantra, preset.lat, preset.lon);
     }
   };
 
@@ -125,8 +130,9 @@ export default function YantraForm({
         setLat(newLat.toString());
         setLon(newLon.toString());
         if (newName) setActivePreset(newName);
-        if (onYantraChange && selectedYantra) {
-          onYantraChange(selectedYantra, newLat, newLon);
+        const currentYantra = activeYantraId || selectedYantra;
+        if (onYantraChange && currentYantra) {
+          onYantraChange(currentYantra, newLat, newLon);
         }
       }
     };
@@ -137,12 +143,13 @@ export default function YantraForm({
       window.removeEventListener('select-yantra', handleGlobalSelectYantra);
       window.removeEventListener('select-location', handleGlobalSelectLocation);
     };
-  }, [lat, lon, selectedYantra, onYantraChange]);
+  }, [lat, lon, selectedYantra, activeYantraId, onYantraChange]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const effectiveYantra = activeYantraId || selectedYantra || 'samrat';
     const formData = new FormData(e.currentTarget);
-    formData.set('yantra', selectedYantra);
+    formData.set('yantra', effectiveYantra);
     action(formData);
   };
 
@@ -282,13 +289,14 @@ export default function YantraForm({
             {/* Direct-click instrument buttons (instant responsiveness, no lag) */}
             <div className="grid grid-cols-2 gap-2">
               {YANTRAS.map((yantra) => {
-                const isSelected = selectedYantra === yantra.id;
+                const isSelected = (activeYantraId ? activeYantraId === yantra.id : selectedYantra === yantra.id);
                 return (
                   <button
                     key={yantra.id}
                     type="button"
                     id={`btn-yantra-${yantra.id}`}
-                    onClick={() => handleSelectYantra(yantra.id)}
+                    aria-pressed={isSelected}
+                    onClick={(e) => handleSelectYantra(yantra.id, e)}
                     className={cn(
                       "relative flex flex-col items-center justify-center rounded-xl p-2.5 h-[84px] text-center cursor-pointer",
                       "transition-all duration-200 select-none group border backdrop-blur-sm",
