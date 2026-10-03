@@ -35,19 +35,13 @@ export async function generateYantra(
       targetYantra = validation.data.yantra;
     }
 
-    // Service-to-service communication via Vercel service binding (BACKEND_URL).
-    // In local development outside 'vercel dev', fall back to localhost ports.
-    const isDev = process.env.NODE_ENV === 'development';
-    const candidateUrls = [
-      process.env.BACKEND_URL,
-      ...(isDev ? ['http://127.0.0.1:4000', 'http://127.0.0.1:3001'] : []),
-    ].filter(Boolean) as string[];
-
-    for (const baseUrl of candidateUrls) {
+    // Service-to-service communication via Vercel service binding (BACKEND_URL)
+    // Only attempt external HTTP if BACKEND_URL is explicitly configured, with a fast 400ms timeout
+    if (process.env.BACKEND_URL) {
       try {
-        const targetUrl = new URL('/api/yantra', baseUrl);
+        const targetUrl = new URL('/api/yantra', process.env.BACKEND_URL);
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2500);
+        const timeoutId = setTimeout(() => controller.abort(), 400);
 
         const response = await fetch(targetUrl, {
           method: 'POST',
@@ -70,7 +64,7 @@ export async function generateYantra(
           }
         }
       } catch {
-        // Backend candidate offline or timed out, proceed to next candidate or fallback
+        // Backend candidate offline or timed out, proceed immediately to local engine
       }
     }
 

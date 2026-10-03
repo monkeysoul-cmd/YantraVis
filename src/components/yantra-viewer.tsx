@@ -808,15 +808,14 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       const camera = new THREE.PerspectiveCamera(45, width / height, 0.05, 200);
       camera.position.set(4.5, 3.5, 6.5);
 
-      // Renderer
+      // High-performance WebGL Renderer
       const renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
         powerPreference: 'high-performance',
-        logarithmicDepthBuffer: true,
       });
       renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -833,7 +832,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       controls.minPolarAngle = 0.1;
       controls.maxPolarAngle = Math.PI * 0.85;
       controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.4;
+      controls.autoRotateSpeed = 0.35;
 
       // ─── Lighting ───────────────────────────────────────────────────────────
 
@@ -841,7 +840,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       const hemisphereLight = new THREE.HemisphereLight(
         new THREE.Color(0xffeedd), // sky warm
         new THREE.Color(0x2a1a0a), // ground warm bounce
-        0.6
+        0.65
       );
       scene.add(hemisphereLight);
 
@@ -849,16 +848,16 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       const sunLight = new THREE.DirectionalLight(new THREE.Color(0xfff8e7), 3.0);
       sunLight.position.set(10, 16, 8);
       sunLight.castShadow = true;
-      sunLight.shadow.mapSize.width = 2048;
-      sunLight.shadow.mapSize.height = 2048;
+      sunLight.shadow.mapSize.width = 1024;
+      sunLight.shadow.mapSize.height = 1024;
       sunLight.shadow.camera.near = 0.5;
-      sunLight.shadow.camera.far = 80;
-      sunLight.shadow.camera.left = -12;
-      sunLight.shadow.camera.right = 12;
-      sunLight.shadow.camera.top = 12;
-      sunLight.shadow.camera.bottom = -12;
-      sunLight.shadow.bias = -0.0003;
-      sunLight.shadow.normalBias = 0.05;
+      sunLight.shadow.camera.far = 60;
+      sunLight.shadow.camera.left = -6.5;
+      sunLight.shadow.camera.right = 6.5;
+      sunLight.shadow.camera.top = 6.5;
+      sunLight.shadow.camera.bottom = -6.5;
+      sunLight.shadow.bias = -0.0004;
+      sunLight.shadow.normalBias = 0.03;
       scene.add(sunLight);
 
       // Fill light — cool side fill

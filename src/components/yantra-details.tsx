@@ -44,10 +44,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
+import { YANTRA_KNOWLEDGE } from '@/lib/yantra-knowledge';
+
 type TabKey = 'description' | 'dimensions' | 'analysis' | 'orientation';
 
 const TABS: { key: TabKey; label: string; icon: typeof Info }[] = [
-  { key: 'description', label: 'About', icon: Info },
+  { key: 'description', label: 'About & Working', icon: Info },
   { key: 'dimensions', label: 'Dimensions', icon: Ruler },
   { key: 'analysis', label: 'BOM & Analysis', icon: Layers },
   { key: 'orientation', label: 'Orientation', icon: AlignCenter },
@@ -80,8 +82,8 @@ function StatCard({ label, value, icon: Icon, accent = false }: { label: string;
       }}>
       <div className="flex items-center gap-1.5">
         {Icon && <Icon className="h-3 w-3 text-muted-foreground/60" />}
-        <p className="text-[9px] font-medium uppercase tracking-widest text-muted-foreground capitalize leading-none">
-          {label.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim()}
+        <p className="text-[9px] font-medium uppercase tracking-widest text-muted-foreground leading-none">
+          {label.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim()}
         </p>
       </div>
       <p className="font-headline text-base font-semibold leading-tight"
@@ -181,8 +183,8 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           
           <div className="relative p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="info-pill flex items-center gap-1">
                     <Compass className="h-3 w-3" />
                     Parametric Active
@@ -191,17 +193,34 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                     <Globe className="h-3 w-3" />
                     {data.location.latitude.toFixed(3)}° N
                   </span>
+                  {YANTRA_KNOWLEDGE[data.yantraId] && (
+                    <>
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-serif bg-amber-500/15 border border-amber-500/30 text-amber-300">
+                        {YANTRA_KNOWLEDGE[data.yantraId].devanagari}
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] bg-orange-500/10 border border-orange-500/20 text-orange-300/90">
+                        {YANTRA_KNOWLEDGE[data.yantraId].category}
+                      </span>
+                    </>
+                  )}
                 </div>
-                <h2 className="font-headline text-2xl sm:text-3xl font-bold leading-tight"
-                  style={{
-                    background: 'linear-gradient(135deg, hsl(24, 90%, 68%), hsl(38, 95%, 62%), hsl(43, 100%, 56%))',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    filter: 'drop-shadow(0 2px 8px hsla(24, 90%, 55%, 0.2))'
-                  }}>
-                  {data.yantraName}
-                </h2>
+                <div>
+                  <h2 className="font-headline text-2xl sm:text-3xl font-bold leading-tight"
+                    style={{
+                      background: 'linear-gradient(135deg, hsl(24, 90%, 68%), hsl(38, 95%, 62%), hsl(43, 100%, 56%))',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      filter: 'drop-shadow(0 2px 8px hsla(24, 90%, 55%, 0.2))'
+                    }}>
+                    {data.yantraName}
+                  </h2>
+                  {YANTRA_KNOWLEDGE[data.yantraId] && (
+                    <p className="text-xs text-amber-200/80 font-medium mt-0.5 italic">
+                      "{YANTRA_KNOWLEDGE[data.yantraId].meaning}"
+                    </p>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <MapPin className="h-3 w-3" />
                   Calibrated for {data.location.latitude.toFixed(4)}° N, {data.location.longitude.toFixed(4)}° E
