@@ -72,9 +72,27 @@ export default function YantraForm({
   onYantraChange,
   onCoordinatesChange,
 }: YantraFormProps) {
-  const [lat, setLat] = useState('26.9124');
-  const [lon, setLon] = useState('75.7873');
-  const [selectedYantra, setSelectedYantra] = useState<string>(activeYantraId || 'samrat');
+  const [lat, setLat] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('latitude');
+      if (p) return p;
+    }
+    return '26.9124';
+  });
+  const [lon, setLon] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('longitude');
+      if (p) return p;
+    }
+    return '75.7873';
+  });
+  const [selectedYantra, setSelectedYantra] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('yantra');
+      if (p) return p;
+    }
+    return activeYantraId || 'samrat';
+  });
   const [activePreset, setActivePreset] = useState<string>('Jaipur');
 
   // Keep selectedYantra in sync with external changes (e.g., when a new model is generated)
@@ -142,6 +160,7 @@ export default function YantraForm({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     const effectiveYantra = selectedYantra || activeYantraId || 'samrat';
     const formData = new FormData(e.currentTarget);
     formData.set('yantra', effectiveYantra);
@@ -174,7 +193,7 @@ export default function YantraForm({
       </CardHeader>
 
       <CardContent className="p-0">
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} method="post" action="#" className="space-y-5">
           <input type="hidden" name="yantra" value={selectedYantra} />
 
           {/* Geolocation Section */}

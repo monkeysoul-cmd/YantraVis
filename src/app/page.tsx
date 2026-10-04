@@ -149,7 +149,20 @@ function LoadingSkeleton() {
 export default function Home() {
   const [state, setState] = useState<ActionState>(initialState);
   const [isPending, startTransition] = useTransition();
-  const [localData, setLocalData] = useState<YantraData | null>(null);
+  const [localData, setLocalData] = useState<YantraData | null>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const yantraParam = params.get('yantra');
+      const latParam = Number(params.get('latitude'));
+      const lonParam = Number(params.get('longitude'));
+      if (yantraParam) {
+        const lat = !isNaN(latParam) && latParam !== 0 ? latParam : 26.9124;
+        const lon = !isNaN(lonParam) && lonParam !== 0 ? lonParam : 75.7873;
+        return generateParametricYantraData(yantraParam, lat, lon);
+      }
+    }
+    return generateParametricYantraData('samrat', 26.9124, 75.7873);
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
