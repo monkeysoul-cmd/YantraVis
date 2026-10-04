@@ -300,7 +300,6 @@ export default function AppHeader() {
                 boxShadow: '0 0 12px hsla(43, 100%, 52%, 0.15)',
               }}
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
               <span>SIH 2025</span>
             </div>
 
