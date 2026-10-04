@@ -39,7 +39,6 @@ export default function ArModal({ isOpen, onClose, yantraId }: ArModalProps) {
           {/* AR overlay badge */}
           <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium"
             style={{ background: 'hsla(220, 32%, 7%, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid hsla(24, 90%, 55%, 0.25)', color: 'hsl(24, 90%, 60%)' }}>
-            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'hsl(24, 90%, 55%)' }} />
             AR Simulation
           </div>
         </div>

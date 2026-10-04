@@ -33,11 +33,11 @@ function MandalaBg() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] rounded-full border opacity-[0.03] animate-spin-slow"
         style={{ borderColor: 'hsl(24, 90%, 55%)', animationDuration: '35s' }} />
       
-      {/* Glowing dots at corners */}
-      <div className="absolute top-20 right-20 w-2 h-2 rounded-full animate-twinkle" style={{ background: 'hsl(43, 100%, 65%)', boxShadow: '0 0 12px hsl(43, 100%, 65%)' }} />
-      <div className="absolute bottom-32 left-16 w-1.5 h-1.5 rounded-full animate-twinkle delay-300" style={{ background: 'hsl(24, 90%, 65%)', boxShadow: '0 0 10px hsl(24, 90%, 65%)' }} />
-      <div className="absolute top-1/3 right-1/4 w-1 h-1 rounded-full animate-twinkle delay-600" style={{ background: 'hsl(43, 100%, 70%)', boxShadow: '0 0 8px hsl(43, 100%, 70%)' }} />
-      <div className="absolute top-2/3 left-[20%] w-1 h-1 rounded-full animate-twinkle delay-200" style={{ background: 'hsl(24, 90%, 70%)', boxShadow: '0 0 8px hsl(24, 90%, 70%)' }} />
+      {/* Ambient background dots */}
+      <div className="absolute top-20 right-20 w-2 h-2 rounded-full opacity-20" style={{ background: 'hsl(43, 100%, 65%)', boxShadow: '0 0 12px hsl(43, 100%, 65%)' }} />
+      <div className="absolute bottom-32 left-16 w-1.5 h-1.5 rounded-full opacity-20" style={{ background: 'hsl(24, 90%, 65%)', boxShadow: '0 0 10px hsl(24, 90%, 65%)' }} />
+      <div className="absolute top-1/3 right-1/4 w-1 h-1 rounded-full opacity-20" style={{ background: 'hsl(43, 100%, 70%)', boxShadow: '0 0 8px hsl(43, 100%, 70%)' }} />
+      <div className="absolute top-2/3 left-[20%] w-1 h-1 rounded-full opacity-20" style={{ background: 'hsl(24, 90%, 70%)', boxShadow: '0 0 8px hsl(24, 90%, 70%)' }} />
     </div>
   );
 }
@@ -61,17 +61,6 @@ function LoadingOverlay() {
           <p className="text-xs text-muted-foreground max-w-[220px] leading-relaxed">
             Applying geographic coordinates to parametric astronomical formulae…
           </p>
-        </div>
-        {/* Animated dots */}
-        <div className="flex gap-1.5">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{
-                background: 'hsl(24, 90%, 55%)',
-                animationDelay: `${i * 200}ms`,
-                animationDuration: '1s'
-              }} />
-          ))}
         </div>
       </div>
     </div>
@@ -174,6 +163,12 @@ export default function Home() {
         setState(res);
       } catch (err) {
         console.error("Form action failed:", err);
+        const yantraId = (formData.get('yantra') as string) || 'samrat';
+        const lat = Number(formData.get('latitude')) || 26.9124;
+        const lon = Number(formData.get('longitude')) || 75.7873;
+        const fallback = generateParametricYantraData(yantraId, lat, lon);
+        setLocalData(fallback);
+        setState({ data: fallback, error: null });
         toast({
           variant: 'destructive',
           title: 'Notice',
@@ -183,15 +178,6 @@ export default function Home() {
         setIsLoading(false);
       }
     });
-  };
-
-  const handleSelectYantra = (yantraId: string, lat?: number, lon?: number) => {
-    const targetLat = lat ?? (displayData?.location.latitude ?? 26.9124);
-    const targetLon = lon ?? (displayData?.location.longitude ?? 75.7873);
-    const newData = generateParametricYantraData(yantraId, targetLat, targetLon);
-    setLocalData(newData);
-    setState({ data: newData, error: null });
-    if (isMobile) setIsSheetOpen(true);
   };
 
   useEffect(() => {
@@ -222,7 +208,6 @@ export default function Home() {
                 action={handleFormAction}
                 isPending={isProcessing}
                 activeYantraId={displayData?.yantraId}
-                onYantraChange={handleSelectYantra}
               />
             </div>
           </ScrollArea>
@@ -297,7 +282,6 @@ export default function Home() {
                   action={handleFormAction}
                   isPending={isProcessing}
                   activeYantraId={displayData?.yantraId}
-                  onYantraChange={handleSelectYantra}
                 />
               </div>
             </ScrollArea>

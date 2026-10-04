@@ -288,7 +288,6 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           {/* Viewer info label */}
           <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] text-muted-foreground"
             style={{ background: 'hsla(220, 32%, 7%, 0.75)', backdropFilter: 'blur(8px)', border: '1px solid hsla(220, 25%, 18%, 0.6)' }}>
-            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
             WebGL 3D · Drag to orbit · Scroll to zoom
           </div>
         </div>

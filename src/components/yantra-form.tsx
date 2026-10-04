@@ -61,7 +61,7 @@ export type YantraFormProps = {
   action: (payload: FormData) => void;
   isPending: boolean;
   activeYantraId?: string;
-  onYantraChange?: (yantraId: string, lat: number, lon: number) => void;
+  onYantraChange?: (yantraId: string) => void;
   onCoordinatesChange?: (lat: number, lon: number) => void;
 };
 
@@ -74,27 +74,25 @@ export default function YantraForm({
 }: YantraFormProps) {
   const [lat, setLat] = useState('26.9124');
   const [lon, setLon] = useState('75.7873');
-  const [selectedYantra, setSelectedYantra] = useState<string>(activeYantraId || '');
+  const [selectedYantra, setSelectedYantra] = useState<string>(activeYantraId || 'samrat');
   const [activePreset, setActivePreset] = useState<string>('Jaipur');
 
-  // Keep selectedYantra in sync with external changes (e.g., from top nav dialog or model generation)
+  // Keep selectedYantra in sync with external changes (e.g., when a new model is generated)
   useEffect(() => {
     if (activeYantraId) {
       setSelectedYantra(activeYantraId);
     }
   }, [activeYantraId]);
 
-  // Handle instant selection of a Yantra (both with and without direct DOM click event)
+  // Handle selection of a Yantra in the configuration panel (does NOT generate model until Generate button is clicked)
   const handleSelectYantra = (yantraId: string, e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     setSelectedYantra(yantraId);
-    const numLat = Number(lat) || 26.9124;
-    const numLon = Number(lon) || 75.7873;
     if (onYantraChange) {
-      onYantraChange(yantraId, numLat, numLon);
+      onYantraChange(yantraId);
     }
   };
 
@@ -108,10 +106,6 @@ export default function YantraForm({
     if (onCoordinatesChange) {
       onCoordinatesChange(preset.lat, preset.lon);
     }
-    const currentYantra = activeYantraId || selectedYantra;
-    if (onYantraChange && currentYantra) {
-      onYantraChange(currentYantra, preset.lat, preset.lon);
-    }
   };
 
   // Listen for global custom events from the top navigation bar dialogs
@@ -120,6 +114,8 @@ export default function YantraForm({
       const customEvent = e as CustomEvent<{ yantraId: string }>;
       if (customEvent.detail?.yantraId) {
         handleSelectYantra(customEvent.detail.yantraId);
+        const btn = document.getElementById(`btn-yantra-${customEvent.detail.yantraId}`);
+        btn?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     };
 
@@ -130,9 +126,8 @@ export default function YantraForm({
         setLat(newLat.toString());
         setLon(newLon.toString());
         if (newName) setActivePreset(newName);
-        const currentYantra = activeYantraId || selectedYantra;
-        if (onYantraChange && currentYantra) {
-          onYantraChange(currentYantra, newLat, newLon);
+        if (onCoordinatesChange) {
+          onCoordinatesChange(newLat, newLon);
         }
       }
     };
@@ -143,13 +138,15 @@ export default function YantraForm({
       window.removeEventListener('select-yantra', handleGlobalSelectYantra);
       window.removeEventListener('select-location', handleGlobalSelectLocation);
     };
-  }, [lat, lon, selectedYantra, activeYantraId, onYantraChange]);
+  }, [onCoordinatesChange]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const effectiveYantra = activeYantraId || selectedYantra || 'samrat';
+    const effectiveYantra = selectedYantra || activeYantraId || 'samrat';
     const formData = new FormData(e.currentTarget);
     formData.set('yantra', effectiveYantra);
+    formData.set('latitude', lat);
+    formData.set('longitude', lon);
     action(formData);
   };
 
@@ -172,7 +169,7 @@ export default function YantraForm({
           </CardTitle>
         </div>
         <CardDescription className="text-xs leading-relaxed text-muted-foreground">
-          Select an ancient instrument to instantly render its calibrated 3D model and astronomical parameters.
+          Select an ancient instrument and location, then generate its calibrated 3D model and astronomical parameters.
         </CardDescription>
       </CardHeader>
 
@@ -286,10 +283,10 @@ export default function YantraForm({
               </span>
             </div>
 
-            {/* Direct-click instrument buttons (instant responsiveness, no lag) */}
+            {/* Instrument selection buttons */}
             <div className="grid grid-cols-2 gap-2">
               {YANTRAS.map((yantra) => {
-                const isSelected = (activeYantraId ? activeYantraId === yantra.id : selectedYantra === yantra.id);
+                const isSelected = selectedYantra === yantra.id;
                 return (
                   <button
                     key={yantra.id}
@@ -335,14 +332,6 @@ export default function YantraForm({
                         {yantra.name}
                       </span>
                     </div>
-
-                    {/* Active dot indicator */}
-                    {isSelected && (
-                      <div
-                        className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full animate-pulse"
-                        style={{ background: 'hsl(43, 100%, 52%)' }}
-                      />
-                    )}
                   </button>
                 );
               })}

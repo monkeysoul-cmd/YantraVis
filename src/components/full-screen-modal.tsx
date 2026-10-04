@@ -76,7 +76,6 @@ export default function FullScreenModal({
             style={{ background: 'linear-gradient(to top, hsla(222, 35%, 4%, 0.9) 0%, transparent 100%)' }} />
           <div className="absolute bottom-[72px] left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] text-muted-foreground pointer-events-none"
             style={{ background: 'hsla(220, 32%, 7%, 0.7)', backdropFilter: 'blur(8px)' }}>
-            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
             WebGL 3D · Drag to orbit · Scroll to zoom · Right-click to pan
           </div>
         </div>
