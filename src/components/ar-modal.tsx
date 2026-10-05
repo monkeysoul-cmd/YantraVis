@@ -1,12 +1,11 @@
 'use client';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import YantraViewer from "./yantra-viewer";
 import type { Yantra } from "@/lib/yantras";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Button } from "./ui/button";
-import { X } from "lucide-react";
+import { Sparkles, View } from "lucide-react";
 
 type ArModalProps = {
   isOpen: boolean;
@@ -15,43 +14,51 @@ type ArModalProps = {
 };
 
 export default function ArModal({ isOpen, onClose, yantraId }: ArModalProps) {
-    const bgImage = PlaceHolderImages.find(img => img.id === 'ar-background');
+  const bgImage = PlaceHolderImages.find(img => img.id === 'ar-background');
     
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0"
-        style={{ background: 'hsl(222, 35%, 5%)', border: '1px solid hsla(24, 85%, 42%, 0.2)' }}>
-
-        <div className="flex-grow relative overflow-hidden" style={{ background: 'hsl(222, 40%, 4%)' }}>
+      <DialogContent 
+        className="max-w-4xl h-[88vh] flex flex-col p-0 gap-0 overflow-hidden border border-primary/20 surface-elevated rounded-2xl shadow-2xl"
+      >
+        <div className="flex-grow relative overflow-hidden bg-background">
           {bgImage && (
             <Image 
-                src={bgImage.imageUrl} 
-                alt="Outdoor site for AR preview" 
-                fill
-                className="object-cover opacity-60"
-                data-ai-hint={bgImage.imageHint}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              src={bgImage.imageUrl} 
+              alt="Outdoor site for AR preview" 
+              fill
+              className="object-cover opacity-50"
+              data-ai-hint={bgImage.imageHint}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 50vw"
             />
           )}
           <div className="absolute inset-0">
             <YantraViewer yantraId={yantraId} isArMode={true} />
           </div>
-          {/* AR overlay badge */}
-          <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium"
-            style={{ background: 'hsla(220, 32%, 7%, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid hsla(24, 90%, 55%, 0.25)', color: 'hsl(24, 90%, 60%)' }}>
-            AR Simulation
+          
+          {/* AR overlay pill */}
+          <div 
+            className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium surface-glass border border-accent/30 shadow-lg text-accent"
+          >
+            <View className="h-3.5 w-3.5" />
+            <span>AR Environment Simulation</span>
           </div>
         </div>
 
-        <DialogHeader className="p-5 flex-shrink-0"
-          style={{ borderTop: '1px solid hsla(24, 85%, 42%, 0.15)', background: 'hsla(220, 32%, 7%, 0.95)' }}>
-            <div className='space-y-1'>
-                <DialogTitle className="font-headline text-base"
-                  style={{ color: 'hsl(24, 90%, 62%)' }}>Augmented Reality Preview</DialogTitle>
-                <DialogDescription className="text-xs">
-                    Simulation mode. On supported mobile devices, this view uses your camera to place the yantra in your real environment.
-                </DialogDescription>
+        <DialogHeader 
+          className="p-5 flex-shrink-0 border-t border-border/30 surface-glass"
+        >
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-accent" />
+              <DialogTitle className="font-headline text-lg text-gradient-gold">
+                Augmented Reality Perspective
+              </DialogTitle>
             </div>
+            <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
+              Spatial scale preview. When deployed to AR-compatible mobile browsers with WebXR, this projects the 1:1 scale parametric geometry into your real-world horizon.
+            </DialogDescription>
+          </div>
         </DialogHeader>
       </DialogContent>
     </Dialog>

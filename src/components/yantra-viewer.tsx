@@ -20,59 +20,159 @@ export type YantraViewerRef = {
 // ─── Realistic Material Palette ───────────────────────────────────────────────
 
 function createSandstoneMaterial() {
-  // Jaipur pink sandstone — warm coral-terracotta
+  // Jaipur pink sandstone — warm coral-terracotta with realistic weathering
   return new THREE.MeshStandardMaterial({
-    color: new THREE.Color(0xc27a54),
-    roughness: 0.82,
-    metalness: 0.02,
-    envMapIntensity: 0.3,
+    color: new THREE.Color(0xc47d56),
+    roughness: 0.78,
+    metalness: 0.03,
+    envMapIntensity: 0.45,
+    flatShading: false,
   });
 }
 
 function createWeatheredSandstoneMaterial() {
   return new THREE.MeshStandardMaterial({
-    color: new THREE.Color(0xb06840),
-    roughness: 0.92,
-    metalness: 0.01,
-    envMapIntensity: 0.2,
+    color: new THREE.Color(0xb26a42),
+    roughness: 0.88,
+    metalness: 0.02,
+    envMapIntensity: 0.3,
+    flatShading: false,
   });
 }
 
 function createMarbleMaterial() {
-  // Makrana white marble — slightly warm
+  // Makrana white marble — slightly warm with enhanced reflectivity
   return new THREE.MeshStandardMaterial({
-    color: new THREE.Color(0xf0ebe2),
-    roughness: 0.25,
-    metalness: 0.08,
-    envMapIntensity: 0.6,
+    color: new THREE.Color(0xf2ede5),
+    roughness: 0.18,
+    metalness: 0.12,
+    envMapIntensity: 0.85,
+    flatShading: false,
   });
 }
 
 function createBronzeMaterial() {
   return new THREE.MeshStandardMaterial({
-    color: new THREE.Color(0xcb8e3e),
-    roughness: 0.25,
-    metalness: 0.82,
-    envMapIntensity: 0.8,
+    color: new THREE.Color(0xd4963f),
+    roughness: 0.20,
+    metalness: 0.88,
+    envMapIntensity: 1.2,
+    flatShading: false,
   });
 }
 
 function createOxidizedBronzeMaterial() {
   return new THREE.MeshStandardMaterial({
-    color: new THREE.Color(0x7a9e8a),
-    roughness: 0.55,
-    metalness: 0.65,
-    envMapIntensity: 0.5,
+    color: new THREE.Color(0x7da08c),
+    roughness: 0.50,
+    metalness: 0.70,
+    envMapIntensity: 0.7,
+    flatShading: false,
   });
 }
 
 function createDarkStoneMaterial() {
   return new THREE.MeshStandardMaterial({
-    color: new THREE.Color(0x4a3728),
-    roughness: 0.88,
-    metalness: 0.04,
-    envMapIntensity: 0.2,
+    color: new THREE.Color(0x4c3a2a),
+    roughness: 0.85,
+    metalness: 0.05,
+    envMapIntensity: 0.35,
+    flatShading: false,
   });
+}
+
+// ─── HDR Environment Map Generator ──────────────────────────────────────────
+
+function createEnvironmentMap(renderer: THREE.WebGLRenderer): THREE.Texture {
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  pmremGenerator.compileEquirectangularShader();
+  
+  // Create a warm sunset-like environment
+  const scene = new THREE.Scene();
+  
+  // Warm golden sky gradient
+  const skyColor = new THREE.Color(0xfff0d4);
+  const groundColor = new THREE.Color(0x2a1a0a);
+  const horizonColor = new THREE.Color(0xff9a3c);
+  
+  // Upper hemisphere
+  const upperHemi = new THREE.HemisphereLight(skyColor, horizonColor, 1.0);
+  scene.add(upperHemi);
+  
+  // Ambient fill
+  const ambient = new THREE.AmbientLight(groundColor, 0.3);
+  scene.add(ambient);
+  
+  // Sun disc approximation
+  const sunGeo = new THREE.SphereGeometry(0.5, 16, 8);
+  const sunMat = new THREE.MeshBasicMaterial({ color: 0xfff5e0 });
+  const sunMesh = new THREE.Mesh(sunGeo, sunMat);
+  sunMesh.position.set(5, 8, 3);
+  scene.add(sunMesh);
+  
+  const envMap = pmremGenerator.fromScene(scene, 0.04).texture;
+  pmremGenerator.dispose();
+  
+  return envMap;
+}
+
+// ─── Floating Dust Particles ────────────────────────────────────────────────
+
+function createDustParticles(scene: THREE.Scene): THREE.Points {
+  const particleCount = 80;
+  const positions = new Float32Array(particleCount * 3);
+  const velocities: number[] = [];
+  
+  for (let i = 0; i < particleCount; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 12;
+    positions[i * 3 + 1] = Math.random() * 8;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 12;
+    velocities.push(
+      (Math.random() - 0.5) * 0.003,
+      Math.random() * 0.005 + 0.002,
+      (Math.random() - 0.5) * 0.003
+    );
+  }
+  
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  
+  const material = new THREE.PointsMaterial({
+    color: 0xd4a040,
+    size: 0.04,
+    transparent: true,
+    opacity: 0.5,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    sizeAttenuation: true,
+  });
+  
+  const points = new THREE.Points(geometry, material);
+  (points as any)._velocities = velocities;
+  scene.add(points);
+  return points;
+}
+
+function updateDustParticles(points: THREE.Points, elapsed: number) {
+  const positions = points.geometry.attributes.position.array as Float32Array;
+  const velocities = (points as any)._velocities as number[];
+  
+  for (let i = 0; i < positions.length / 3; i++) {
+    positions[i * 3] += velocities[i * 3] + Math.sin(elapsed * 0.5 + i) * 0.001;
+    positions[i * 3 + 1] += velocities[i * 3 + 1];
+    positions[i * 3 + 2] += velocities[i * 3 + 2] + Math.cos(elapsed * 0.3 + i) * 0.001;
+    
+    // Reset particles that float too high
+    if (positions[i * 3 + 1] > 8) {
+      positions[i * 3] = (Math.random() - 0.5) * 12;
+      positions[i * 3 + 1] = -0.5;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 12;
+    }
+  }
+  
+  // Gentle overall opacity pulse
+  (points.material as THREE.PointsMaterial).opacity = 0.35 + Math.sin(elapsed * 0.7) * 0.15;
+  points.geometry.attributes.position.needsUpdate = true;
 }
 
 // ─── Ground Platform ──────────────────────────────────────────────────────────
@@ -1055,13 +1155,13 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       const scene = new THREE.Scene();
       scene.background = null;
 
-      // Atmospheric fog
+      // Atmospheric fog — subtle depth fade
       if (!isArMode) {
-        scene.fog = new THREE.FogExp2(0x08080e, 0.04);
+        scene.fog = new THREE.FogExp2(0x060810, 0.032);
       }
 
-      // Camera
-      const camera = new THREE.PerspectiveCamera(45, width / height, 0.05, 200);
+      // Camera — cinematic FOV
+      const camera = new THREE.PerspectiveCamera(42, width / height, 0.05, 200);
       camera.position.set(4.5, 3.5, 6.5);
 
       // High-performance WebGL Renderer
@@ -1071,12 +1171,16 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
         powerPreference: 'high-performance',
       });
       renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.0));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.2;
+      renderer.toneMappingExposure = 1.35;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
+      
+      // HDR Environment Map for realistic reflections
+      const envMap = createEnvironmentMap(renderer);
+      scene.environment = envMap;
       
       // Clear any previous nodes before mounting canvas
       while (currentMount.firstChild) {
@@ -1084,52 +1188,64 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       }
       currentMount.appendChild(renderer.domElement);
 
-      // Controls
+      // Controls — smooth damping
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
-      controls.dampingFactor = 0.06;
+      controls.dampingFactor = 0.05;
       controls.minDistance = 1.5;
       controls.maxDistance = 40;
       controls.minPolarAngle = 0.1;
       controls.maxPolarAngle = Math.PI * 0.85;
       controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.35;
+      controls.autoRotateSpeed = 0.30;
 
-      // ─── Lighting ───────────────────────────────────────────────────────────
+      // ─── Lighting — Museum-grade illumination ─────────────────────────────────
 
-      // Sky ambient — warm blue sky
+      // Sky ambient — warm golden sky
       const hemisphereLight = new THREE.HemisphereLight(
         new THREE.Color(0xffeedd), // sky warm
         new THREE.Color(0x2a1a0a), // ground warm bounce
-        0.65
+        0.70
       );
       scene.add(hemisphereLight);
 
-      // Key light — solar
-      const sunLight = new THREE.DirectionalLight(new THREE.Color(0xfff8e7), 3.0);
+      // Key light — solar (higher resolution shadows)
+      const sunLight = new THREE.DirectionalLight(new THREE.Color(0xfff6e0), 3.2);
       sunLight.position.set(10, 16, 8);
       sunLight.castShadow = true;
-      sunLight.shadow.mapSize.width = 1024;
-      sunLight.shadow.mapSize.height = 1024;
+      sunLight.shadow.mapSize.width = 2048;
+      sunLight.shadow.mapSize.height = 2048;
       sunLight.shadow.camera.near = 0.5;
       sunLight.shadow.camera.far = 60;
-      sunLight.shadow.camera.left = -6.5;
-      sunLight.shadow.camera.right = 6.5;
-      sunLight.shadow.camera.top = 6.5;
-      sunLight.shadow.camera.bottom = -6.5;
-      sunLight.shadow.bias = -0.0004;
-      sunLight.shadow.normalBias = 0.03;
+      sunLight.shadow.camera.left = -7;
+      sunLight.shadow.camera.right = 7;
+      sunLight.shadow.camera.top = 7;
+      sunLight.shadow.camera.bottom = -7;
+      sunLight.shadow.bias = -0.0003;
+      sunLight.shadow.normalBias = 0.025;
+      sunLight.shadow.radius = 2;
       scene.add(sunLight);
 
-      // Fill light — cool side fill
-      const fillLight = new THREE.DirectionalLight(new THREE.Color(0xb8d4f0), 0.5);
+      // Fill light — cool side fill with slight blue
+      const fillLight = new THREE.DirectionalLight(new THREE.Color(0xb8d4f0), 0.55);
       fillLight.position.set(-8, 4, -6);
       scene.add(fillLight);
 
       // Warm bounce from below
-      const bounceLight = new THREE.PointLight(new THREE.Color(0xff9a3c), 0.4, 20);
+      const bounceLight = new THREE.PointLight(new THREE.Color(0xff9a3c), 0.45, 22);
       bounceLight.position.set(0, -2, 3);
       scene.add(bounceLight);
+
+      // Rim/edge light — defines silhouettes against dark background
+      const rimLight = new THREE.DirectionalLight(new THREE.Color(0xffe8c0), 0.8);
+      rimLight.position.set(-4, 8, -10);
+      scene.add(rimLight);
+
+      // Floating golden dust particles
+      let dustParticles: THREE.Points | null = null;
+      if (!isArMode) {
+        dustParticles = createDustParticles(scene);
+      }
 
       // ─── Build Instrument ───────────────────────────────────────────────────
 
@@ -1200,6 +1316,11 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
         animationFrameId = requestAnimationFrame(animate);
         const elapsed = clock.getElapsedTime();
 
+        // Update dust particles
+        if (dustParticles) {
+          updateDustParticles(dustParticles, elapsed);
+        }
+
         if (animateShadow) {
           // Solar path simulation:
           // In Northern hemisphere (India ~26°N), the sun rises in East (+X),
@@ -1224,11 +1345,12 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
             isGoldenHour ? 0.85 : 0.35,
             0.85 + sunElevation * 0.15
           );
-          sunLight.intensity = Math.max(0.3, sunElevation * 3.2);
-          hemisphereLight.intensity = Math.max(0.2, sunElevation * 0.65);
+          sunLight.intensity = Math.max(0.3, sunElevation * 3.5);
+          hemisphereLight.intensity = Math.max(0.2, sunElevation * 0.70);
 
           // Ambient fills during day
           bounceLight.intensity = Math.max(0.1, sunElevation * 0.5);
+          rimLight.intensity = Math.max(0.3, sunElevation * 0.8);
         }
 
         // Gentle auto-rotate stops when user interacts
@@ -1239,14 +1361,19 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
 
       // ─── Resize handler ──────────────────────────────────────────────────────
 
+      // Debounced resize handler for performance
+      let resizeTimeout: ReturnType<typeof setTimeout>;
       const handleResize = () => {
-        if (!currentMount) return;
-        const w = currentMount.clientWidth;
-        const h = currentMount.clientHeight;
-        if (w === 0 || h === 0) return;
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          if (!currentMount) return;
+          const w = currentMount.clientWidth;
+          const h = currentMount.clientHeight;
+          if (w === 0 || h === 0) return;
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+        }, 50);
       };
       window.addEventListener('resize', handleResize);
       const resizeObserver = new ResizeObserver(() => handleResize());
@@ -1256,9 +1383,11 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
 
       return () => {
         cancelAnimationFrame(animationFrameId);
+        clearTimeout(resizeTimeout);
         window.removeEventListener('resize', handleResize);
         resizeObserver.disconnect();
         controls.dispose();
+        envMap.dispose();
         scene.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             child.geometry?.dispose();
@@ -1267,6 +1396,10 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
             } else if (child.material) {
               child.material.dispose();
             }
+          }
+          if (child instanceof THREE.Points) {
+            child.geometry?.dispose();
+            (child.material as THREE.Material)?.dispose();
           }
         });
         renderer.dispose();

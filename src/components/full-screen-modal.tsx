@@ -3,9 +3,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import YantraViewer from "./yantra-viewer";
 import type { Yantra } from "@/lib/yantras";
-import { Sun, Moon, Compass, Maximize2 } from "lucide-react";
+import { Sun, Moon, Compass, Maximize2, X, Sparkles, Eye } from "lucide-react";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
+import { Button } from "./ui/button";
 
 type FullScreenModalProps = {
   isOpen: boolean;
@@ -28,89 +29,120 @@ export default function FullScreenModal({
 }: FullScreenModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-none w-screen h-screen flex flex-col p-0 gap-0 border-0 rounded-none"
-        style={{ background: 'hsl(222, 35%, 4%)' }}>
-        
+      <DialogContent 
+        className="max-w-none w-screen h-screen flex flex-col p-0 gap-0 border-0 rounded-none overflow-hidden select-none"
+        style={{ background: 'hsl(225, 47%, 3%)' }}
+      >
         {/* Viewer fills full screen */}
         <div className="flex-1 relative overflow-hidden min-h-0">
           <YantraViewer yantraId={yantraId} latitude={latitude} animateShadow={animateShadow} />
-          
-          {/* Top controls overlay */}
-          <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
-            {/* Shadow toggle */}
-            <div className="flex items-center gap-2 px-3 py-2 rounded-full"
-              style={{
-                background: 'hsla(220, 32%, 7%, 0.85)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid hsla(43, 100%, 52%, 0.2)'
-              }}>
-              <Sun className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 55%)' }} />
-              <Switch
-                id="animate-shadow-fullscreen"
-                checked={animateShadow}
-                onCheckedChange={setAnimateShadow}
-                className="scale-90"
-              />
-              <Moon className="h-3.5 w-3.5 text-muted-foreground/60" />
-              <Label htmlFor="animate-shadow-fullscreen" className="sr-only">Simulate Day/Night</Label>
-            </div>
 
-            {/* Compass badge aligned */}
-            <div className="w-9 h-9 rounded-full flex items-center justify-center relative"
-              style={{
-                background: 'hsla(220, 32%, 7%, 0.85)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid hsla(43, 100%, 52%, 0.2)'
-              }}
-              title="True Meridian — North">
-              <div className="relative flex items-center justify-center">
-                <Compass className="h-4 w-4 text-foreground/80" />
-                <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[8px] font-bold leading-none"
-                  style={{ color: 'hsl(43, 100%, 55%)' }}>N</span>
+          {/* Floating Top Header HUD */}
+          <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20 pointer-events-none">
+            {/* Left Controls */}
+            <div className="flex items-center gap-2.5 pointer-events-auto">
+              {/* Shadow toggle capsule */}
+              <div 
+                className="flex items-center gap-2.5 px-3.5 py-2 rounded-full surface-glass shadow-lg"
+                style={{
+                  border: '1px solid hsla(43, 100%, 52%, 0.25)',
+                }}
+              >
+                <Sun className={`h-4 w-4 transition-colors ${animateShadow ? 'text-amber-400 animate-pulse' : 'text-amber-400/70'}`} />
+                <Switch
+                  id="animate-shadow-fullscreen"
+                  checked={animateShadow}
+                  onCheckedChange={setAnimateShadow}
+                  className="scale-90 data-[state=checked]:bg-amber-500"
+                />
+                <Moon className={`h-3.5 w-3.5 transition-colors ${animateShadow ? 'text-blue-300' : 'text-muted-foreground/60'}`} />
+                <span className="text-[11px] font-medium tracking-wide text-foreground/90 pl-1 hidden sm:inline">
+                  {animateShadow ? 'Shadow Orbit Active' : 'Static Light'}
+                </span>
+                <Label htmlFor="animate-shadow-fullscreen" className="sr-only">Simulate Day/Night</Label>
+              </div>
+
+              {/* Compass badge */}
+              <div 
+                className="h-9 px-3 rounded-full flex items-center gap-2 surface-glass shadow-lg"
+                style={{
+                  border: '1px solid hsla(24, 90%, 55%, 0.2)',
+                }}
+                title="True Celestial Meridian (North Aligned)"
+              >
+                <Compass className="h-4 w-4 text-primary animate-spin-slow" style={{ animationDuration: '40s' }} />
+                <span className="text-[11px] font-semibold text-accent tracking-wider">TRUE N</span>
               </div>
             </div>
+
+            {/* Right Close Button */}
+            <div className="pointer-events-auto flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="h-9 w-9 rounded-full surface-glass hover:bg-destructive/20 hover:text-destructive border border-border/40 hover:border-destructive/40 transition-all cursor-pointer"
+                aria-label="Exit Fullscreen"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
-          {/* Bottom gradient + label */}
-          <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
-            style={{ background: 'linear-gradient(to top, hsla(222, 35%, 4%, 0.9) 0%, transparent 100%)' }} />
-          <div className="absolute bottom-[72px] left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] text-muted-foreground pointer-events-none"
-            style={{ background: 'hsla(220, 32%, 7%, 0.7)', backdropFilter: 'blur(8px)' }}>
-            WebGL 3D · Drag to orbit · Scroll to zoom · Right-click to pan
+          {/* Bottom HUD Hint */}
+          <div 
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-medium text-foreground/80 pointer-events-none surface-glass border border-white/5 shadow-xl"
+          >
+            <Eye className="h-3.5 w-3.5 text-accent" />
+            <span>Drag to rotate</span>
+            <span className="text-white/20">·</span>
+            <span>Pinch / Scroll to zoom</span>
+            <span className="text-white/20">·</span>
+            <span>Right-click to pan</span>
           </div>
+
+          {/* Soft Bottom Vignette */}
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
+            style={{ background: 'linear-gradient(to top, hsl(225, 47%, 3%) 0%, transparent 100%)' }} 
+          />
         </div>
 
-        {/* Bottom info bar */}
-        <div className="flex-shrink-0 flex items-center justify-between px-6 py-3"
+        {/* Bottom Info Bar */}
+        <div 
+          className="flex-shrink-0 flex items-center justify-between px-6 py-3.5 relative z-10"
           style={{
-            background: 'hsla(220, 32%, 7%, 0.95)',
-            backdropFilter: 'blur(16px)',
-            borderTop: '1px solid hsla(24, 85%, 42%, 0.2)'
-          }}>
-          <div className="space-y-0.5">
-            <p className="font-headline text-base font-semibold leading-tight"
-              style={{
-                background: 'linear-gradient(135deg, hsl(24, 90%, 65%), hsl(43, 100%, 55%))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>
-              {yantraName}
-            </p>
-            <p className="text-[10px] text-muted-foreground">
-              Full-screen 3D simulation · Lat {latitude?.toFixed(4)}° N
-            </p>
+            background: 'hsla(225, 40%, 5%, 0.95)',
+            backdropFilter: 'blur(20px)',
+            borderTop: '1px solid hsla(24, 85%, 42%, 0.2)',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-[0_0_10px_hsl(43,100%,52%)]" />
+            <div>
+              <p 
+                className="font-headline text-base font-semibold leading-tight text-gradient-gold"
+              >
+                {yantraName}
+              </p>
+              <p className="text-[11px] text-muted-foreground/80 flex items-center gap-1.5 mt-0.5">
+                <span>Astronomical Simulation</span>
+                <span>•</span>
+                <span className="text-foreground/70 font-mono">Lat {latitude?.toFixed(4)}° N</span>
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Maximize2 className="h-3.5 w-3.5" />
-            Full Screen View
+          
+          <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
+            <Sparkles className="h-3.5 w-3.5 text-accent" />
+            <span>Interactive Real-time WebGL</span>
           </div>
         </div>
 
-        {/* Hidden accessible header for screen readers */}
+        {/* Accessible Dialog Title */}
         <DialogHeader className="sr-only">
           <DialogTitle>{yantraName} - Full Screen 3D Simulation</DialogTitle>
-          <DialogDescription>Use mouse or touch gestures to rotate, pan, and zoom. Toggle Day/Night cycle to observe shadow dynamics.</DialogDescription>
+          <DialogDescription>Interactive full-screen 3D view of {yantraName} at latitude {latitude?.toFixed(4)}° N with real-time solar shadow dynamics.</DialogDescription>
         </DialogHeader>
       </DialogContent>
     </Dialog>

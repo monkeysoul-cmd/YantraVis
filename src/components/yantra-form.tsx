@@ -14,29 +14,23 @@ function SubmitButton({ isPending }: { isPending: boolean }) {
   return (
     <Button
       type="submit"
-      className="w-full text-sm py-5 font-medium tracking-wide transition-all duration-300 relative overflow-hidden group cursor-pointer"
+      className="w-full text-sm py-5 font-medium tracking-wide btn-premium cursor-pointer"
       disabled={isPending}
       style={{
         background: isPending
-          ? 'hsla(24, 85%, 42%, 0.6)'
-          : 'linear-gradient(135deg, hsl(24, 85%, 42%), hsl(24, 90%, 52%), hsl(38, 95%, 50%))',
-        boxShadow: isPending ? 'none' : '0 4px 20px hsla(24, 90%, 55%, 0.35), 0 1px 4px hsla(0,0%,0%,0.2)',
+          ? 'hsla(24, 85%, 42%, 0.5)'
+          : 'linear-gradient(135deg, hsl(24, 85%, 40%), hsl(24, 90%, 50%), hsl(38, 95%, 48%))',
+        boxShadow: isPending ? 'none' : '0 4px 24px hsla(24, 90%, 55%, 0.3), 0 1px 4px hsla(0,0%,0%,0.25)',
         border: 'none',
         color: 'white',
+        borderRadius: '14px',
       }}
     >
-      {/* Shimmer overlay on hover */}
-      <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{
-          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
-          backgroundSize: '200% 100%',
-          animation: isPending ? 'none' : 'shimmer 1.5s infinite'
-        }} />
-      <span className="relative flex items-center justify-center gap-2 font-medium">
+      <span className="relative flex items-center justify-center gap-2.5 font-medium">
         {isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Calculating Alignments…
+            Computing Alignments…
           </>
         ) : (
           <>
@@ -172,23 +166,28 @@ export default function YantraForm({
   return (
     <Card className="glass-card border-none shadow-none bg-transparent">
       {/* Header */}
-      <CardHeader className="p-0 pb-4">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: 'linear-gradient(135deg, hsla(24, 85%, 42%, 0.2), hsla(43, 100%, 52%, 0.15))', border: '1px solid hsla(43, 100%, 52%, 0.3)' }}>
-            <Navigation className="h-3.5 w-3.5" style={{ color: 'hsl(24, 90%, 60%)' }} />
+      <CardHeader className="p-0 pb-5">
+        <div className="flex items-center gap-2.5 mb-1.5">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+            style={{
+              background: 'linear-gradient(135deg, hsla(24, 85%, 42%, 0.15), hsla(43, 100%, 52%, 0.10))',
+              border: '1px solid hsla(43, 100%, 52%, 0.25)',
+              boxShadow: '0 0 15px hsla(24, 90%, 55%, 0.08)',
+            }}>
+            <Navigation className="h-4 w-4" style={{ color: 'hsl(24, 90%, 62%)' }} />
           </div>
           <CardTitle className="font-headline text-xl tracking-wider" style={{
-            background: 'linear-gradient(135deg, hsl(24, 90%, 65%), hsl(43, 100%, 55%))',
+            background: 'linear-gradient(135deg, hsl(24, 90%, 65%), hsl(43, 100%, 58%))',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
+            backgroundClip: 'text',
+            filter: 'drop-shadow(0 1px 6px hsla(24, 90%, 55%, 0.15))',
           }}>
             Configuration
           </CardTitle>
         </div>
-        <CardDescription className="text-xs leading-relaxed text-muted-foreground">
-          Select an ancient instrument and location, then generate its calibrated 3D model and astronomical parameters.
+        <CardDescription className="text-xs leading-relaxed text-muted-foreground pl-[42px]">
+          Select an ancient instrument and location, then generate its calibrated 3D model.
         </CardDescription>
       </CardHeader>
 
@@ -196,11 +195,11 @@ export default function YantraForm({
         <form onSubmit={handleSubmit} method="post" action="#" className="space-y-5">
           <input type="hidden" name="yantra" value={selectedYantra} />
 
-          {/* Geolocation Section */}
+          {/* ─── Geolocation Section ─── */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 shrink-0" style={{ color: 'hsl(24, 90%, 55%)' }} />
-              <span className="font-headline text-sm tracking-wider text-foreground/90">Geolocation</span>
+              <MapPin className="h-4 w-4 shrink-0" style={{ color: 'hsl(24, 90%, 58%)' }} />
+              <span className="font-headline text-sm tracking-wider" style={{ color: 'hsla(38, 25%, 88%, 0.85)' }}>Geolocation</span>
             </div>
 
             {/* Preset Buttons */}
@@ -214,22 +213,22 @@ export default function YantraForm({
                     title={preset.title}
                     onClick={() => applyPreset(preset)}
                     className={cn(
-                      "flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer",
+                      "flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-all duration-300 cursor-pointer",
                       activePreset === preset.name
                         ? "text-accent-foreground"
                         : "text-muted-foreground hover:text-foreground"
                     )}
                     style={{
                       background: activePreset === preset.name
-                        ? 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.25), hsla(43, 100%, 52%, 0.2))'
-                        : 'hsla(220, 28%, 11%, 0.6)',
+                        ? 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.18), hsla(43, 100%, 52%, 0.12))'
+                        : 'hsla(225, 28%, 8%, 0.6)',
                       border: activePreset === preset.name
-                        ? '1px solid hsla(43, 100%, 52%, 0.5)'
-                        : '1px solid hsla(220, 25%, 14%, 1)',
+                        ? '1px solid hsla(43, 100%, 52%, 0.4)'
+                        : '1px solid hsla(225, 22%, 14%, 0.8)',
                       boxShadow: activePreset === preset.name
-                        ? '0 0 10px hsla(43, 100%, 52%, 0.2)'
+                        ? '0 0 12px hsla(43, 100%, 52%, 0.12), inset 0 1px 0 hsla(255, 100%, 100%, 0.05)'
                         : 'none',
-                      color: activePreset === preset.name ? 'hsl(43, 100%, 60%)' : undefined
+                      color: activePreset === preset.name ? 'hsl(43, 100%, 62%)' : undefined
                     }}
                   >
                     <span>{preset.emoji}</span>
@@ -259,8 +258,14 @@ export default function YantraForm({
                     setLat(e.target.value);
                     setActivePreset('');
                   }}
-                  className="h-9 text-sm bg-background/50 border-border/60 focus-visible:ring-0 focus-visible:border-primary/60 transition-colors"
-                  style={{ boxShadow: 'inset 0 2px 4px hsla(0,0%,0%,0.08)' }}
+                  className="h-10 text-sm input-premium transition-all duration-300"
+                  style={{
+                    background: 'hsla(225, 35%, 6%, 0.8)',
+                    border: '1px solid hsla(225, 22%, 14%, 0.6)',
+                    borderRadius: '10px',
+                    boxShadow: 'inset 0 2px 6px hsla(0, 0%, 0%, 0.15)',
+                    color: 'hsl(38, 25%, 88%)',
+                  }}
                 />
               </div>
               <div className="space-y-1.5">
@@ -281,84 +286,109 @@ export default function YantraForm({
                     setLon(e.target.value);
                     setActivePreset('');
                   }}
-                  className="h-9 text-sm bg-background/50 border-border/60 focus-visible:ring-0 focus-visible:border-primary/60 transition-colors"
-                  style={{ boxShadow: 'inset 0 2px 4px hsla(0,0%,0%,0.08)' }}
+                  className="h-10 text-sm input-premium transition-all duration-300"
+                  style={{
+                    background: 'hsla(225, 35%, 6%, 0.8)',
+                    border: '1px solid hsla(225, 22%, 14%, 0.6)',
+                    borderRadius: '10px',
+                    boxShadow: 'inset 0 2px 6px hsla(0, 0%, 0%, 0.15)',
+                    color: 'hsl(38, 25%, 88%)',
+                  }}
                 />
               </div>
             </div>
           </div>
 
-          <Separator style={{ background: 'linear-gradient(90deg, transparent, hsla(24, 85%, 42%, 0.3), transparent)' }} />
+          {/* Separator */}
+          <div className="relative py-1">
+            <Separator className="opacity-0" />
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px]"
+              style={{ background: 'linear-gradient(90deg, transparent, hsla(24, 85%, 42%, 0.25), hsla(43, 100%, 52%, 0.15), transparent)' }} />
+          </div>
 
-          {/* Instrument Selection */}
+          {/* ─── Instrument Selection ─── */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 55%)' }} />
-                <span className="font-headline text-sm tracking-wider text-foreground/90">Select Instrument</span>
+                <Sparkles className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 58%)' }} />
+                <span className="font-headline text-sm tracking-wider" style={{ color: 'hsla(38, 25%, 88%, 0.85)' }}>Select Instrument</span>
               </div>
-              <span className="text-[10px] text-muted-foreground font-mono bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
+              <span className="text-[10px] text-muted-foreground font-mono px-2 py-0.5 rounded-md"
+                style={{
+                  background: 'hsla(225, 28%, 8%, 0.6)',
+                  border: '1px solid hsla(225, 22%, 14%, 0.6)',
+                }}>
                 13 Yantras
               </span>
             </div>
 
-            {/* Instrument selection buttons */}
+            {/* Instrument selection cards with 3D tilt */}
             <div className="grid grid-cols-2 gap-2">
               {YANTRAS.map((yantra) => {
                 const isSelected = selectedYantra === yantra.id;
                 return (
-                  <button
-                    key={yantra.id}
-                    type="button"
-                    id={`btn-yantra-${yantra.id}`}
-                    aria-pressed={isSelected}
-                    onClick={(e) => handleSelectYantra(yantra.id, e)}
-                    className={cn(
-                      "relative flex flex-col items-center justify-center rounded-xl p-2.5 h-[84px] text-center cursor-pointer",
-                      "transition-all duration-200 select-none group border backdrop-blur-sm",
-                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-                    )}
-                    style={{
-                      background: isSelected
-                        ? 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.20), hsla(43, 100%, 52%, 0.12))'
-                        : 'hsla(220, 28%, 8%, 0.7)',
-                      borderColor: isSelected
-                        ? 'hsla(43, 100%, 52%, 0.55)'
-                        : 'hsla(220, 25%, 14%, 0.9)',
-                      boxShadow: isSelected
-                        ? '0 0 0 1px hsla(43, 100%, 52%, 0.35), 0 0 18px hsla(43, 100%, 52%, 0.22)'
-                        : 'none',
-                    }}
-                  >
-                    <div className="flex flex-col items-center gap-1.5 w-full">
-                      <yantra.Icon
-                        className="h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
-                        style={{
-                          color: isSelected
-                            ? 'hsl(43, 100%, 55%)'
-                            : 'hsl(24, 60%, 50%)',
-                          filter: isSelected
-                            ? 'drop-shadow(0 0 6px hsla(43, 100%, 52%, 0.5))'
-                            : 'none'
-                        }}
-                      />
-                      <span
-                        className="text-[11px] font-medium tracking-wide leading-tight line-clamp-2"
-                        style={{
-                          color: isSelected ? 'hsl(38, 25%, 95%)' : 'hsl(38, 15%, 62%)'
-                        }}
-                      >
-                        {yantra.name}
-                      </span>
-                    </div>
-                  </button>
+                  <div key={yantra.id} className="instrument-card">
+                    <button
+                      type="button"
+                      id={`btn-yantra-${yantra.id}`}
+                      aria-pressed={isSelected}
+                      onClick={(e) => handleSelectYantra(yantra.id, e)}
+                      className={cn(
+                        "instrument-card-inner relative flex flex-col items-center justify-center rounded-xl p-3 h-[88px] text-center cursor-pointer w-full",
+                        "select-none group border backdrop-blur-sm",
+                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                      )}
+                      style={{
+                        background: isSelected
+                          ? 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.14), hsla(43, 100%, 52%, 0.08))'
+                          : 'hsla(225, 35%, 6%, 0.7)',
+                        borderColor: isSelected
+                          ? 'hsla(43, 100%, 52%, 0.45)'
+                          : 'hsla(225, 22%, 14%, 0.6)',
+                        boxShadow: isSelected
+                          ? '0 0 0 1px hsla(43, 100%, 52%, 0.3), 0 0 20px hsla(43, 100%, 52%, 0.15), inset 0 1px 0 hsla(255, 100%, 100%, 0.06)'
+                          : 'none',
+                      }}
+                    >
+                      {/* Active glow indicator */}
+                      {isSelected && (
+                        <div className="absolute inset-0 rounded-xl pointer-events-none animate-glow-breathe"
+                          style={{ opacity: 0.5 }} />
+                      )}
+                      <div className="flex flex-col items-center gap-2 w-full relative z-10">
+                        <yantra.Icon
+                          className="h-5 w-5 flex-shrink-0 transition-all duration-300 group-hover:scale-115"
+                          style={{
+                            color: isSelected
+                              ? 'hsl(43, 100%, 58%)'
+                              : 'hsl(24, 60%, 48%)',
+                            filter: isSelected
+                              ? 'drop-shadow(0 0 8px hsla(43, 100%, 52%, 0.5))'
+                              : 'none',
+                            transition: 'color 0.3s, filter 0.3s, transform 0.3s',
+                          }}
+                        />
+                        <span
+                          className="text-[11px] font-medium tracking-wide leading-tight line-clamp-2 transition-colors duration-300"
+                          style={{
+                            color: isSelected ? 'hsl(38, 25%, 95%)' : 'hsl(38, 15%, 58%)'
+                          }}
+                        >
+                          {yantra.name}
+                        </span>
+                      </div>
+                    </button>
+                  </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Sticky action bar: guaranteed visibility, never pushed out of sight */}
-          <div className="pt-2 sticky bottom-0 z-10 bg-gradient-to-t from-[#070c18] via-[#070c18]/95 to-transparent pb-1">
+          {/* Sticky action bar */}
+          <div className="pt-2 sticky bottom-0 z-10 pb-1"
+            style={{
+              background: 'linear-gradient(to top, hsl(225, 47%, 3%) 60%, transparent)',
+            }}>
             <SubmitButton isPending={isPending} />
           </div>
         </form>
