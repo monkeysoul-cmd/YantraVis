@@ -5,7 +5,7 @@ import YantraViewer from "./yantra-viewer";
 import type { Yantra } from "@/lib/yantras";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Sparkles, View } from "lucide-react";
+import { Eye, View } from "lucide-react";
 
 type ArModalProps = {
   isOpen: boolean;
@@ -50,7 +50,7 @@ export default function ArModal({ isOpen, onClose, yantraId }: ArModalProps) {
         >
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-accent" />
+              <Eye className="h-4 w-4 text-accent" />
               <DialogTitle className="font-headline text-lg text-gradient-gold">
                 Augmented Reality Perspective
               </DialogTitle>

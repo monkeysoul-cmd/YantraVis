@@ -10,7 +10,7 @@ import { generateParametricYantraData } from '@/lib/yantra-calculator';
 import AppHeader from '@/components/app-header';
 import YantraForm from '@/components/yantra-form';
 import YantraDetails from '@/components/yantra-details';
-import { Compass, Telescope, Star, Sun, Sparkles, Orbit, Layers, Award } from 'lucide-react';
+import { Compass, Telescope, Star, Sun, Orbit, Layers, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -110,7 +110,7 @@ function WelcomeState() {
 
         <div className="space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold tracking-wider text-accent surface-glass border border-accent/25 uppercase">
-            <Sparkles className="h-3.5 w-3.5" />
+            <Orbit className="h-3.5 w-3.5 text-accent" />
             Parametric Observatory Engine
           </div>
           <h2 className="font-headline text-3xl sm:text-4xl font-bold tracking-tight text-gradient-gold">

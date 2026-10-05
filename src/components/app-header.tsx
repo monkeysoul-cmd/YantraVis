@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Compass, Landmark, Sparkles, ExternalLink, Menu, Layers } from 'lucide-react';
+import { Telescope, Star, Compass, Landmark, BookOpen, ExternalLink, Menu, Layers } from 'lucide-react';
 import { YANTRAS } from '@/lib/yantras';
 import {
   Dialog,
@@ -22,109 +22,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-// Custom SVG Logo — Stylized astrolabe/yantra mark
-function YantraLogo({ className = '' }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <linearGradient id="logo-grad-gold" x1="0" y1="0" x2="48" y2="48">
-          <stop offset="0%" stopColor="hsl(38, 100%, 78%)" />
-          <stop offset="50%" stopColor="hsl(24, 95%, 62%)" />
-          <stop offset="100%" stopColor="hsl(43, 100%, 55%)" />
-        </linearGradient>
-        <linearGradient id="logo-grad-copper" x1="0" y1="48" x2="48" y2="0">
-          <stop offset="0%" stopColor="hsl(18, 85%, 52%)" />
-          <stop offset="100%" stopColor="hsl(38, 100%, 70%)" />
-        </linearGradient>
-        <radialGradient id="logo-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="hsla(43, 100%, 65%, 0.3)" />
-          <stop offset="100%" stopColor="hsla(43, 100%, 65%, 0)" />
-        </radialGradient>
-        <filter id="logo-blur">
-          <feGaussianBlur stdDeviation="2" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-      {/* Ambient glow */}
-      <circle cx="24" cy="24" r="22" fill="url(#logo-glow)" />
-      {/* Outer celestial ring */}
-      <circle cx="24" cy="24" r="21" stroke="url(#logo-grad-gold)" strokeWidth="1.5" opacity="0.6" className="animate-spin-slow" style={{ transformOrigin: '24px 24px' }} />
-      {/* Middle ring with tick marks */}
-      <circle cx="24" cy="24" r="16" stroke="url(#logo-grad-gold)" strokeWidth="1" opacity="0.4" />
-      {/* Cardinal tick marks on outer ring */}
-      {[0, 90, 180, 270].map((deg) => (
-        <line
-          key={`major-${deg}`}
-          x1="24"
-          y1="3"
-          x2="24"
-          y2="7"
-          stroke="url(#logo-grad-gold)"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          transform={`rotate(${deg} 24 24)`}
-          opacity="0.8"
-        />
-      ))}
-      {/* Minor tick marks */}
-      {[45, 135, 225, 315].map((deg) => (
-        <line
-          key={`minor-${deg}`}
-          x1="24"
-          y1="4"
-          x2="24"
-          y2="6.5"
-          stroke="url(#logo-grad-gold)"
-          strokeWidth="0.8"
-          strokeLinecap="round"
-          transform={`rotate(${deg} 24 24)`}
-          opacity="0.4"
-        />
-      ))}
-      {/* Gnomon triangle (Samrat Yantra inspired) */}
-      <path
-        d="M24 8L18 32L30 32Z"
-        stroke="url(#logo-grad-copper)"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-        fill="hsla(24, 85%, 55%, 0.08)"
-        filter="url(#logo-blur)"
-      />
-      {/* Quadrant arcs */}
-      <path
-        d="M16 28 A 10 10 0 0 1 24 18"
-        stroke="url(#logo-grad-gold)"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.7"
-      />
-      <path
-        d="M32 28 A 10 10 0 0 0 24 18"
-        stroke="url(#logo-grad-gold)"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.7"
-      />
-      {/* Center celestial point */}
-      <circle cx="24" cy="22" r="1.5" fill="url(#logo-grad-gold)" opacity="0.9" />
-      {/* North indicator — small star */}
-      <circle cx="24" cy="5" r="1" fill="hsl(43, 100%, 65%)" opacity="0.9" />
-      {/* Inner decorative circle */}
-      <circle cx="24" cy="24" r="11" stroke="url(#logo-grad-gold)" strokeWidth="0.5" opacity="0.25"
-        strokeDasharray="2 3" className="animate-counter-spin" style={{ transformOrigin: '24px 24px', animationDuration: '30s' }} />
-    </svg>
-  );
-}
+
 
 const OBSERVATORIES = [
   {
@@ -219,16 +117,22 @@ export default function AppHeader() {
           
           {/* ─── Logo & Title ─── */}
           <div className="flex items-center gap-3 shrink-0 group cursor-default">
-            {/* Custom SVG Logo with glow */}
-            <div className="relative w-10 h-10 flex-shrink-0">
-              <YantraLogo className="w-10 h-10 relative z-10" />
-              {/* Logo ambient glow */}
-              <div className="absolute inset-0 rounded-full opacity-40 group-hover:opacity-70 transition-opacity duration-700"
+            <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
+              {/* Outer Orbit ring */}
+              <div className="absolute inset-0 rounded-full border border-primary/30 animate-spin-slow pointer-events-none" />
+              {/* Inner Orbit ring */}
+              <div className="absolute inset-1 rounded-full border border-accent/25 animate-counter-spin pointer-events-none" />
+              {/* Center Icon */}
+              <div
+                className="relative w-7 h-7 flex items-center justify-center rounded-lg shadow-lg"
                 style={{
-                  background: 'radial-gradient(circle, hsla(43, 100%, 55%, 0.25) 0%, transparent 70%)',
-                  filter: 'blur(6px)',
+                  background: 'linear-gradient(135deg, hsla(24, 90%, 50%, 0.3), hsla(43, 100%, 52%, 0.22))',
+                  border: '1px solid hsla(43, 100%, 52%, 0.45)',
+                  boxShadow: '0 0 16px hsla(24, 90%, 55%, 0.3), inset 0 1px 0 hsla(255, 100%, 100%, 0.2)',
                 }}
-              />
+              >
+                <Telescope className="h-4 w-4" style={{ color: 'hsl(38, 100%, 65%)' }} />
+              </div>
             </div>
 
             <div className="flex flex-col justify-center">
@@ -244,8 +148,7 @@ export default function AppHeader() {
               >
                 YantraVis
               </span>
-              <span className="text-[9px] sm:text-[10px] font-body font-semibold tracking-[0.22em] uppercase leading-none mt-1"
-                style={{ color: 'hsla(38, 60%, 75%, 0.6)' }}>
+              <span className="text-[9px] sm:text-[10px] font-body font-semibold tracking-[0.22em] uppercase text-amber-200/70 leading-none mt-1">
                 Observational Astronomy
               </span>
             </div>
@@ -479,7 +382,7 @@ export default function AppHeader() {
                     e.currentTarget.style.borderColor = 'transparent';
                   }}
                 >
-                  <Sparkles className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 58%)' }} />
+                  <BookOpen className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 58%)' }} />
                   <span>Heritage & Math</span>
                 </button>
               </DialogTrigger>
@@ -498,7 +401,7 @@ export default function AppHeader() {
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text',
                     }}>
-                    <Sparkles className="h-5 w-5" style={{ color: 'hsl(43, 100%, 58%)' }} />
+                    <BookOpen className="h-5 w-5" style={{ color: 'hsl(43, 100%, 58%)' }} />
                     Celestial Mathematics of Yantras
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground mt-1">
@@ -617,7 +520,7 @@ export default function AppHeader() {
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
                       }}>
-                      <YantraLogo className="w-6 h-6" />
+                      <Telescope className="h-4 w-4 text-amber-400" />
                       YantraVis
                     </SheetTitle>
                     <SheetDescription className="text-xs text-muted-foreground">

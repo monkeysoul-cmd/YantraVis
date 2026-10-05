@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import YantraViewer from "./yantra-viewer";
 import type { Yantra } from "@/lib/yantras";
-import { Sun, Moon, Compass, Maximize2, X, Sparkles, Eye } from "lucide-react";
+import { Sun, Moon, Compass, Maximize2, X, Eye } from "lucide-react";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
@@ -134,7 +134,7 @@ export default function FullScreenModal({
           </div>
           
           <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
-            <Sparkles className="h-3.5 w-3.5 text-accent" />
+            <Eye className="h-3.5 w-3.5 text-accent" />
             <span>Interactive Real-time WebGL</span>
           </div>
         </div>

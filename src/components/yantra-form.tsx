@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { YANTRAS } from '@/lib/yantras';
-import { Globe, Loader2, MapPin, Navigation, Sparkles } from 'lucide-react';
+import { Globe, Loader2, MapPin, Navigation, Compass } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 
@@ -310,7 +310,7 @@ export default function YantraForm({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 58%)' }} />
+                <Compass className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 58%)' }} />
                 <span className="font-headline text-sm tracking-wider" style={{ color: 'hsla(38, 25%, 88%, 0.85)' }}>Select Instrument</span>
               </div>
               <span className="text-[10px] text-muted-foreground font-mono px-2 py-0.5 rounded-md"
