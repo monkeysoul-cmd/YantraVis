@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 
 const initialState: ActionState = { data: null, error: null };
 
-// Decorative ambient background with celestial sacred geometry
+// Ambient background graphics
 function MandalaBg() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
@@ -63,7 +63,7 @@ function MandalaBg() {
   );
 }
 
-// High-end loading overlay with spinning astrolabe rings
+// Fullscreen loading overlay
 function LoadingOverlay() {
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in duration-200">
@@ -92,12 +92,12 @@ function LoadingOverlay() {
   );
 }
 
-// Museum showcase empty state
+// Initial empty state
 function WelcomeState() {
   return (
     <div className="flex-1 flex items-center justify-center min-h-[60vh]">
       <div className="text-center max-w-lg px-4 space-y-6 animate-rise-fade">
-        {/* Decorative celestial showcase icon */}
+        {/* Hero icon */}
         <div className="relative inline-flex items-center justify-center">
           <div className="absolute w-32 h-32 rounded-full border border-primary/20 animate-spin-slow" style={{ animationDuration: '40s' }} />
           <div className="absolute w-24 h-24 rounded-full border border-accent/20 animate-counter-spin" style={{ animationDuration: '30s' }} />

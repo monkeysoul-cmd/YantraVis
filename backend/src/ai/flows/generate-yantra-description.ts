@@ -1,9 +1,5 @@
 'use server';
-/**
- * @fileOverview A yantra description AI agent.
- *
- * - generateYantraDescription - A function that handles the yantra description generation process.
- */
+
 
 import {ai} from '../genkit';
 import {

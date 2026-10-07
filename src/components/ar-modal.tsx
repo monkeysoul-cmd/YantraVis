@@ -28,7 +28,6 @@ export default function ArModal({ isOpen, onClose, yantraId }: ArModalProps) {
               alt="Outdoor site for AR preview" 
               fill
               className="object-cover opacity-50"
-              data-ai-hint={bgImage.imageHint}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 50vw"
             />
           )}
@@ -36,7 +35,6 @@ export default function ArModal({ isOpen, onClose, yantraId }: ArModalProps) {
             <YantraViewer yantraId={yantraId} isArMode={true} />
           </div>
           
-          {/* AR overlay pill */}
           <div 
             className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium surface-glass border border-accent/30 shadow-lg text-accent"
           >

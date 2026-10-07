@@ -104,11 +104,10 @@ app.post(['/api/yantra', '/yantra'], async (req: express.Request, res: express.R
         return res.status(400).json({ data: null, error: 'Invalid Yantra selected' });
     }
 
-    // Generate accurate parametric data for this location
+    // Local calculation fallback
     const fallbackData = preGeneratedData || generateParametricYantraData(yantra, latitude, longitude);
     const parametricDimensions = fallbackData.dimensions || calculateParametricDimensions(yantra, latitude, longitude);
 
-    // If Google AI API key is available, attempt AI generation with graceful fallback and strict timeout
     if (hasAiKey) {
       try {
         let timerId: ReturnType<typeof setTimeout> | undefined;
@@ -135,11 +134,10 @@ app.post(['/api/yantra', '/yantra'], async (req: express.Request, res: express.R
 
         return res.json({ data: yantraData, error: null });
       } catch (aiError) {
-        console.warn('Genkit AI flow unavailable or timed out, using parametric astronomical model:', aiError);
+        console.warn('AI flow unavailable or timed out, using fallback:', aiError);
       }
     }
 
-    // Return the high-accuracy parametric astronomical data
     return res.json({ data: fallbackData, error: null });
   } catch (error) {
     console.error('Error generating yantra data:', error);
@@ -147,18 +145,16 @@ app.post(['/api/yantra', '/yantra'], async (req: express.Request, res: express.R
   }
 });
 
-// Generic 404 handler for API routes
 app.use((_req: express.Request, res: express.Response) => {
   res.status(404).json({ data: null, error: 'Endpoint not found' });
 });
 
-// Global unhandled error middleware
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Unhandled server error:', err);
   res.status(500).json({ data: null, error: 'Internal server error occurred.' });
 });
 
-// Start HTTP server only if executed as standalone process (not on Vercel serverless)
+// Standalone runner
 if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
   app.listen(port, () => {
     console.log(`Backend server listening on port ${port}`);

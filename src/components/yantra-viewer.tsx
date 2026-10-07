@@ -17,7 +17,7 @@ export type YantraViewerRef = {
   exportSTL: () => Blob | null;
 };
 
-// ─── Realistic Material Palette ───────────────────────────────────────────────
+// Material definitions
 
 function createSandstoneMaterial() {
   // Jaipur pink sandstone — warm coral-terracotta with realistic weathering
@@ -81,7 +81,7 @@ function createDarkStoneMaterial() {
   });
 }
 
-// ─── HDR Environment Map Generator ──────────────────────────────────────────
+// Environment map generator
 
 function createEnvironmentMap(renderer: THREE.WebGLRenderer): THREE.Texture {
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -118,7 +118,7 @@ function createEnvironmentMap(renderer: THREE.WebGLRenderer): THREE.Texture {
   return envMap;
 }
 
-// ─── Floating Dust Particles ────────────────────────────────────────────────
+// Ambient dust particle system
 
 function createDustParticles(scene: THREE.Scene): THREE.Points {
   const particleCount = 80;
@@ -177,7 +177,7 @@ function updateDustParticles(points: THREE.Points, elapsed: number) {
   points.geometry.attributes.position.needsUpdate = true;
 }
 
-// ─── Ground Platform ──────────────────────────────────────────────────────────
+// Ground platform and orientation markers
 
 function createGround(scene: THREE.Scene, groundY = 0) {
   // Platform base — flush with ground plane
@@ -237,7 +237,7 @@ function createGround(scene: THREE.Scene, groundY = 0) {
   }
 }
 
-// ─── Instrument Builders ──────────────────────────────────────────────────────
+// Parametric instrument builders
 
 function buildSamrat(latRad: number): THREE.Group {
   const group = new THREE.Group();
@@ -1127,7 +1127,7 @@ function buildDefault(): THREE.Group {
   return group;
 }
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// Main 3D viewport component
 
 const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
   ({ yantraId, latitude = 26.9124, isArMode = false, animateShadow = false }, ref) => {
@@ -1203,7 +1203,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.30;
 
-      // ─── Lighting — Museum-grade illumination ─────────────────────────────────
+      // Scene lighting
 
       // Sky ambient — warm golden sky
       const hemisphereLight = new THREE.HemisphereLight(
@@ -1251,7 +1251,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
         dustParticles = createDustParticles(scene);
       }
 
-      // ─── Build Instrument ───────────────────────────────────────────────────
+      // Build requested instrument geometry
 
       const safeLat = typeof latitude === 'number' && !isNaN(latitude) ? latitude : 26.9124;
       const latRad = (Math.max(5, Math.min(85, Math.abs(safeLat))) * Math.PI) / 180;
@@ -1284,7 +1284,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       scene.add(object);
       objectRef.current = object;
 
-      // ─── Ground Platform & Auto-Centering ───────────────────────────────────
+      // Auto-center geometry and position on ground plane
 
       // Auto-align object: center in X & Z, and rest flush on ground plane at y = 0
       const initialBox = new THREE.Box3().setFromObject(object);
@@ -1311,7 +1311,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       camera.lookAt(center);
       controls.target.copy(center);
 
-      // ─── Animation ──────────────────────────────────────────────────────────
+      // Animation loop
 
       const clock = new THREE.Clock();
       let animationFrameId: number;
@@ -1363,7 +1363,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       };
       animate();
 
-      // ─── Resize handler ──────────────────────────────────────────────────────
+      // Handle resize
 
       // Debounced resize handler for performance
       let resizeTimeout: ReturnType<typeof setTimeout>;
@@ -1383,7 +1383,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       const resizeObserver = new ResizeObserver(() => handleResize());
       resizeObserver.observe(currentMount);
 
-      // ─── Cleanup ─────────────────────────────────────────────────────────────
+      // Resource cleanup
 
       return () => {
         cancelAnimationFrame(animationFrameId);

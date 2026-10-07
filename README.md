@@ -25,17 +25,27 @@
 
 ---
 
+## 🖥️ Observatory Dashboard
+
+<p align="center">
+  <img src="docs/images/dashboard.png" alt="YantraVis Interactive 3D Astronomical Observatory Dashboard" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</p>
+
+*Figure 1: YantraVis interactive dashboard featuring the 3D parametric Samrat Yantra, cardinal True North orientation markers, solar shadow simulation, real-time astronomical parameters, and digital fabrication exports.*
+
+---
+
 ## 🎯 The Problem
-Historically, there has been a lack of unified digital repositories for ancient astronomical instruments (*Yantras*), leading to the loss of ancient observational knowledge, low awareness, and educational gaps. Without modern computational tools, recalculating the complex geographic alignment, scale, and accuracy for specific locations across India remains difficult—leaving ancient yantras preserved only as static monuments rather than reproducible astronomical instruments.
+Historically, there has been a lack of unified digital repositories for ancient astronomical instruments (*Yantras*), leading to the erosion of observational astronomy knowledge and educational gaps. Without modern computational tools, recalculating the geographic alignment, scale, and accuracy of these instruments for specific locations across India remains challenging—leaving ancient yantras preserved merely as static monuments rather than reproducible observational apparatus.
 
 ## 💡 Our Solution: YantraVis
-**YantraVis** is a full-stack astronomical modeling and heritage preservation platform. For any latitude and longitude across India (and worldwide), it calculates parametric construction dimensions for 13 ancient instruments (*Samrat, Rama, Jai-Prakash, Rasivalaya, Digamsa, Bhitti, etc.*), generates real-time 3D models with solar shadow simulation, provides precision CAD/STL exports for digital fabrication, and integrates generative AI for structural and accuracy analysis.
+**YantraVis** is a full-stack astronomical modeling and heritage preservation platform. For any latitude and longitude across India and worldwide, it calculates parametric construction dimensions for **13 historical instruments** (*Samrat, Rama, Jai-Prakash, Rasivalaya, Digamsa, Bhitti, Golayantra, etc.*), generates real-time 3D models with solar shadow simulation, provides precision CAD/STL exports for digital fabrication, and integrates generative AI for structural feasibility and material analysis.
 
 - **Parametric Construction Dimensions**: Mathematically tailored dimensions derived from true geographic coordinates.
 - **Interactive 3D Simulation**: Real-time WebGL rendering with solar position algorithms and dynamic shadow raycasting.
 - **CAD & 3D Fabrication Export**: Native AutoCAD ASCII DXF layered export and STL 3D printing mesh generation.
 - **Orientation & Calibration Guide**: Precise true north alignment, magnetic declination offset, and IST solar noon correction.
-- **AI-Powered Analysis**: Bill of Materials (BOM), cost estimation, material recommendations, and angular readout precision.
+- **Dual Engine Architecture**: Instant client-side computation with optional Google Genkit AI backend for contextual insights and Bill of Materials.
 
 ---
 
@@ -46,7 +56,7 @@ The following diagram illustrates the multi-tier architecture of YantraVis, deta
 ```mermaid
 graph TB
     subgraph Client ["Client Application (Next.js 14 App Router)"]
-        UI["UI Layer<br/>(TailwindCSS + Celestial Dark Theme)"]
+        UI["UI Layer<br/>(TailwindCSS + Celestial Theme)"]
         Form["Parameter Input<br/>(Latitude, Longitude, Presets, Sliders)"]
         Canvas["Interactive 3D Canvas<br/>(Three.js & OrbitControls)"]
         ARView["Augmented Reality View<br/>(WebXR / Camera Overlay)"]
@@ -55,8 +65,8 @@ graph TB
     subgraph CoreEngine ["Core Computation & Geometry Engine (Client-side)"]
         Calc["Parametric Calculator<br/>(yantra-calculator.ts)"]
         Astro["Solar Ephemeris Engine<br/>(Solar Noon, Declination, Local Hour Angle)"]
-        Declination["Magnetic Declination<br/>(Empirical Indian Subcontinent Model)"]
-        ShadowEngine["Dynamic Shadow Engine<br/>(Sun Vector & Real-time Raycasting)"]
+        Declination["Magnetic Declination<br/>(Empirical Subcontinent Model)"]
+        ShadowEngine["Dynamic Shadow Engine<br/>(Solar Vector & Real-time Raycasting)"]
     end
 
     subgraph CADExport ["CAD & Digital Fabrication Pipeline"]
@@ -65,7 +75,7 @@ graph TB
     end
 
     subgraph AIService ["AI Microservice (Node.js & Genkit)"]
-        Server["Express API Server<br/>(Port 3001)"]
+        Server["Express API Server<br/>(Port 4000)"]
         Genkit["Google Genkit Framework"]
         Gemini["Google Gemini 2.0 / 1.5 Flash"]
         Flows["AI Analysis Flows<br/>(BOM, Accuracy, Structural Materials)"]
@@ -99,7 +109,7 @@ sequenceDiagram
     participant UI as Next.js Web Interface
     participant Calc as Parametric Math Engine
     participant Three as Three.js 3D Viewer
-    participant AI as Genkit AI Backend
+    participant AI as Genkit AI Backend (Port 4000)
     participant CAD as DXF / STL Exporter
 
     User->>UI: Selects Yantra (e.g., Samrat Yantra) & Enters (Lat, Lon)
@@ -112,15 +122,15 @@ sequenceDiagram
     Three-->>UI: Render Scene with Dynamic Solar Shadow Tracing
     
     opt Generative AI Analysis
-        User->>UI: Click "Generate AI Analysis"
-        UI->>AI: POST /api/yantra-analysis (yantraId, dimensions, location)
-        AI-->>UI: Stream BOM, Construction Materials & Accuracy Report
+        User->>UI: Request Model Analysis
+        UI->>AI: POST /api/yantra (yantraId, latitude, longitude)
+        AI-->>UI: Return BOM, Construction Materials, Precision & Alignment Notes
     end
 
     opt CAD & 3D Fabrication Export
         User->>UI: Click "Export CAD (.DXF)"
         UI->>CAD: generateDxfContent(yantraData)
-        CAD-->>User: Trigger download of layered .DXF file
+        CAD-->>User: Trigger download of layered .DXF file (AC1009)
         User->>UI: Click "Export 3D Model (.STL)"
         UI->>CAD: STLExporter.parse(scene)
         CAD-->>User: Trigger download of 3D printable .STL file
@@ -129,9 +139,31 @@ sequenceDiagram
 
 ---
 
+## 📐 Supported Astronomical Instruments (13 Yantras)
+
+YantraVis supports **13 ancient observational instruments**, classified across their primary astronomical measurement functions:
+
+| Instrument | Sanskrit Name | Classification | Primary Astronomical Measurement |
+| :--- | :--- | :--- | :--- |
+| **Samrat Yantra** | सम्राट यन्त्र | Equinoctial Sundial | Local solar time (up to 2-second accuracy), hour angle, declination |
+| **Rama Yantra** | राम यन्त्र | Cylindrical Alt-Azimuth | Celestial altitude and azimuth of stars, sun, and planets |
+| **Jai Prakash Yantra** | जय प्रकाश यन्त्र | Hemispherical Bowl | Direct inverted sky mapping, coordinates, constellations, zodiac transits |
+| **Rasivalaya Yantra** | राशिवलय यन्त्र | 12 Zodiac Dials | Direct celestial latitude and longitude as zodiac constellations transit meridian |
+| **Digamsa Yantra** | दिगंश यन्त्र | Concentric Azimuth Rings | Precise azimuth angle of celestial bodies at rising, culmination, and setting |
+| **Dhruva-Protha-Chakra** | ध्रुव-प्रोथ-चक्र | Polar Transit Ring | Alignment with Polaris (Dhruva Tara) and tracking circumpolar transits |
+| **Samrat Combo Yantra** | संयुक्त सम्राट यन्त्र | Composite Observatory | Integrated equinoctial gnomon combined with sighting chakra rings |
+| **Golayantra Chakra** | गोलयन्त्र चक्र | Armillary Sphere | Planetary pathways, ecliptic coordinates, and celestial spheres |
+| **Bhitti Yantra** | भित्ति यन्त्र | Meridian Transit Wall | Solar meridian transit altitude, zenith distance, and local solar noon |
+| **Dakshinottara Bhitti** | दक्षिणोत्तर भित्ति | Double Meridian Wall | Dual-faced meridian observation for solstitial and equinoctial declination |
+| **Nadi Valaya Yantra** | नाडी वलय यन्त्र | Dual Equinoctial Dial | Northern and southern celestial hemisphere timekeeping across seasons |
+| **Palaka Yantra** | फलक यन्त्र | Astronomical Plane Board | Portable sighting and trigonometric plane calculations |
+| **Chaapa Yantra** | चाप यन्त्र | Meridian Declination Arc | Sighting celestial bodies along the local meridian arc |
+
+---
+
 ## ☀️ Solar Ephemeris & Shadow Simulation Engine
 
-The shadow simulation in YantraVis dynamically tracks the position of the sun based on precise spherical astronomy and real-time celestial mechanics:
+The shadow simulation in YantraVis dynamically tracks the position of the sun based on spherical astronomy and real-time celestial mechanics:
 
 ```mermaid
 flowchart TD
@@ -145,51 +177,6 @@ flowchart TD
     G & H --> I["Three.js Directional Light Vector<br/>[x = cos α sin γ, y = sin α, z = cos α cos γ]"]
     I --> J["Dynamic Shadow Map Projection<br/>Shadow cast by Gnomon onto Quadrant Scales"]
     J --> K["Astronomical Readout<br/>Local Solar Time & Celestial Coordinate Mapping"]
-```
-
----
-
-## 📐 Yantra Instrument Classification & Typology
-
-YantraVis supports **13 ancient observational instruments**, classified across their primary astronomical measurement functions:
-
-```mermaid
-graph TD
-    classDef default fill:#1e293b,stroke:#3b82f6,stroke-width:1.5px,color:#f8fafc;
-    classDef category fill:#0f172a,stroke:#8b5cf6,stroke-width:2px,color:#a78bfa;
-    classDef instrument fill:#1e1b4b,stroke:#06b6d4,stroke-width:1.5px,color:#e2e8f0;
-
-    Root["YantraVis Instrument Suite<br/>(13 Historical Instruments)"]:::category
-
-    Cat1["Equinoctial Sundials<br/>(Time & Hour Angle)"]:::category
-    Cat2["Altitude & Azimuth Systems<br/>(Horizon Coordinates)"]:::category
-    Cat3["Hemispherical Celestial Maps<br/>(Inverted Sky Coordinates)"]:::category
-    Cat4["Ecliptic & Zodiac Systems<br/>(Celestial Longitude)"]:::category
-    Cat5["Meridian Transit Walls<br/>(Zenith Distance & Declination)"]:::category
-
-    Root --> Cat1
-    Root --> Cat2
-    Root --> Cat3
-    Root --> Cat4
-    Root --> Cat5
-
-    Cat1 --> Y1["Samrat Yantra<br/>(Supreme Equinoctial Dial)"]:::instrument
-    Cat1 --> Y2["Nadi Valaya Yantra<br/>(Dual Equinoctial Hemispheres)"]:::instrument
-    Cat1 --> Y3["Yantra Samrat Combo<br/>(Sundial + Meridian Ring)"]:::instrument
-
-    Cat2 --> Y4["Rama Yantra<br/>(Slotted Cylindrical Alt-Azimuth)"]:::instrument
-    Cat2 --> Y5["Digamsa Yantra<br/>(Concentric Azimuth Rings)"]:::instrument
-
-    Cat3 --> Y6["Jai Prakash Yantra<br/>(Complementary Hemispherical Bowls)"]:::instrument
-    Cat3 --> Y7["Golayantra Chakra<br/>(Armillary Celestial Sphere)"]:::instrument
-
-    Cat4 --> Y8["Rasivalaya Yantra<br/>(12 Zodiac Ecliptic Instruments)"]:::instrument
-
-    Cat5 --> Y9["Bhitti Yantra<br/>(Meridian Transit Wall)"]:::instrument
-    Cat5 --> Y10["Dakshinottara Bhitti<br/>(Noon Meridian Wall)"]:::instrument
-    Cat5 --> Y11["Chaapa Yantra<br/>(Declination Meridian Arc)"]:::instrument
-    Cat5 --> Y12["Dhruva-Protha-Chakra<br/>(Pole Star Transit Ring)"]:::instrument
-    Cat5 --> Y13["Palaka Yantra<br/>(Astronomical Plane Board)"]:::instrument
 ```
 
 ---
@@ -272,12 +259,12 @@ flowchart LR
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 14 (App Router), React 18, TypeScript, TailwindCSS, Lucide Icons, Shadcn UI
-- **3D & Visualization**: Three.js, OrbitControls, WebGL, STLExporter, Dynamic Directional Lighting & Shadows
-- **Backend**: Node.js, Express, TypeScript
-- **AI Framework**: Google Genkit, Google Gemini 2.0 / 1.5 Flash
-- **CAD & Export**: AutoCAD ASCII DXF (AC1009 universal spec), STL 3D Mesh exporter
-- **Astronomical Math**: Solar Position Algorithm (SPA), Declination, Equation of Time, Magnetic Declination approximations
+- **Frontend**: Next.js 14 (App Router), React 18, TypeScript, TailwindCSS, Lucide Icons, Radix UI
+- **3D & Visualization**: Three.js, OrbitControls, WebGL, STLExporter, Dynamic Directional Lighting & Realistic Shadow Mapping
+- **Backend Service**: Node.js, Express, TypeScript, CORS, Dotenv
+- **AI Integration**: Google Genkit, Google Gemini 2.0 / 1.5 Flash
+- **CAD & Fabrication**: AutoCAD ASCII DXF (AC1009 universal spec), STL 3D Mesh exporter
+- **Mathematical Engines**: Parametric Trigonometry, Solar Ephemeris Algorithms, Magnetic Declination approximations
 
 ---
 
@@ -293,18 +280,19 @@ YantraVis/
 │   │   │   │   └── generate-yantra-description.ts # Historical context & descriptions
 │   │   │   ├── genkit.ts                          # Google Genkit initialization
 │   │   │   └── dev.ts
-│   │   ├── lib/
-│   │   └── server.ts                              # Express API entry point (:3001)
+│   │   ├── lib/                                   # Pre-generated data & calculation helpers
+│   │   └── server.ts                              # Express API entry point (:4000)
 │   ├── package.json
 │   └── tsconfig.json
 ├── src/                            # Next.js frontend application
 │   ├── app/
+│   │   ├── actions.ts              # Server action connecting client to backend/local engine
 │   │   ├── layout.tsx              # Root layout & font configurations
 │   │   ├── page.tsx                # Main YantraVis interactive dashboard
-│   │   └── globals.css             # Theme definitions & celestial styling
+│   │   └── globals.css             # Design tokens & responsive styles
 │   ├── components/
-│   │   ├── app-header.tsx          # Navigation header with preset locations
-│   │   ├── ar-modal.tsx            # WebXR / Camera AR preview modal
+│   │   ├── app-header.tsx          # Navigation header with preset locations & directory
+│   │   ├── ar-modal.tsx            # Camera AR preview modal
 │   │   ├── full-screen-modal.tsx   # Expanded 3D viewport modal
 │   │   ├── icons.tsx               # Custom SVG icons for all 13 Yantras
 │   │   ├── yantra-details.tsx      # Parametric readout, AI analysis, CAD export
@@ -313,9 +301,12 @@ YantraVis/
 │   └── lib/
 │       ├── dxf-exporter.ts         # AutoCAD DXF vector layer generator
 │       ├── yantra-calculator.ts    # Core mathematical formulas & geometry engine
+│       ├── yantra-knowledge.ts     # Curated historical details & architectural data
 │       ├── yantras.ts              # Instrument metadata & registry
 │       └── utils.ts
-├── docs/                           # Architecture docs & screenshots
+├── docs/
+│   └── images/
+│       └── dashboard.png           # High-resolution dashboard screenshot
 ├── package.json
 └── README.md
 ```
@@ -326,8 +317,8 @@ YantraVis/
 
 ### Prerequisites
 - **Node.js** >= 18.x
-- **npm** or **yarn** / **pnpm**
-- **Google Gemini API Key** (for AI features)
+- **npm** (or **pnpm** / **yarn**)
+- **Google Gemini API Key** *(optional, for AI features; local mathematical engine runs with zero keys)*
 
 ### 1. Clone the Repository
 ```bash
@@ -342,16 +333,21 @@ npm run dev
 ```
 The frontend will start at `http://localhost:3000`.
 
-### 3. Backend Setup
-In a separate terminal:
+### 3. Backend Setup (Optional for AI Analysis)
+In a separate terminal window:
 ```bash
 cd backend
 npm install
-# Set your Gemini API key in backend/.env:
+
+# Optionally configure your Gemini API key in backend/.env:
 # GEMINI_API_KEY="your-gemini-api-key"
+# PORT=4000
+
 npm run dev
 ```
-The backend API server will start at `http://localhost:3001`.
+The backend API server will listen on `http://localhost:4000`.
+
+> **Note**: If the backend is not running, YantraVis seamlessly falls back to its built-in client-side parametric calculator without interruption.
 
 ---
 

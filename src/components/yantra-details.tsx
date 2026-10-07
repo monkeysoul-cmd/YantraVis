@@ -171,7 +171,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
     <>
       <div className="space-y-4 animate-rise-fade">
 
-        {/* ── Header Block ── */}
+        {/* Header block */}
         <div className="relative rounded-2xl overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, hsla(225, 42%, 4%, 1), hsla(225, 35%, 7%, 1))',
@@ -268,7 +268,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           </div>
         </div>
 
-        {/* ── 3D Viewer ── */}
+        {/* 3D viewer viewport */}
         <div className="relative rounded-2xl overflow-hidden viewer-frame h-[320px] sm:h-[400px]">
           <YantraViewer
             ref={viewerRef}
@@ -311,7 +311,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           </div>
         </div>
 
-        {/* ── Tab Navigation — Animated pill slider ── */}
+        {/* Tab navigation */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 rounded-xl p-1.5"
           style={{
             background: 'hsla(225, 35%, 5%, 0.7)',
@@ -339,7 +339,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           ))}
         </div>
 
-        {/* ── Tab Content with fade animation ── */}
+        {/* Tab content panel */}
         <div className="rounded-2xl overflow-hidden surface-premium animate-tab-fade" key={activeTab}>
           <div className="p-5 sm:p-6">
 
@@ -507,7 +507,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           </div>
         </div>
 
-        {/* ── Action Buttons — Premium export bar ── */}
+        {/* Actions and export controls */}
         <div className="flex flex-wrap sm:flex-nowrap gap-3 items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

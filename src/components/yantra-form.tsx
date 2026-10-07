@@ -208,7 +208,7 @@ export default function YantraForm({
         <form onSubmit={handleSubmit} method="post" action="#" className="space-y-5">
           <input type="hidden" name="yantra" value={selectedYantra} />
 
-          {/* ─── Geolocation Section ─── */}
+          {/* Geolocation inputs */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 shrink-0" style={{ color: 'hsl(24, 90%, 58%)' }} />
@@ -319,7 +319,7 @@ export default function YantraForm({
               style={{ background: 'linear-gradient(90deg, transparent, hsla(24, 85%, 42%, 0.25), hsla(43, 100%, 52%, 0.15), transparent)' }} />
           </div>
 
-          {/* ─── Instrument Selection ─── */}
+          {/* Instrument selection */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">

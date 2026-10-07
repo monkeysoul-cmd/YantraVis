@@ -88,7 +88,7 @@ export default function AppHeader() {
         boxShadow: '0 4px 30px hsla(0, 0%, 0%, 0.5), 0 1px 0 hsla(24, 90%, 55%, 0.05) inset',
       }}>
 
-      {/* Radiant ambient glow — subtle top light */}
+      {/* Background glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -115,7 +115,7 @@ export default function AppHeader() {
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex h-[60px] items-center justify-between gap-4">
           
-          {/* ─── Logo & Title ─── */}
+          {/* Branding */}
           <div className="flex items-center gap-3 shrink-0 group cursor-default">
             <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
               {/* Outer Orbit ring */}
@@ -154,7 +154,7 @@ export default function AppHeader() {
             </div>
           </div>
 
-          {/* ─── Navigation Links (Desktop) ─── */}
+          {/* Desktop navigation */}
           <nav className="hidden md:flex items-center gap-1">
             
             {/* Instruments Directory Dialog */}
@@ -437,10 +437,10 @@ export default function AppHeader() {
 
           </nav>
 
-          {/* ─── Right Badges & External Link ─── */}
+          {/* Actions and badges */}
           <div className="flex items-center gap-2.5">
             
-            {/* SIH 2025 Badge — with subtle shimmer */}
+            {/* SIH 2025 badge */}
             <div
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold relative overflow-hidden"
               style={{

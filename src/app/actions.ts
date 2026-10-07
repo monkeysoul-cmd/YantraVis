@@ -82,7 +82,7 @@ export async function generateYantra(
       }
     }
 
-    // High-precision parametric astronomical calculation engine
+    // Fallback to local parametric calculations if backend is unavailable
     const calculatedData = generateParametricYantraData(targetYantra, targetLat, targetLon);
     return {
       data: calculatedData,
