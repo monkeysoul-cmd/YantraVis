@@ -112,6 +112,8 @@ function createEnvironmentMap(renderer: THREE.WebGLRenderer): THREE.Texture {
   
   const envMap = pmremGenerator.fromScene(scene, 0.04).texture;
   pmremGenerator.dispose();
+  sunGeo.dispose();
+  sunMat.dispose();
   
   return envMap;
 }
@@ -294,27 +296,32 @@ function buildSamrat(latRad: number): THREE.Group {
   // Eastern & Western quadrant arcs with thickness, symmetrically aligned in Z
   const arcR = Math.max(2.0, gH * 1.0);
   for (const side of [-1, 1]) {
+    const quadrantGroup = new THREE.Group();
+    quadrantGroup.position.set(side * 0.7, 0.75 + gH * 0.42, 0);
+    quadrantGroup.scale.x = side;
+
     // Quadrant arc plate
     const arcGeo = new THREE.CylinderGeometry(arcR, arcR + 0.12, 0.55, 48, 1, true, 0, Math.PI * 0.52);
     arcGeo.rotateX(Math.PI / 2);
     arcGeo.rotateZ(latRad - Math.PI / 2 + 0.05);
     const arcMesh = new THREE.Mesh(arcGeo, marble);
-    arcMesh.position.set(side * 0.7, 0.75 + gH * 0.42, 0);
-    arcMesh.scale.x = side;
     arcMesh.castShadow = true;
     arcMesh.receiveShadow = true;
-    group.add(arcMesh);
+    quadrantGroup.add(arcMesh);
 
-    // Scale markings — small bronze notches
+    // Scale markings — small bronze notches aligned along the rotated quadrant curve
+    const arcRot = latRad - Math.PI / 2 + 0.05;
     for (let t = 0; t <= 8; t++) {
-      const angle = (t / 8) * (Math.PI / 2);
-      const nx = side * (0.7 + Math.cos(angle) * arcR * 0.85);
-      const ny = 0.75 + gH * 0.42 + Math.sin(angle) * arcR * 0.85;
+      const angle = (t / 8) * (Math.PI * 0.52) + arcRot;
+      const nx = Math.cos(angle) * (arcR + 0.06);
+      const ny = Math.sin(angle) * (arcR + 0.06);
       const notchGeo = new THREE.CylinderGeometry(0.018, 0.018, 0.05, 6);
       const notch = new THREE.Mesh(notchGeo, bronze);
-      notch.position.set(nx, ny, 0.3);
-      group.add(notch);
+      notch.position.set(nx, ny, 0.28);
+      quadrantGroup.add(notch);
     }
+
+    group.add(quadrantGroup);
   }
 
   // Structural support walls flanking gnomon
@@ -433,13 +440,13 @@ function buildJaiPrakash(latRad: number): THREE.Group {
   group.add(bowl);
 
   // Decorative celestial latitude rings inside bowl
-  const ringAngles = [0, 23.5, -23.5, 45, -45];
+  const ringAngles = [15, 30, 45, 60, 75];
   ringAngles.forEach((deg) => {
     const rad = THREE.MathUtils.degToRad(deg);
     const rRing = R * Math.cos(rad) * 0.98;
     const yRing = platformH - R * Math.sin(rad);
     const ringGeo = new THREE.TorusGeometry(rRing, 0.018, 8, 64);
-    const ringMesh = new THREE.Mesh(ringGeo, deg === 0 ? bronze : marble);
+    const ringMesh = new THREE.Mesh(ringGeo, deg === 45 ? bronze : marble);
     ringMesh.rotation.x = Math.PI / 2;
     ringMesh.position.y = yRing;
     group.add(ringMesh);
@@ -661,10 +668,9 @@ function buildGolayantra(latRad: number): THREE.Group {
   eclipticRing.castShadow = true;
   sphereGroup.add(eclipticRing);
 
-  // Polar axis rod
+  // Polar axis rod (concentric along sphere's polar axis)
   const poleGeo = new THREE.CylinderGeometry(0.03, 0.03, R * 2 + 0.4, 12);
   const poleRod = new THREE.Mesh(poleGeo, bronze);
-  poleRod.rotation.z = latRad - Math.PI / 2;
   poleRod.castShadow = true;
   sphereGroup.add(poleRod);
 
@@ -672,9 +678,7 @@ function buildGolayantra(latRad: number): THREE.Group {
   const capGeo = new THREE.SphereGeometry(0.08, 12, 6);
   [-1, 1].forEach((dir) => {
     const cap = new THREE.Mesh(capGeo, bronze);
-    const offset = dir * (R + 0.18);
-    const angle = latRad - Math.PI / 2;
-    cap.position.set(-Math.sin(angle) * offset, Math.cos(angle) * offset, 0);
+    cap.position.set(0, dir * (R + 0.18), 0);
     sphereGroup.add(cap);
   });
 
@@ -1397,13 +1401,16 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
               child.material.dispose();
             }
           }
+          if (child instanceof THREE.Line) {
+            child.geometry?.dispose();
+            (child.material as THREE.Material)?.dispose();
+          }
           if (child instanceof THREE.Points) {
             child.geometry?.dispose();
             (child.material as THREE.Material)?.dispose();
           }
         });
         renderer.dispose();
-        renderer.forceContextLoss();
         if (renderer.domElement?.parentNode) {
           renderer.domElement.parentNode.removeChild(renderer.domElement);
         }

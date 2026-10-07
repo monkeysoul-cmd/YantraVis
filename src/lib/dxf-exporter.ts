@@ -46,8 +46,9 @@ export function generateDxfContent(data: YantraData): string {
   lines.push('1', `GEOLOCATION: LAT ${lat.toFixed(4)} DEG N, LON ${lon.toFixed(4)} DEG E`);
 
   // Parametric Dimensions annotations
+  const dims = dimensions || {};
   let textY = 29.0;
-  Object.entries(dimensions).forEach(([key, val]) => {
+  Object.entries(dims).forEach(([key, val]) => {
     lines.push('0', 'TEXT', '8', 'DIMENSIONS');
     lines.push('10', '0.0', '20', textY.toFixed(2), '30', '0.0');
     lines.push('40', '0.8');
@@ -56,8 +57,8 @@ export function generateDxfContent(data: YantraData): string {
   });
 
   // Base Foundation Rectangle
-  const baseW = Number(dimensions['Base Width'] || dimensions['Wall Length'] || dimensions['Cylinder Radius'] || 15);
-  const h = Number(dimensions['Height'] || dimensions['Gnomon Height'] || dimensions['Wall Height'] || 20);
+  const baseW = Number(dims['Base Width'] || dims['Wall Length'] || dims['Cylinder Radius'] || 15);
+  const h = Number(dims['Height'] || dims['Gnomon Height'] || dims['Wall Height'] || 20);
 
   // Foundation ground line
   lines.push('0', 'LINE', '8', 'FOUNDATION');

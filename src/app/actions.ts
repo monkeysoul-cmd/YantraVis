@@ -35,13 +35,27 @@ export async function generateYantra(
       targetYantra = validation.data.yantra;
     }
 
-    // Service-to-service communication via Vercel service binding (BACKEND_URL)
-    // Only attempt external HTTP if BACKEND_URL is explicitly configured, with a fast 400ms timeout
-    if (process.env.BACKEND_URL) {
+    // Check backend connection: NEXT_PUBLIC_BACKEND_URL, BACKEND_URL, or local dev port 4000
+    const backendBase =
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      process.env.BACKEND_URL ||
+      (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:4000' : '');
+
+    let targetUrl: string | null = null;
+    if (backendBase) {
       try {
-        const targetUrl = new URL('/api/yantra', process.env.BACKEND_URL);
+        targetUrl = new URL('/api/yantra', backendBase).toString();
+      } catch {
+        targetUrl = `${backendBase.replace(/\/+$/, '')}/api/yantra`;
+      }
+    } else if (typeof window !== 'undefined' && window.location.origin) {
+      targetUrl = `${window.location.origin}/api/yantra`;
+    }
+
+    if (targetUrl) {
+      try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 400);
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
 
         const response = await fetch(targetUrl, {
           method: 'POST',

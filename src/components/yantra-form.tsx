@@ -125,9 +125,16 @@ export default function YantraForm({
     const handleGlobalSelectYantra = (e: Event) => {
       const customEvent = e as CustomEvent<{ yantraId: string }>;
       if (customEvent.detail?.yantraId) {
-        handleSelectYantra(customEvent.detail.yantraId);
-        const btn = document.getElementById(`btn-yantra-${customEvent.detail.yantraId}`);
+        const newYantraId = customEvent.detail.yantraId;
+        handleSelectYantra(newYantraId);
+        const btn = document.getElementById(`btn-yantra-${newYantraId}`);
         btn?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Automatically generate/recalibrate 3D model for the selected instrument
+        const fd = new FormData();
+        fd.set('yantra', newYantraId);
+        fd.set('latitude', lat);
+        fd.set('longitude', lon);
+        action(fd);
       }
     };
 
@@ -141,6 +148,12 @@ export default function YantraForm({
         if (onCoordinatesChange) {
           onCoordinatesChange(newLat, newLon);
         }
+        // Automatically recalibrate 3D model for the selected observatory coordinates
+        const fd = new FormData();
+        fd.set('yantra', selectedYantra || activeYantraId || 'samrat');
+        fd.set('latitude', newLat.toString());
+        fd.set('longitude', newLon.toString());
+        action(fd);
       }
     };
 
@@ -150,7 +163,7 @@ export default function YantraForm({
       window.removeEventListener('select-yantra', handleGlobalSelectYantra);
       window.removeEventListener('select-location', handleGlobalSelectLocation);
     };
-  }, [onCoordinatesChange]);
+  }, [onCoordinatesChange, lat, lon, selectedYantra, activeYantraId, action]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

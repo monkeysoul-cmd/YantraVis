@@ -8,6 +8,7 @@ export const SAMRAT_JAIPUR_DATA: YantraData = {
     'Base Width': 13,
     Height: 22.11,
     'Gnomon Angle': 26.9124,
+    'Quadrant Radius': 48.85,
     'North Alignment': 0.288,
   },
   analysis: {

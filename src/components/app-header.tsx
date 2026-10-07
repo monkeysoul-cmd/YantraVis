@@ -531,22 +531,42 @@ export default function AppHeader() {
                     <div className="space-y-2">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Directory</p>
                       <div className="space-y-1.5">
-                        <div className="p-3 rounded-xl flex items-center justify-between"
-                          style={{ background: 'hsla(225, 35%, 7%, 0.8)', border: '1px solid hsla(225, 22%, 14%, 0.6)' }}>
-                          <span className="text-xs font-medium" style={{ color: 'hsla(38, 25%, 85%, 0.9)' }}>Instruments</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setInstrumentsOpen(true);
+                          }}
+                          className="w-full p-3 rounded-xl flex items-center justify-between text-left transition-colors cursor-pointer hover:bg-primary/10"
+                          style={{ background: 'hsla(225, 35%, 7%, 0.8)', border: '1px solid hsla(225, 22%, 14%, 0.6)' }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Layers className="h-4 w-4" style={{ color: 'hsl(43, 100%, 58%)' }} />
+                            <span className="text-xs font-medium" style={{ color: 'hsla(38, 25%, 85%, 0.9)' }}>Instruments</span>
+                          </div>
                           <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold"
                             style={{ background: 'hsla(43, 100%, 52%, 0.1)', border: '1px solid hsla(43, 100%, 52%, 0.2)', color: 'hsl(43, 100%, 58%)' }}>
                             13 Models
                           </span>
-                        </div>
-                        <div className="p-3 rounded-xl flex items-center justify-between"
-                          style={{ background: 'hsla(225, 35%, 7%, 0.8)', border: '1px solid hsla(225, 22%, 14%, 0.6)' }}>
-                          <span className="text-xs font-medium" style={{ color: 'hsla(38, 25%, 85%, 0.9)' }}>Observatories</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setObservatoriesOpen(true);
+                          }}
+                          className="w-full p-3 rounded-xl flex items-center justify-between text-left transition-colors cursor-pointer hover:bg-primary/10"
+                          style={{ background: 'hsla(225, 35%, 7%, 0.8)', border: '1px solid hsla(225, 22%, 14%, 0.6)' }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Landmark className="h-4 w-4" style={{ color: 'hsl(43, 100%, 58%)' }} />
+                            <span className="text-xs font-medium" style={{ color: 'hsla(38, 25%, 85%, 0.9)' }}>Observatories</span>
+                          </div>
                           <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold"
                             style={{ background: 'hsla(225, 28%, 14%, 0.6)', border: '1px solid hsla(225, 22%, 18%, 0.8)', color: 'hsla(38, 15%, 60%, 0.8)' }}>
                             5 Sites
                           </span>
-                        </div>
+                        </button>
                       </div>
                     </div>
 
