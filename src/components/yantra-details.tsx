@@ -165,7 +165,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
     toast({ title: 'Specification Exported', description: 'Full metadata, BOM & orientation guidelines downloaded.' });
   };
 
-  const dimEntries = Object.entries(data.dimensions);
+  const dimEntries = Object.entries(data?.dimensions || {});
 
   return (
     <>
@@ -415,7 +415,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {data.analysis.billOfMaterials.map((item, index) => (
+                        {(data.analysis?.billOfMaterials || []).map((item, index) => (
                           <TableRow
                             key={index}
                             className="bom-row transition-colors"
@@ -442,7 +442,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                       <CircleDollarSign className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 58%)' }} />
                       <h4 className="font-headline text-xs tracking-wider" style={{ color: 'hsl(43, 100%, 62%)' }}>Cost Estimate</h4>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{data.analysis.costEstimate}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{data.analysis?.costEstimate || 'N/A'}</p>
                   </div>
                   <div className="p-4 rounded-xl space-y-2"
                     style={{
@@ -453,7 +453,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                       <CheckCircle className="h-3.5 w-3.5" style={{ color: 'hsl(24, 90%, 62%)' }} />
                       <h4 className="font-headline text-xs tracking-wider" style={{ color: 'hsl(24, 90%, 62%)' }}>Astronomical Accuracy</h4>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{data.analysis.accuracy}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{data.analysis?.accuracy || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -470,10 +470,10 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                 </div>
                 <div className="grid grid-cols-1 gap-2.5">
                   {[
-                    { icon: Compass, label: 'True North Meridian Alignment', value: data.analysis.orientation.trueNorthAngle, color: 'hsl(24, 90%, 58%)' },
-                    { icon: MapPin, label: 'Magnetic Declination Correction', value: data.analysis.orientation.magneticDeclination, color: 'hsl(43, 100%, 55%)' },
-                    { icon: HardHat, label: 'Foundation Engineering', value: data.analysis.orientation.foundationNotes, color: 'hsl(180, 65%, 50%)' },
-                    { icon: Scale, label: 'Tolerance & Calibration Guidance', value: data.analysis.orientation.toleranceGuidance, color: 'hsl(145, 60%, 48%)' },
+                    { icon: Compass, label: 'True North Meridian Alignment', value: data.analysis?.orientation?.trueNorthAngle || '', color: 'hsl(24, 90%, 58%)' },
+                    { icon: MapPin, label: 'Magnetic Declination Correction', value: data.analysis?.orientation?.magneticDeclination || '', color: 'hsl(43, 100%, 55%)' },
+                    { icon: HardHat, label: 'Foundation Engineering', value: data.analysis?.orientation?.foundationNotes || '', color: 'hsl(180, 65%, 50%)' },
+                    { icon: Scale, label: 'Tolerance & Calibration Guidance', value: data.analysis?.orientation?.toleranceGuidance || '', color: 'hsl(145, 60%, 48%)' },
                   ].map(({ icon: Icon, label, value, color }) => (
                     <div key={label} className="flex gap-3 p-4 rounded-xl transition-all duration-300 group"
                       style={{

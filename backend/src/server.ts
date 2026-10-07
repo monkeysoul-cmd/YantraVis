@@ -73,10 +73,11 @@ app.post(['/api/yantra', '/yantra'], async (req: express.Request, res: express.R
     
     const { latitude, longitude, yantra } = validatedFields.data;
 
-    // Check for Jaipur defaults
+    const hasAiKey = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY);
     const isJaipurDefaults = latitude === 26.9124 && longitude === 75.7873;
+
+    let preGeneratedData: YantraData | undefined;
     if (isJaipurDefaults) {
-      let preGeneratedData: YantraData | undefined;
       switch(yantra) {
           case 'samrat': preGeneratedData = SAMRAT_JAIPUR_DATA; break;
           case 'rama': preGeneratedData = RAMA_JAIPUR_DATA; break;
@@ -92,8 +93,9 @@ app.post(['/api/yantra', '/yantra'], async (req: express.Request, res: express.R
           case 'palaka': preGeneratedData = PALAKA_JAIPUR_DATA; break;
           case 'chaapa': preGeneratedData = CHAAPA_JAIPUR_DATA; break;
       }
-      if (preGeneratedData) {
-          return res.json({ data: preGeneratedData, error: null });
+      // If no AI key configured, return pre-generated data immediately
+      if (preGeneratedData && !hasAiKey) {
+        return res.json({ data: preGeneratedData, error: null });
       }
     }
 
@@ -103,22 +105,24 @@ app.post(['/api/yantra', '/yantra'], async (req: express.Request, res: express.R
     }
 
     // Generate accurate parametric data for this location
-    const fallbackData = generateParametricYantraData(yantra, latitude, longitude);
-    const parametricDimensions = calculateParametricDimensions(yantra, latitude, longitude);
+    const fallbackData = preGeneratedData || generateParametricYantraData(yantra, latitude, longitude);
+    const parametricDimensions = fallbackData.dimensions || calculateParametricDimensions(yantra, latitude, longitude);
 
     // If Google AI API key is available, attempt AI generation with graceful fallback and strict timeout
-    if (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY) {
+    if (hasAiKey) {
       try {
+        let timerId: ReturnType<typeof setTimeout> | undefined;
         const aiPromise = Promise.all([
           generateYantraDescription({ yantraName: selectedYantra.name }),
           generateYantraAnalysis({ yantraName: selectedYantra.name, dimensions: parametricDimensions, location: { latitude, longitude } })
         ]);
 
-        const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('AI generation timed out')), 4500)
-        );
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          timerId = setTimeout(() => reject(new Error('AI generation timed out')), 5000);
+        });
 
         const [descriptionResult, analysisResult] = await Promise.race([aiPromise, timeoutPromise]);
+        if (timerId) clearTimeout(timerId);
 
         const yantraData: YantraData = {
           yantraId: yantra as any,
@@ -143,6 +147,17 @@ app.post(['/api/yantra', '/yantra'], async (req: express.Request, res: express.R
   }
 });
 
+// Generic 404 handler for API routes
+app.use((_req: express.Request, res: express.Response) => {
+  res.status(404).json({ data: null, error: 'Endpoint not found' });
+});
+
+// Global unhandled error middleware
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Unhandled server error:', err);
+  res.status(500).json({ data: null, error: 'Internal server error occurred.' });
+});
+
 // Start HTTP server only if executed as standalone process (not on Vercel serverless)
 if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
   app.listen(port, () => {
@@ -151,4 +166,3 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
 }
 
 export default app;
-module.exports = app;
