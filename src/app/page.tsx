@@ -193,7 +193,7 @@ export default function Home() {
   // Mobile layout
   if (isMobile) {
     return (
-      <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+      <div className="flex flex-col h-screen bg-black text-foreground overflow-hidden">
         <SolarSystemBackground />
         {isProcessing && <LoadingOverlay />}
         <AppHeader />
@@ -257,7 +257,7 @@ export default function Home() {
 
   // Desktop layout
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex flex-col h-screen bg-black text-foreground overflow-hidden">
       <SolarSystemBackground />
       {isProcessing && <LoadingOverlay />}
       <AppHeader />
