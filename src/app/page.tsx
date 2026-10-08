@@ -17,51 +17,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import SolarSystemBackground from '@/components/solar-system-background';
 
 const initialState: ActionState = { data: null, error: null };
-
-// Ambient background graphics
-function MandalaBg() {
-  return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
-      {/* Background radial glow spots */}
-      <div 
-        className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-20 filter blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, hsla(24, 90%, 55%, 0.35) 0%, transparent 70%)' }}
-      />
-      <div 
-        className="absolute top-1/4 -right-40 w-[500px] h-[500px] rounded-full opacity-25 filter blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, hsla(43, 100%, 52%, 0.25) 0%, transparent 70%)' }}
-      />
-      <div 
-        className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] rounded-full opacity-15 filter blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, hsla(18, 85%, 52%, 0.2) 0%, transparent 70%)' }}
-      />
-
-      {/* Large outer celestial orbital ring */}
-      <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full border border-dashed opacity-[0.035] animate-spin-slow pointer-events-none"
-        style={{ borderColor: 'hsl(43, 100%, 52%)', animationDuration: '120s' }} 
-      />
-      {/* Mid astronomical coordinate ring */}
-      <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[680px] rounded-full border opacity-[0.04] animate-counter-spin pointer-events-none"
-        style={{ borderColor: 'hsl(24, 90%, 55%)', animationDuration: '90s' }} 
-      />
-      {/* Inner sacred geometry ring */}
-      <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full border border-dotted opacity-[0.05] animate-spin-slow pointer-events-none"
-        style={{ borderColor: 'hsl(38, 95%, 62%)', animationDuration: '60s' }} 
-      />
-      
-      {/* Starlight accents */}
-      <div className="absolute top-24 right-28 w-1.5 h-1.5 rounded-full bg-accent/40 shadow-[0_0_10px_hsl(43,100%,65%)] animate-pulse" />
-      <div className="absolute bottom-40 left-24 w-1.5 h-1.5 rounded-full bg-primary/40 shadow-[0_0_10px_hsl(24,90%,65%)] animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/3 right-1/4 w-1 h-1 rounded-full bg-accent/30 shadow-[0_0_6px_hsl(43,100%,70%)]" />
-      <div className="absolute top-2/3 left-1/4 w-1 h-1 rounded-full bg-primary/30 shadow-[0_0_6px_hsl(24,90%,70%)]" />
-    </div>
-  );
-}
 
 // Fullscreen loading overlay
 function LoadingOverlay() {
@@ -236,7 +194,7 @@ export default function Home() {
   if (isMobile) {
     return (
       <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
-        <MandalaBg />
+        <SolarSystemBackground />
         {isProcessing && <LoadingOverlay />}
         <AppHeader />
         <div className="w-full p-3 sm:p-4 flex-1 min-h-0 overflow-hidden flex flex-col relative z-10">
@@ -300,7 +258,7 @@ export default function Home() {
   // Desktop layout
   return (
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
-      <MandalaBg />
+      <SolarSystemBackground />
       {isProcessing && <LoadingOverlay />}
       <AppHeader />
 
