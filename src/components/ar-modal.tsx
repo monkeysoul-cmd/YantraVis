@@ -19,7 +19,7 @@ export default function ArModal({ isOpen, onClose, yantraId }: ArModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-4xl h-[88vh] flex flex-col p-0 gap-0 overflow-hidden border border-primary/20 surface-elevated rounded-2xl shadow-2xl"
+        className="w-[94vw] sm:max-w-4xl h-[88vh] h-[88dvh] flex flex-col p-0 gap-0 overflow-hidden border border-primary/20 surface-elevated rounded-2xl shadow-2xl"
       >
         <div className="flex-grow relative overflow-hidden bg-background">
           {bgImage && (

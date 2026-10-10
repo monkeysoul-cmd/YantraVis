@@ -30,7 +30,7 @@ export default function FullScreenModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-none w-screen h-screen flex flex-col p-0 gap-0 border-0 rounded-none overflow-hidden select-none"
+        className="max-w-none w-screen h-screen h-[100dvh] flex flex-col p-0 gap-0 border-0 rounded-none overflow-hidden select-none"
         style={{ background: 'hsl(225, 47%, 3%)' }}
       >
         {/* Viewer fills full screen */}
@@ -38,12 +38,12 @@ export default function FullScreenModal({
           <YantraViewer yantraId={yantraId} latitude={latitude} animateShadow={animateShadow} />
 
           {/* Floating Top Header HUD */}
-          <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20 pointer-events-none">
+          <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between z-20 pointer-events-none">
             {/* Left Controls */}
-            <div className="flex items-center gap-2.5 pointer-events-auto">
+            <div className="flex items-center gap-2 sm:gap-2.5 pointer-events-auto">
               {/* Shadow toggle capsule */}
               <div 
-                className="flex items-center gap-2.5 px-3.5 py-2 rounded-full surface-glass shadow-lg"
+                className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full surface-glass shadow-lg"
                 style={{
                   border: '1px solid hsla(43, 100%, 52%, 0.25)',
                 }}
@@ -64,14 +64,14 @@ export default function FullScreenModal({
 
               {/* Compass badge */}
               <div 
-                className="h-9 px-3 rounded-full flex items-center gap-2 surface-glass shadow-lg"
+                className="h-8 sm:h-9 px-2.5 sm:px-3 rounded-full flex items-center gap-1.5 sm:gap-2 surface-glass shadow-lg hidden xs:flex"
                 style={{
                   border: '1px solid hsla(24, 90%, 55%, 0.2)',
                 }}
                 title="True Celestial Meridian (North Aligned)"
               >
                 <Compass className="h-4 w-4 text-primary animate-spin-slow" style={{ animationDuration: '40s' }} />
-                <span className="text-[11px] font-semibold text-accent tracking-wider">TRUE N</span>
+                <span className="text-[10px] sm:text-[11px] font-semibold text-accent tracking-wider">TRUE N</span>
               </div>
             </div>
 
@@ -81,7 +81,7 @@ export default function FullScreenModal({
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="h-9 w-9 rounded-full surface-glass hover:bg-destructive/20 hover:text-destructive border border-border/40 hover:border-destructive/40 transition-all cursor-pointer"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-full surface-glass hover:bg-destructive/20 hover:text-destructive border border-border/40 hover:border-destructive/40 transition-all cursor-pointer"
                 aria-label="Exit Fullscreen"
               >
                 <X className="h-4 w-4" />

@@ -269,7 +269,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
         </div>
 
         {/* 3D viewer viewport */}
-        <div className="relative rounded-2xl overflow-hidden viewer-frame h-[320px] sm:h-[400px]">
+        <div className="relative rounded-2xl overflow-hidden viewer-frame h-[290px] xs:h-[350px] sm:h-[400px] md:h-[440px] lg:h-[480px] xl:h-[540px] 2xl:h-[620px]">
           <YantraViewer
             ref={viewerRef}
             yantraId={data.yantraId as import('@/lib/yantras').Yantra['id']}
@@ -301,7 +301,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           </div>
 
           {/* Viewer info label */}
-          <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] text-muted-foreground"
+          <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] text-muted-foreground"
             style={{
               background: 'hsla(225, 40%, 5%, 0.75)',
               backdropFilter: 'blur(12px)',
@@ -312,7 +312,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
         </div>
 
         {/* Tab navigation */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 rounded-xl p-1.5"
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-1.5 rounded-xl p-1 sm:p-1.5"
           style={{
             background: 'hsla(225, 35%, 5%, 0.7)',
             border: '1px solid hsla(225, 22%, 12%, 0.8)',
@@ -321,7 +321,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className="flex items-center justify-center gap-1.5 px-2.5 py-2.5 rounded-lg text-xs font-medium transition-all duration-350 cursor-pointer"
+              className="flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-2 sm:px-2.5 sm:py-2.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-350 cursor-pointer"
               style={{
                 background: activeTab === key
                   ? 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.15), hsla(43, 100%, 52%, 0.10))'
@@ -333,8 +333,8 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                   : 'none',
               }}
             >
-              <Icon className="h-3.5 w-3.5" />
-              <span>{label}</span>
+              <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+              <span className="truncate">{label}</span>
             </button>
           ))}
         </div>
@@ -403,7 +403,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                       Bill of Materials
                     </h3>
                   </div>
-                  <div className="rounded-xl overflow-hidden" style={{ border: '1px solid hsla(225, 22%, 12%, 0.8)' }}>
+                  <div className="rounded-xl overflow-hidden overflow-x-auto" style={{ border: '1px solid hsla(225, 22%, 12%, 0.8)' }}>
                     <Table>
                       <TableHeader>
                         <TableRow style={{
@@ -508,11 +508,11 @@ export default function YantraDetails({ data }: { data: YantraData }) {
         </div>
 
         {/* Actions and export controls */}
-        <div className="flex flex-wrap sm:flex-nowrap gap-3 items-center">
+        <div className="flex flex-col xs:flex-row gap-2.5 sm:gap-3 items-stretch xs:items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                className="flex-1 sm:flex-none gap-2 text-sm font-medium h-11 px-6 btn-premium cursor-pointer"
+                className="w-full xs:w-auto gap-2 text-sm font-medium h-11 px-6 btn-premium cursor-pointer"
                 style={{
                   background: 'linear-gradient(135deg, hsl(24, 85%, 40%), hsl(24, 90%, 50%))',
                   boxShadow: '0 4px 20px hsla(24, 90%, 55%, 0.3)',
@@ -570,7 +570,7 @@ export default function YantraDetails({ data }: { data: YantraData }) {
           <Button
             onClick={() => setIsArModalOpen(true)}
             variant="outline"
-            className="flex-1 sm:flex-none gap-2 text-sm h-11 px-6 transition-all duration-300 cursor-pointer"
+            className="w-full xs:w-auto gap-2 text-sm h-11 px-6 transition-all duration-300 cursor-pointer"
             style={{
               background: 'hsla(225, 35%, 6%, 0.8)',
               border: '1px solid hsla(24, 90%, 55%, 0.2)',
