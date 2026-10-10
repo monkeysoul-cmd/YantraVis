@@ -66,6 +66,7 @@ export default function AppHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [instrumentsOpen, setInstrumentsOpen] = useState(false);
   const [observatoriesOpen, setObservatoriesOpen] = useState(false);
+  const [heritageOpen, setHeritageOpen] = useState(false);
 
   const handleSelectYantra = (id: string) => {
     window.dispatchEvent(new CustomEvent('select-yantra', { detail: { yantraId: id } }));
@@ -112,32 +113,32 @@ export default function AppHeader() {
         }}
       />
 
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex h-[60px] items-center justify-between gap-4">
+      <div className="w-full px-3 sm:px-6 lg:px-8">
+        <div className="flex h-[56px] sm:h-[60px] items-center justify-between gap-2 sm:gap-4">
           
           {/* Branding */}
-          <div className="flex items-center gap-3 shrink-0 group cursor-default">
-            <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 group cursor-default">
+            <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center">
               {/* Outer Orbit ring */}
               <div className="absolute inset-0 rounded-full border border-primary/30 animate-spin-slow pointer-events-none" />
               {/* Inner Orbit ring */}
               <div className="absolute inset-1 rounded-full border border-accent/25 animate-counter-spin pointer-events-none" />
               {/* Center Icon */}
               <div
-                className="relative w-7 h-7 flex items-center justify-center rounded-lg shadow-lg"
+                className="relative w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-lg shadow-lg"
                 style={{
                   background: 'linear-gradient(135deg, hsla(24, 90%, 50%, 0.3), hsla(43, 100%, 52%, 0.22))',
                   border: '1px solid hsla(43, 100%, 52%, 0.45)',
                   boxShadow: '0 0 16px hsla(24, 90%, 55%, 0.3), inset 0 1px 0 hsla(255, 100%, 100%, 0.2)',
                 }}
               >
-                <Telescope className="h-4 w-4" style={{ color: 'hsl(38, 100%, 65%)' }} />
+                <Telescope className="h-3.5 w-3.5 sm:h-4 sm:w-4" style={{ color: 'hsl(38, 100%, 65%)' }} />
               </div>
             </div>
 
             <div className="flex flex-col justify-center">
               <span
-                className="font-headline text-lg sm:text-xl font-bold tracking-wider leading-none"
+                className="font-headline text-base sm:text-xl font-bold tracking-wider leading-none"
                 style={{
                   background: 'linear-gradient(135deg, hsl(38, 100%, 78%), hsl(24, 95%, 65%), hsl(43, 100%, 58%))',
                   WebkitBackgroundClip: 'text',
@@ -148,14 +149,14 @@ export default function AppHeader() {
               >
                 YantraVis
               </span>
-              <span className="text-[9px] sm:text-[10px] font-body font-semibold tracking-[0.22em] uppercase text-amber-200/70 leading-none mt-1">
+              <span className="text-[8px] sm:text-[10px] font-body font-semibold tracking-[0.16em] sm:tracking-[0.22em] uppercase text-amber-200/70 leading-none mt-0.5 sm:mt-1 truncate max-w-[130px] sm:max-w-none">
                 Observational Astronomy
               </span>
             </div>
           </div>
 
           {/* Desktop navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1">
             
             {/* Instruments Directory Dialog */}
             <Dialog open={instrumentsOpen} onOpenChange={setInstrumentsOpen}>
@@ -190,13 +191,13 @@ export default function AppHeader() {
                   </span>
                 </button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[85vh] p-0 flex flex-col border-0"
+              <DialogContent className="w-[94vw] sm:w-full max-w-2xl max-h-[85vh] p-0 flex flex-col border-0"
                 style={{
                   background: 'linear-gradient(135deg, hsl(225, 45%, 4%), hsl(225, 40%, 6%))',
                   border: '1px solid hsla(24, 85%, 42%, 0.2)',
                   boxShadow: '0 25px 80px hsla(0, 0%, 0%, 0.6), 0 0 40px hsla(24, 90%, 55%, 0.08)',
                 }}>
-                <DialogHeader className="p-6 pb-4" style={{ borderBottom: '1px solid hsla(225, 22%, 14%, 0.8)' }}>
+                <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4" style={{ borderBottom: '1px solid hsla(225, 22%, 14%, 0.8)' }}>
                   <DialogTitle className="font-headline text-xl flex items-center gap-2.5"
                     style={{
                       background: 'linear-gradient(135deg, hsl(24, 90%, 65%), hsl(43, 100%, 58%))',
@@ -291,13 +292,13 @@ export default function AppHeader() {
                   </span>
                 </button>
               </DialogTrigger>
-              <DialogContent className="max-w-xl max-h-[85vh] p-0 flex flex-col border-0"
+              <DialogContent className="w-[94vw] sm:w-full max-w-xl max-h-[85vh] p-0 flex flex-col border-0"
                 style={{
                   background: 'linear-gradient(135deg, hsl(225, 45%, 4%), hsl(225, 40%, 6%))',
                   border: '1px solid hsla(24, 85%, 42%, 0.2)',
                   boxShadow: '0 25px 80px hsla(0, 0%, 0%, 0.6), 0 0 40px hsla(24, 90%, 55%, 0.08)',
                 }}>
-                <DialogHeader className="p-6 pb-4" style={{ borderBottom: '1px solid hsla(225, 22%, 14%, 0.8)' }}>
+                <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4" style={{ borderBottom: '1px solid hsla(225, 22%, 14%, 0.8)' }}>
                   <DialogTitle className="font-headline text-xl flex items-center gap-2.5"
                     style={{
                       background: 'linear-gradient(135deg, hsl(24, 90%, 65%), hsl(43, 100%, 58%))',
@@ -362,7 +363,7 @@ export default function AppHeader() {
             </Dialog>
 
             {/* Heritage & Science Dialog */}
-            <Dialog>
+            <Dialog open={heritageOpen} onOpenChange={setHeritageOpen}>
               <DialogTrigger asChild>
                 <button
                   type="button"
@@ -386,15 +387,14 @@ export default function AppHeader() {
                   <span>Heritage & Math</span>
                 </button>
               </DialogTrigger>
-              <DialogContent className="max-w-xl border-0"
+              <DialogContent className="w-[94vw] sm:w-full max-w-xl max-h-[85vh] p-0 flex flex-col border-0"
                 style={{
                   background: 'linear-gradient(135deg, hsl(225, 45%, 4%), hsl(225, 40%, 6%))',
                   border: '1px solid hsla(24, 85%, 42%, 0.2)',
                   boxShadow: '0 25px 80px hsla(0, 0%, 0%, 0.6), 0 0 40px hsla(24, 90%, 55%, 0.08)',
-                  padding: '24px',
                 }}>
-                <DialogHeader className="pb-4" style={{ borderBottom: '1px solid hsla(225, 22%, 14%, 0.8)' }}>
-                  <DialogTitle className="font-headline text-xl flex items-center gap-2.5"
+                <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4" style={{ borderBottom: '1px solid hsla(225, 22%, 14%, 0.8)' }}>
+                  <DialogTitle className="font-headline text-lg sm:text-xl flex items-center gap-2.5"
                     style={{
                       background: 'linear-gradient(135deg, hsl(24, 90%, 65%), hsl(43, 100%, 58%))',
                       WebkitBackgroundClip: 'text',
@@ -408,30 +408,32 @@ export default function AppHeader() {
                     How ancient trigonometric architecture translates celestial motions into precise measurements.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 pt-4 text-xs leading-relaxed text-muted-foreground">
-                  <div className="p-4 rounded-xl"
-                    style={{
-                      background: 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.08), hsla(43, 100%, 52%, 0.05))',
-                      border: '1px solid hsla(24, 90%, 55%, 0.15)',
-                    }}>
-                    <strong className="block font-semibold mb-1.5" style={{ color: 'hsl(38, 100%, 80%)' }}>
-                      True North & Latitude Calibration:
-                    </strong>
-                    <span style={{ color: 'hsla(38, 25%, 80%, 0.8)' }}>
-                      Every Yantra is physically aligned to True Astronomical North. The gnomon triangular angle of the Samrat Yantra is constructed to match the local geographical latitude (Φ) exactly.
-                    </span>
+                <ScrollArea className="flex-1 p-4 sm:p-6 pt-4">
+                  <div className="space-y-4 text-xs leading-relaxed text-muted-foreground pb-4">
+                    <div className="p-4 rounded-xl"
+                      style={{
+                        background: 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.08), hsla(43, 100%, 52%, 0.05))',
+                        border: '1px solid hsla(24, 90%, 55%, 0.15)',
+                      }}>
+                      <strong className="block font-semibold mb-1.5" style={{ color: 'hsl(38, 100%, 80%)' }}>
+                        True North & Latitude Calibration:
+                      </strong>
+                      <span style={{ color: 'hsla(38, 25%, 80%, 0.8)' }}>
+                        Every Yantra is physically aligned to True Astronomical North. The gnomon triangular angle of the Samrat Yantra is constructed to match the local geographical latitude (Φ) exactly.
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      <h5 className="font-headline text-sm font-semibold" style={{ color: 'hsla(38, 25%, 90%, 0.9)' }}>
+                        Core Astronomical Formulas:
+                      </h5>
+                      <ul className="list-disc pl-5 space-y-1.5" style={{ color: 'hsla(38, 25%, 75%, 0.7)' }}>
+                        <li><strong style={{ color: 'hsl(24, 90%, 62%)' }}>Solar Declination (δ):</strong> Calibrated using ecliptic longitude from the vernal equinox.</li>
+                        <li><strong style={{ color: 'hsl(24, 90%, 62%)' }}>Hour Angle (h):</strong> Time offset from local solar noon, measured directly along the quadrant scales.</li>
+                        <li><strong style={{ color: 'hsl(24, 90%, 62%)' }}>Shadow Projection:</strong> Dynamic cast computed via ray-plane intersections in 3D Euclidean space.</li>
+                      </ul>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <h5 className="font-headline text-sm font-semibold" style={{ color: 'hsla(38, 25%, 90%, 0.9)' }}>
-                      Core Astronomical Formulas:
-                    </h5>
-                    <ul className="list-disc pl-5 space-y-1.5" style={{ color: 'hsla(38, 25%, 75%, 0.7)' }}>
-                      <li><strong style={{ color: 'hsl(24, 90%, 62%)' }}>Solar Declination (δ):</strong> Calibrated using ecliptic longitude from the vernal equinox.</li>
-                      <li><strong style={{ color: 'hsl(24, 90%, 62%)' }}>Hour Angle (h):</strong> Time offset from local solar noon, measured directly along the quadrant scales.</li>
-                      <li><strong style={{ color: 'hsl(24, 90%, 62%)' }}>Shadow Projection:</strong> Dynamic cast computed via ray-plane intersections in 3D Euclidean space.</li>
-                    </ul>
-                  </div>
-                </div>
+                </ScrollArea>
               </DialogContent>
             </Dialog>
 
@@ -487,8 +489,8 @@ export default function AppHeader() {
               <span>GitHub</span>
             </a>
 
-            {/* Mobile Menu Sheet */}
-            <div className="md:hidden">
+            {/* Mobile / Tablet Menu Sheet */}
+            <div className="lg:hidden">
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button
@@ -565,6 +567,24 @@ export default function AppHeader() {
                           <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold"
                             style={{ background: 'hsla(225, 28%, 14%, 0.6)', border: '1px solid hsla(225, 22%, 18%, 0.8)', color: 'hsla(38, 15%, 60%, 0.8)' }}>
                             5 Sites
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setHeritageOpen(true);
+                          }}
+                          className="w-full p-3 rounded-xl flex items-center justify-between text-left transition-colors cursor-pointer hover:bg-primary/10"
+                          style={{ background: 'hsla(225, 35%, 7%, 0.8)', border: '1px solid hsla(225, 22%, 14%, 0.6)' }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <BookOpen className="h-4 w-4" style={{ color: 'hsl(43, 100%, 58%)' }} />
+                            <span className="text-xs font-medium" style={{ color: 'hsla(38, 25%, 85%, 0.9)' }}>Heritage & Math</span>
+                          </div>
+                          <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold"
+                            style={{ background: 'hsla(24, 90%, 55%, 0.1)', border: '1px solid hsla(24, 90%, 55%, 0.2)', color: 'hsl(24, 90%, 62%)' }}>
+                            Science
                           </span>
                         </button>
                       </div>

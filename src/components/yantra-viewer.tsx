@@ -1190,6 +1190,10 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       while (currentMount.firstChild) {
         currentMount.removeChild(currentMount.firstChild);
       }
+      renderer.domElement.style.touchAction = 'none';
+      renderer.domElement.style.display = 'block';
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
       currentMount.appendChild(renderer.domElement);
 
       // Controls — smooth damping
@@ -1376,8 +1380,9 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
           if (w === 0 || h === 0) return;
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
-          renderer.setSize(w, h);
-        }, 50);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.0));
+          renderer.setSize(w, h, false);
+        }, 30);
       };
       window.addEventListener('resize', handleResize);
       const resizeObserver = new ResizeObserver(() => handleResize());
@@ -1421,7 +1426,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       };
     }, [yantraId, latitude, isArMode, animateShadow]);
 
-    return <div ref={mountRef} className="w-full h-full min-h-[280px]" />;
+    return <div ref={mountRef} className="w-full h-full min-h-[220px] touch-none" />;
   }
 );
 

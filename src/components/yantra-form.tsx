@@ -252,7 +252,7 @@ export default function YantraForm({
             </div>
 
             {/* Coordinate Inputs */}
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-2.5">
               <div className="space-y-1.5">
                 <Label htmlFor="latitude" className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                   Latitude (°)
