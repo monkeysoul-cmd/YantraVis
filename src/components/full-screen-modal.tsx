@@ -30,6 +30,7 @@ export default function FullScreenModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
+        hideCloseButton
         className="max-w-none w-screen h-screen h-[100dvh] flex flex-col p-0 gap-0 border-0 rounded-none overflow-hidden select-none"
         style={{ background: 'hsl(225, 47%, 3%)' }}
       >
