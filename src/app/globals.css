@@ -139,6 +139,35 @@
       inset 0 1px 0 hsla(255, 100%, 100%, 0.08);
   }
 
+  /* Surface classes */
+  .surface-glass {
+    background: hsla(225, 45%, 6%, 0.80);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  :root:not(.dark) .surface-glass {
+    background: hsla(30, 20%, 98%, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .surface-elevated {
+    background: hsla(225, 40%, 6%, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  :root:not(.dark) .surface-elevated {
+    background: hsla(30, 20%, 99%, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .surface-overlay {
+    background: hsla(225, 40%, 4%, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
   /* Card surface variants */
   .surface-premium {
     background: linear-gradient(135deg, hsla(225, 40%, 5%, 0.98), hsla(225, 35%, 7%, 0.95));

@@ -17,13 +17,103 @@ export type YantraViewerRef = {
   exportSTL: () => Blob | null;
 };
 
-// Material definitions
+// Material definitions and procedural stone/marble texture generators
+
+let cachedSandstoneTex: THREE.CanvasTexture | null = null;
+let cachedMarbleTex: THREE.CanvasTexture | null = null;
+
+function getSandstoneTexture(): THREE.CanvasTexture | null {
+  if (typeof document === 'undefined') return null;
+  if (cachedSandstoneTex) return cachedSandstoneTex;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#b85d38';
+      ctx.fillRect(0, 0, 256, 256);
+      for (let y = 0; y < 256; y += 4) {
+        const alpha = 0.04 + Math.sin(y * 0.1) * 0.02;
+        ctx.fillStyle = y % 8 === 0 ? `rgba(90, 40, 20, ${alpha})` : `rgba(220, 140, 90, ${alpha})`;
+        ctx.fillRect(0, y, 256, 4);
+      }
+      for (let i = 0; i < 2000; i++) {
+        const x = Math.random() * 256;
+        const y = Math.random() * 256;
+        const shade = Math.random() > 0.5 ? 255 : 0;
+        ctx.fillStyle = `rgba(${shade}, ${shade * 0.8}, ${shade * 0.6}, ${Math.random() * 0.07})`;
+        ctx.fillRect(x, y, 1.5, 1.5);
+      }
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 2);
+    cachedSandstoneTex = tex;
+    return tex;
+  } catch {
+    return null;
+  }
+}
+
+function getMarbleTexture(): THREE.CanvasTexture | null {
+  if (typeof document === 'undefined') return null;
+  if (cachedMarbleTex) return cachedMarbleTex;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#f5f0e8';
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.strokeStyle = 'rgba(180, 160, 140, 0.12)';
+      ctx.lineWidth = 2.5;
+      for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        let x = Math.random() * 256;
+        let y = 0;
+        ctx.moveTo(x, y);
+        while (y < 256) {
+          x += (Math.random() - 0.5) * 35;
+          y += 20 + Math.random() * 30;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.08)';
+      ctx.lineWidth = 1.2;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        let x = 0;
+        let y = Math.random() * 256;
+        ctx.moveTo(x, y);
+        while (x < 256) {
+          x += 20 + Math.random() * 30;
+          y += (Math.random() - 0.5) * 20;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 2);
+    cachedMarbleTex = tex;
+    return tex;
+  } catch {
+    return null;
+  }
+}
 
 function createSandstoneMaterial() {
-  // Jaipur pink sandstone — warm coral-terracotta with realistic weathering
+  const map = getSandstoneTexture();
   return new THREE.MeshStandardMaterial({
-    color: new THREE.Color(0xc47d56),
-    roughness: 0.78,
+    color: new THREE.Color(0xb85d38),
+    map: map || undefined,
+    roughness: 0.76,
     metalness: 0.03,
     envMapIntensity: 0.45,
     flatShading: false,
@@ -31,22 +121,25 @@ function createSandstoneMaterial() {
 }
 
 function createWeatheredSandstoneMaterial() {
+  const map = getSandstoneTexture();
   return new THREE.MeshStandardMaterial({
-    color: new THREE.Color(0xb26a42),
-    roughness: 0.88,
+    color: new THREE.Color(0x9e4c2a),
+    map: map || undefined,
+    roughness: 0.85,
     metalness: 0.02,
-    envMapIntensity: 0.3,
+    envMapIntensity: 0.35,
     flatShading: false,
   });
 }
 
 function createMarbleMaterial() {
-  // Makrana white marble — slightly warm with enhanced reflectivity
+  const map = getMarbleTexture();
   return new THREE.MeshStandardMaterial({
-    color: new THREE.Color(0xf2ede5),
-    roughness: 0.18,
-    metalness: 0.12,
-    envMapIntensity: 0.85,
+    color: new THREE.Color(0xf6f2eb),
+    map: map || undefined,
+    roughness: 0.16,
+    metalness: 0.08,
+    envMapIntensity: 0.95,
     flatShading: false,
   });
 }
@@ -248,18 +341,19 @@ function buildSamrat(latRad: number): THREE.Group {
 
   const baseL = 3.6;
   const gH = baseL * Math.tan(latRad);
+  const foundationY = 0.75;
 
-  // Foundation steps: 3 tiers of 0.25 height each
-  [3.8, 3.4, 3.0].forEach((w, i) => {
-    const stepGeo = new THREE.BoxGeometry(w, 0.25, 1.2 - i * 0.15);
-    const step = new THREE.Mesh(stepGeo, sandstone);
+  // 1. Foundation: 3 stepped masonry plinths
+  [4.0, 3.6, 3.2].forEach((w, i) => {
+    const stepGeo = new THREE.BoxGeometry(w, 0.25, 1.4 - i * 0.15);
+    const step = new THREE.Mesh(stepGeo, weathered);
     step.position.y = 0.125 + i * 0.25;
     step.castShadow = true;
     step.receiveShadow = true;
     group.add(step);
   });
 
-  // Triangular gnomon
+  // 2. Triangular gnomon core
   const gnomonShape = new THREE.Shape();
   gnomonShape.moveTo(-baseL / 2, 0);
   gnomonShape.lineTo(baseL / 2, 0);
@@ -267,123 +361,170 @@ function buildSamrat(latRad: number): THREE.Group {
   gnomonShape.closePath();
 
   const gnomonGeo = new THREE.ExtrudeGeometry(gnomonShape, {
-    depth: 0.35,
+    depth: 0.36,
     bevelEnabled: true,
     bevelThickness: 0.04,
     bevelSize: 0.04,
     bevelSegments: 3,
   });
-  gnomonGeo.translate(0, 0, -0.175);
+  gnomonGeo.translate(0, 0, -0.18);
   const gnomonMesh = new THREE.Mesh(gnomonGeo, sandstone);
-  gnomonMesh.position.set(0, 0.75, 0);
+  gnomonMesh.position.set(0, foundationY, 0);
   gnomonMesh.castShadow = true;
   gnomonMesh.receiveShadow = true;
   group.add(gnomonMesh);
 
-  // Marble cladding edge along hypotenuse
+  // 3. Central climbable staircase along hypotenuse (aligned correctly from South +baseL/2 up to North -baseL/2)
   const hypoLength = Math.sqrt(baseL * baseL + gH * gH);
-  const hypoGeo = new THREE.BoxGeometry(hypoLength, 0.08, 0.38);
-  const hypo = new THREE.Mesh(hypoGeo, marble);
-  hypo.position.set(0, 0.75 + gH * 0.5, 0);
-  hypo.rotation.z = -Math.atan2(gH, baseL);
-  hypo.castShadow = true;
-  group.add(hypo);
-
-  // Staircase steps along gnomon hypotenuse (the climbable ramp)
-  const stairCount = Math.max(8, Math.floor(hypoLength * 2.5));
   const hypoAngle = Math.atan2(gH, baseL);
+  
+  // Marble hypotenuse bed slab
+  const hypoBed = new THREE.Mesh(new THREE.BoxGeometry(hypoLength, 0.08, 0.40), marble);
+  hypoBed.position.set(0, foundationY + gH * 0.5, 0);
+  hypoBed.rotation.z = -hypoAngle;
+  hypoBed.castShadow = true;
+  group.add(hypoBed);
+
+  // Steps climbing up the hypotenuse
+  const stairCount = Math.max(12, Math.floor(hypoLength * 3.2));
   for (let s = 0; s < stairCount; s++) {
     const t = (s + 0.5) / stairCount;
-    const sx = -baseL / 2 + t * baseL;
-    const sy = 0.75 + t * gH;
-    const stepW = 0.06;
-    const stepH = 0.025;
-    const stepGeo = new THREE.BoxGeometry(hypoLength / stairCount * 0.9, stepH, 0.42);
+    // Step goes from base (sx = +baseL/2, sy = foundationY) to apex (sx = -baseL/2, sy = foundationY + gH)
+    const sx = baseL / 2 - t * baseL;
+    const sy = foundationY + t * gH;
+    const stepGeo = new THREE.BoxGeometry((hypoLength / stairCount) * 0.88, 0.03, 0.38);
     const stepMesh = new THREE.Mesh(stepGeo, marble);
     stepMesh.position.set(sx, sy + 0.05, 0);
     stepMesh.rotation.z = -hypoAngle;
+    stepMesh.castShadow = true;
     group.add(stepMesh);
   }
 
-  // Gnomon top finial (decorative capstone at the apex)
-  const finialBase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.1, 16), marble);
-  finialBase.position.set(-baseL / 2, 0.75 + gH + 0.05, 0);
-  group.add(finialBase);
+  // 4. Balustrades / railings along the ramp edges
+  [-0.19, 0.19].forEach((zOff) => {
+    const railGeo = new THREE.BoxGeometry(hypoLength, 0.04, 0.03);
+    const rail = new THREE.Mesh(railGeo, marble);
+    rail.position.set(0, foundationY + gH * 0.5 + 0.12, zOff);
+    rail.rotation.z = -hypoAngle;
+    rail.castShadow = true;
+    group.add(rail);
 
-  const finialSphere = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 8), bronze);
-  finialSphere.position.set(-baseL / 2, 0.75 + gH + 0.17, 0);
-  group.add(finialSphere);
+    // Support baluster posts
+    for (let p = 0; p <= 6; p++) {
+      const pt = p / 6;
+      const px = baseL / 2 - pt * baseL;
+      const py = foundationY + pt * gH;
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.14, 0.03), marble);
+      post.position.set(px, py + 0.07, zOff);
+      post.castShadow = true;
+      group.add(post);
+    }
+  });
 
-  // Bottom edge marble trim along gnomon base
-  const baseTrim = new THREE.Mesh(new THREE.BoxGeometry(baseL + 0.1, 0.06, 0.4), marble);
-  baseTrim.position.set(0, 0.78, 0);
-  group.add(baseTrim);
+  // 5. Authentic observation Chhatri (Pavilion) at the apex (-baseL/2, foundationY + gH, 0)
+  const chhatriGroup = new THREE.Group();
+  chhatriGroup.position.set(-baseL / 2, foundationY + gH, 0);
+  
+  // Plinth
+  const plinth = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.06, 0.58), marble);
+  plinth.position.y = 0.03;
+  chhatriGroup.add(plinth);
 
-  // Eastern & Western quadrant arcs with thickness
-  const arcR = Math.max(2.0, gH * 1.0);
+  // 4 Carved stone pillars
+  const colH = 0.45;
+  [[-0.22, -0.22], [0.22, -0.22], [-0.22, 0.22], [0.22, 0.22]].forEach(([cx, cz]) => {
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, colH, 12), sandstone);
+    col.position.set(cx, 0.06 + colH / 2, cz);
+    col.castShadow = true;
+    chhatriGroup.add(col);
+
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.08), marble);
+    cap.position.set(cx, 0.06 + colH, cz);
+    chhatriGroup.add(cap);
+  });
+
+  // Cornice & Roof
+  const cornice = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.04, 0.56), marble);
+  cornice.position.y = 0.06 + colH + 0.02;
+  chhatriGroup.add(cornice);
+
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.28, 20, 14, 0, Math.PI * 2, 0, Math.PI * 0.5), sandstone);
+  dome.position.y = 0.06 + colH + 0.04;
+  dome.castShadow = true;
+  chhatriGroup.add(dome);
+
+  // Brass Kalash finial
+  const kalash = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.16, 12), bronze);
+  kalash.position.y = 0.06 + colH + 0.04 + 0.28 + 0.08;
+  kalash.castShadow = true;
+  chhatriGroup.add(kalash);
+
+  group.add(chhatriGroup);
+
+  // 6. Eastern & Western Quadrant Arcs (precision marble curves with bronze graduations)
+  const arcR = Math.max(2.1, gH * 1.05);
   for (const side of [-1, 1]) {
-    const quadrantGroup = new THREE.Group();
-    quadrantGroup.position.set(side * 0.7, 0.75 + gH * 0.42, 0);
-    quadrantGroup.scale.x = side;
+    const quad = new THREE.Group();
+    quad.position.set(side * 0.72, foundationY + gH * 0.42, 0);
+    quad.scale.x = side;
 
-    // Quadrant arc plate — thicker for realism
-    const arcGeo = new THREE.CylinderGeometry(arcR, arcR + 0.12, 0.55, 48, 1, true, 0, Math.PI * 0.52);
+    // Thick marble quadrant arc face
+    const arcGeo = new THREE.CylinderGeometry(arcR, arcR + 0.15, 0.58, 64, 1, true, 0, Math.PI * 0.52);
     arcGeo.rotateX(Math.PI / 2);
     arcGeo.rotateZ(latRad - Math.PI / 2 + 0.05);
     const arcMesh = new THREE.Mesh(arcGeo, marble);
     arcMesh.castShadow = true;
     arcMesh.receiveShadow = true;
-    quadrantGroup.add(arcMesh);
+    quad.add(arcMesh);
 
-    // Inner backing plate for arc (giving arc physical thickness)
-    const innerArcGeo = new THREE.CylinderGeometry(arcR - 0.15, arcR - 0.03, 0.5, 48, 1, true, 0, Math.PI * 0.52);
-    innerArcGeo.rotateX(Math.PI / 2);
-    innerArcGeo.rotateZ(latRad - Math.PI / 2 + 0.05);
-    const innerArc = new THREE.Mesh(innerArcGeo, sandstone);
-    quadrantGroup.add(innerArc);
+    // Stone masonry backing structure
+    const backArcGeo = new THREE.CylinderGeometry(arcR - 0.22, arcR - 0.02, 0.54, 48, 1, true, 0, Math.PI * 0.52);
+    backArcGeo.rotateX(Math.PI / 2);
+    backArcGeo.rotateZ(latRad - Math.PI / 2 + 0.05);
+    const backArc = new THREE.Mesh(backArcGeo, sandstone);
+    quad.add(backArc);
 
-    // Scale markings — bronze notches
+    // Fine scale graduations: hours (bronze studs) and minute tick notches
     const arcRot = latRad - Math.PI / 2 + 0.05;
-    for (let t = 0; t <= 12; t++) {
-      const angle = (t / 12) * (Math.PI * 0.52) + arcRot;
-      const nx = Math.cos(angle) * (arcR + 0.06);
-      const ny = Math.sin(angle) * (arcR + 0.06);
-      const isHour = t % 3 === 0;
-      const notchGeo = new THREE.CylinderGeometry(isHour ? 0.022 : 0.015, isHour ? 0.022 : 0.015, isHour ? 0.08 : 0.04, 6);
-      const notch = new THREE.Mesh(notchGeo, bronze);
-      notch.position.set(nx, ny, 0.28);
-      quadrantGroup.add(notch);
+    for (let t = 0; t <= 24; t++) {
+      const angle = (t / 24) * (Math.PI * 0.52) + arcRot;
+      const isMajor = t % 4 === 0;
+      const nx = Math.cos(angle) * (arcR + 0.07);
+      const ny = Math.sin(angle) * (arcR + 0.07);
+      const mark = new THREE.Mesh(
+        new THREE.BoxGeometry(0.02, isMajor ? 0.08 : 0.04, isMajor ? 0.05 : 0.025),
+        bronze
+      );
+      mark.position.set(nx, ny, 0.28);
+      quad.add(mark);
     }
 
-    // Supporting pillar/pier under each quadrant arc
-    const pierH = gH * 0.35;
-    const pier = new THREE.Mesh(new THREE.BoxGeometry(0.18, pierH, 0.35), weathered);
-    pier.position.set(0, -gH * 0.15 + pierH * 0.1, 0);
+    // Foundation support pier with authentic arched niche cutout
+    const pierH = gH * 0.45;
+    const pier = new THREE.Mesh(new THREE.BoxGeometry(0.24, pierH, 0.42), weathered);
+    pier.position.set(0, -gH * 0.18 + pierH * 0.1, 0);
     pier.castShadow = true;
-    quadrantGroup.add(pier);
+    quad.add(pier);
 
-    group.add(quadrantGroup);
+    group.add(quad);
   }
 
-  // Structural support walls flanking gnomon
-  for (const side of [-0.65, 0.65]) {
-    const wallH = gH * 0.6;
-    const wallGeo = new THREE.BoxGeometry(0.22, wallH, 0.9);
-    const wall = new THREE.Mesh(wallGeo, weathered);
-    wall.position.set(side, 0.75 + wallH / 2, 0);
-    wall.castShadow = true;
-    group.add(wall);
+  // 7. Structural flank walls and decorative horizontal marble string courses
+  for (const side of [-0.68, 0.68]) {
+    const wallH = gH * 0.62;
+    const flank = new THREE.Mesh(new THREE.BoxGeometry(0.24, wallH, 0.95), weathered);
+    flank.position.set(side, foundationY + wallH / 2, 0);
+    flank.castShadow = true;
+    group.add(flank);
   }
 
-  // Decorative marble inlay lines on gnomon face
-  for (let i = 1; i <= 4; i++) {
-    const t = i / 5;
-    const lineY = 0.75 + t * gH;
-    const lineW = baseL * (1 - t) * 0.9;
-    const lineGeo = new THREE.BoxGeometry(lineW, 0.015, 0.36);
-    const lineMesh = new THREE.Mesh(lineGeo, marble);
-    lineMesh.position.set(-baseL / 2 + lineW / 2, lineY, 0);
-    group.add(lineMesh);
+  for (let i = 1; i <= 5; i++) {
+    const t = i / 6;
+    const lineY = foundationY + t * gH;
+    const lineW = baseL * (1 - t) * 0.88;
+    const course = new THREE.Mesh(new THREE.BoxGeometry(lineW, 0.02, 0.38), marble);
+    course.position.set(-baseL / 2 + lineW / 2, lineY, 0);
+    group.add(course);
   }
 
   return group;
@@ -394,72 +535,141 @@ function buildRama(latRad: number): THREE.Group {
   const sandstone = createSandstoneMaterial();
   const marble = createMarbleMaterial();
   const bronze = createBronzeMaterial();
+  const weathered = createWeatheredSandstoneMaterial();
 
-  const R = 2.4;
-  const H = 2.8;
-  const wallThick = 0.22;
-  const floorH = 0.14;
+  const R = 2.6;
+  const H = 2.5;
+  const numSectors = 12;
+  const sectorAngle = (Math.PI * 2) / numSectors; // 30° total per section: 15° stone slab + 15° open gap
+  const floorElevation = 0.28;
 
-  // Outer cylindrical wall — open top
-  const outerWallGeo = new THREE.CylinderGeometry(R, R + 0.1, H, 64, 3, true);
-  const outerWall = new THREE.Mesh(outerWallGeo, sandstone);
-  outerWall.position.y = H / 2;
-  outerWall.castShadow = true;
-  outerWall.receiveShadow = true;
-  group.add(outerWall);
+  // 1. Foundation base ring
+  const baseRingGeo = new THREE.CylinderGeometry(R + 0.3, R + 0.45, 0.18, 48);
+  const baseRing = new THREE.Mesh(baseRingGeo, weathered);
+  baseRing.position.y = 0.09;
+  baseRing.receiveShadow = true;
+  group.add(baseRing);
 
-  // Top coping ring
-  const copingGeo = new THREE.TorusGeometry(R + 0.08, wallThick / 2, 8, 64);
-  const coping = new THREE.Mesh(copingGeo, marble);
-  coping.rotation.x = Math.PI / 2;
-  coping.position.y = H;
-  group.add(coping);
-
-  // Circular floor with marble inlay sitting on ground at y = 0
-  const floorGeo = new THREE.CylinderGeometry(R - 0.01, R, floorH, 64);
-  const floor = new THREE.Mesh(floorGeo, createWeatheredSandstoneMaterial());
-  floor.position.y = floorH / 2;
-  floor.receiveShadow = true;
-  group.add(floor);
-
-  // Marble radial floor divisions resting flush on the floor surface
-  for (let i = 0; i < 36; i++) {
-    const angle = (i * Math.PI * 2) / 36;
-    const divPts = [
-      new THREE.Vector3(Math.cos(angle) * 0.35, floorH + 0.005, Math.sin(angle) * 0.35),
-      new THREE.Vector3(Math.cos(angle) * (R - 0.12), floorH + 0.005, Math.sin(angle) * (R - 0.12)),
-    ];
-    const divGeo = new THREE.BufferGeometry().setFromPoints(divPts);
-    const divMat = new THREE.LineBasicMaterial({
-      color: i % 6 === 0 ? 0xd4af6a : 0xa07050,
-      transparent: true,
-      opacity: i % 6 === 0 ? 0.8 : 0.3,
-    });
-    group.add(new THREE.Line(divGeo, divMat));
-  }
-
-  // Vertical wall slits (altitude readout openings)
-  for (let i = 0; i < 8; i++) {
-    const angle = (i * Math.PI * 2) / 8;
-    const slitGeo = new THREE.BoxGeometry(0.12, H * 0.85, wallThick * 1.5);
-    const slit = new THREE.Mesh(slitGeo, marble);
-    slit.position.set(Math.cos(angle) * R, H * 0.5, Math.sin(angle) * R);
-    slit.rotation.y = -angle;
-    group.add(slit);
-  }
-
-  // Central bronze gnomon pillar
-  const pillarGeo = new THREE.CylinderGeometry(0.08, 0.1, H + 0.4, 24);
+  // 2. Central cylindrical gnomon pillar
+  const pillarGeo = new THREE.CylinderGeometry(0.12, 0.15, H + floorElevation, 32);
   const pillar = new THREE.Mesh(pillarGeo, bronze);
-  pillar.position.y = (H + 0.4) / 2;
+  pillar.position.y = (H + floorElevation) / 2;
   pillar.castShadow = true;
   group.add(pillar);
 
-  // Pillar capital sitting cleanly on the pillar top
-  const capitalGeo = new THREE.SphereGeometry(0.15, 16, 8);
-  const capital = new THREE.Mesh(capitalGeo, bronze);
-  capital.position.y = H + 0.4;
-  group.add(capital);
+  // Ornate capital on central pillar (double tiered with lotus dome)
+  const capitalBase = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.12, 0.1, 24), marble);
+  capitalBase.position.y = H + floorElevation + 0.05;
+  group.add(capitalBase);
+
+  const capitalFinial = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 12), bronze);
+  capitalFinial.position.y = H + floorElevation + 0.18;
+  capitalFinial.castShadow = true;
+  group.add(capitalFinial);
+
+  // 3. 12 Elevated radiating stone floor sectors (with 15° open gaps in between)
+  for (let s = 0; s < numSectors; s++) {
+    const startA = s * sectorAngle;
+    const spanA = sectorAngle * 0.5; // 15° solid sector, leaving 15° open space
+
+    // Extruded radial pie sector for the floor
+    const shape = new THREE.Shape();
+    shape.moveTo(0.2, 0);
+    const pts = 12;
+    for (let p = 0; p <= pts; p++) {
+      const a = startA + (p / pts) * spanA;
+      shape.lineTo(Math.cos(a) * (R - 0.05), Math.sin(a) * (R - 0.05));
+    }
+    shape.lineTo(Math.cos(startA + spanA) * 0.2, Math.sin(startA + spanA) * 0.2);
+    shape.closePath();
+
+    const floorGeo = new THREE.ExtrudeGeometry(shape, {
+      depth: 0.12,
+      bevelEnabled: false,
+    });
+    floorGeo.rotateX(-Math.PI / 2);
+    const sectorMesh = new THREE.Mesh(floorGeo, marble);
+    sectorMesh.position.y = floorElevation;
+    sectorMesh.castShadow = true;
+    sectorMesh.receiveShadow = true;
+    group.add(sectorMesh);
+
+    // Stone support arches / pillars under the elevated floor
+    const midA = startA + spanA * 0.5;
+    for (const radDist of [0.9, 1.8]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.12, floorElevation, 0.12), sandstone);
+      post.position.set(Math.cos(midA) * radDist, floorElevation / 2, Math.sin(midA) * radDist);
+      post.castShadow = true;
+      group.add(post);
+    }
+
+    // Radial bronze division lines on floor sector
+    for (let d = 1; d <= 3; d++) {
+      const dist = 0.5 + d * 0.6;
+      const arcRing = new THREE.Mesh(
+        new THREE.RingGeometry(dist - 0.01, dist + 0.01, 16, 1, startA, spanA),
+        bronze
+      );
+      arcRing.rotateX(-Math.PI / 2);
+      arcRing.position.y = floorElevation + 0.125;
+      group.add(arcRing);
+    }
+  }
+
+  // 4. Perimeter arcade: 12 vertical stone wall pillars corresponding to floor sectors
+  for (let s = 0; s < numSectors; s++) {
+    const midA = s * sectorAngle + sectorAngle * 0.25;
+    const pierW = 0.38;
+    const pierThick = 0.32;
+    const pier = new THREE.Mesh(
+      new THREE.BoxGeometry(pierW, H, pierThick),
+      sandstone
+    );
+    pier.position.set(Math.cos(midA) * R, H / 2, Math.sin(midA) * R);
+    pier.rotation.y = -midA;
+    pier.castShadow = true;
+    pier.receiveShadow = true;
+    group.add(pier);
+
+    // Marble altitude scale facing on the inner surface of each vertical pier
+    const innerFace = new THREE.Mesh(
+      new THREE.BoxGeometry(pierW * 0.85, H * 0.92, 0.03),
+      marble
+    );
+    innerFace.position.set(Math.cos(midA) * (R - pierThick * 0.45), H / 2, Math.sin(midA) * (R - pierThick * 0.45));
+    innerFace.rotation.y = -midA;
+    group.add(innerFace);
+
+    // Altitude degree bands on the inner face
+    for (let b = 1; b <= 5; b++) {
+      const bandY = (b / 6) * H;
+      const band = new THREE.Mesh(new THREE.BoxGeometry(pierW * 0.8, 0.02, 0.04), bronze);
+      band.position.set(Math.cos(midA) * (R - pierThick * 0.45), bandY, Math.sin(midA) * (R - pierThick * 0.45));
+      band.rotation.y = -midA;
+      group.add(band);
+    }
+  }
+
+  // Top perimeter coping ring connecting all pillars
+  const topRing = new THREE.Mesh(
+    new THREE.TorusGeometry(R, 0.08, 12, 64),
+    marble
+  );
+  topRing.rotateX(Math.PI / 2);
+  topRing.position.y = H;
+  topRing.castShadow = true;
+  group.add(topRing);
+
+  // Entrance steps on the south side
+  for (let st = 0; st < 3; st++) {
+    const step = new THREE.Mesh(
+      new THREE.BoxGeometry(0.7, 0.09, 0.2),
+      weathered
+    );
+    step.position.set(0, 0.045 + st * 0.09, R + 0.3 + (2 - st) * 0.2);
+    step.castShadow = true;
+    group.add(step);
+  }
 
   return group;
 }
@@ -469,119 +679,144 @@ function buildJaiPrakash(latRad: number): THREE.Group {
   const sandstone = createSandstoneMaterial();
   const marble = createMarbleMaterial();
   const bronze = createBronzeMaterial();
+  const weathered = createWeatheredSandstoneMaterial();
 
-  const R = 2.2;
-  const platformH = R + 0.4;
+  const R = 2.3;
+  const drumH = R + 0.55;
 
-  // Outer cylindrical masonry wall / drum containing the bowl
-  const drumGeo = new THREE.CylinderGeometry(R + 0.45, R + 0.5, platformH, 64);
-  const drum = new THREE.Mesh(drumGeo, createWeatheredSandstoneMaterial());
-  drum.position.y = platformH / 2;
+  // 1. Outer stepped cylindrical masonry drum
+  const drumPlinth = new THREE.Mesh(new THREE.CylinderGeometry(R + 0.55, R + 0.65, 0.3, 64), weathered);
+  drumPlinth.position.y = 0.15;
+  drumPlinth.receiveShadow = true;
+  group.add(drumPlinth);
+
+  const drum = new THREE.Mesh(new THREE.CylinderGeometry(R + 0.45, R + 0.55, drumH, 64), sandstone);
+  drum.position.y = drumH / 2;
   drum.castShadow = true;
   drum.receiveShadow = true;
   group.add(drum);
 
-  // Decorative base molding ring
-  const baseMoldGeo = new THREE.TorusGeometry(R + 0.48, 0.06, 8, 48);
-  baseMoldGeo.rotateX(Math.PI / 2);
-  const baseMold = new THREE.Mesh(baseMoldGeo, sandstone);
-  baseMold.position.y = 0.06;
-  group.add(baseMold);
+  // Rajput decorative cornice molding along drum rim
+  const cornice = new THREE.Mesh(new THREE.TorusGeometry(R + 0.48, 0.06, 8, 64), marble);
+  cornice.rotateX(Math.PI / 2);
+  cornice.position.y = drumH;
+  cornice.castShadow = true;
+  group.add(cornice);
 
-  // Sunken hemisphere bowl inside the drum with rim at platformH
+  // 2. Concave marble bowl interior (Sunken celestial sphere)
   const bowlMat = marble.clone();
   bowlMat.side = THREE.BackSide;
-  const bowlGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-  const bowl = new THREE.Mesh(bowlGeo, bowlMat);
-  bowl.position.y = platformH;
-  bowl.castShadow = true;
+  const bowl = new THREE.Mesh(
+    new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
+    bowlMat
+  );
+  bowl.position.y = drumH;
   bowl.receiveShadow = true;
   group.add(bowl);
 
-  // Decorative celestial latitude rings inside bowl
-  const ringAngles = [15, 30, 45, 60, 75];
-  ringAngles.forEach((deg) => {
-    const rad = THREE.MathUtils.degToRad(deg);
-    const rRing = R * Math.cos(rad) * 0.98;
-    const yRing = platformH - R * Math.sin(rad);
-    const ringGeo = new THREE.TorusGeometry(rRing, 0.018, 8, 64);
-    const ringMesh = new THREE.Mesh(ringGeo, deg === 45 ? bronze : marble);
-    ringMesh.rotation.x = Math.PI / 2;
-    ringMesh.position.y = yRing;
-    group.add(ringMesh);
-  });
-
-  // Meridian line (N-S line along the bowl interior)
-  const meridianPts: THREE.Vector3[] = [];
-  for (let a = 0; a <= 20; a++) {
-    const angle = (a / 20) * (Math.PI / 2);
-    meridianPts.push(new THREE.Vector3(0, platformH - R * Math.sin(angle), R * Math.cos(angle) * 0.98));
-  }
-  const meridianGeo = new THREE.BufferGeometry().setFromPoints(meridianPts);
-  const meridianLine = new THREE.Line(meridianGeo, new THREE.LineBasicMaterial({ color: 0xcb8e3e, linewidth: 2 }));
-  group.add(meridianLine);
-
-  // Mirror meridian (opposite side)
-  const meridianPts2 = meridianPts.map(p => new THREE.Vector3(0, p.y, -p.z));
-  const meridianGeo2 = new THREE.BufferGeometry().setFromPoints(meridianPts2);
-  group.add(new THREE.Line(meridianGeo2, new THREE.LineBasicMaterial({ color: 0xcb8e3e })));
-
-  // E-W perpendicular meridian line
-  const ewPts: THREE.Vector3[] = [];
-  for (let a = 0; a <= 20; a++) {
-    const angle = (a / 20) * (Math.PI / 2);
-    ewPts.push(new THREE.Vector3(R * Math.cos(angle) * 0.98, platformH - R * Math.sin(angle), 0));
-  }
-  const ewGeo = new THREE.BufferGeometry().setFromPoints(ewPts);
-  group.add(new THREE.Line(ewGeo, new THREE.LineBasicMaterial({ color: 0xcb8e3e, transparent: true, opacity: 0.6 })));
-
-  const ewPts2 = ewPts.map(p => new THREE.Vector3(-p.x, p.y, 0));
-  const ewGeo2 = new THREE.BufferGeometry().setFromPoints(ewPts2);
-  group.add(new THREE.Line(ewGeo2, new THREE.LineBasicMaterial({ color: 0xcb8e3e, transparent: true, opacity: 0.6 })));
-
-  // Marble rim ring with coping at top
-  const rimGeo = new THREE.TorusGeometry(R, 0.14, 16, 72);
-  rimGeo.rotateX(Math.PI / 2);
-  const rim = new THREE.Mesh(rimGeo, marble);
-  rim.position.y = platformH;
-  rim.castShadow = true;
-  group.add(rim);
-
-  // Decorative bronze studs around the rim
-  for (let i = 0; i < 16; i++) {
-    const angle = (i * Math.PI * 2) / 16;
-    const studGeo = new THREE.SphereGeometry(0.03, 8, 6);
-    const stud = new THREE.Mesh(studGeo, bronze);
-    stud.position.set(Math.cos(angle) * (R + 0.02), platformH + 0.08, Math.sin(angle) * (R + 0.02));
-    group.add(stud);
+  // 3. Sunken walkway passage cuts (pathways cut into the bowl so observers can walk inside)
+  const numPassages = 6;
+  for (let i = 0; i < numPassages; i++) {
+    const angle = (i * Math.PI) / 3;
+    const passage = new THREE.Mesh(
+      new THREE.BoxGeometry(0.25, R * 0.8, R * 2.1),
+      sandstone
+    );
+    passage.position.set(0, drumH - R * 0.4, 0);
+    passage.rotation.y = angle;
+    group.add(passage);
   }
 
-  // Cross wire shadow-casters stretched across the rim
-  const wireMat = new THREE.MeshStandardMaterial({ color: 0xcb8e3e, roughness: 0.2, metalness: 0.9 });
-  for (const angle of [0, Math.PI / 2]) {
-    const wireGeo = new THREE.CylinderGeometry(0.015, 0.015, R * 2, 8);
-    wireGeo.rotateZ(Math.PI / 2);
-    wireGeo.rotateY(angle);
-    const wire = new THREE.Mesh(wireGeo, wireMat);
-    wire.position.y = platformH;
+  // 4. Inlaid celestial coordinate curves inside the bowl
+  // Celestial equator
+  const eqPts: THREE.Vector3[] = [];
+  for (let a = 0; a <= 64; a++) {
+    const th = (a / 64) * Math.PI * 2;
+    const rRing = R * 0.88;
+    eqPts.push(new THREE.Vector3(Math.cos(th) * rRing, drumH - R * 0.52, Math.sin(th) * rRing));
+  }
+  const eqGeo = new THREE.BufferGeometry().setFromPoints(eqPts);
+  group.add(new THREE.Line(eqGeo, new THREE.LineBasicMaterial({ color: 0xd4963f, linewidth: 2 })));
+
+  // Tropics of Cancer and Capricorn
+  for (const [deg, col] of [[23.44, 0x7da08c], [-23.44, 0x7da08c]] as const) {
+    const ringPts: THREE.Vector3[] = [];
+    const rRing = R * (deg > 0 ? 0.72 : 0.96);
+    const yRing = drumH - R * (deg > 0 ? 0.70 : 0.28);
+    for (let a = 0; a <= 48; a++) {
+      const th = (a / 48) * Math.PI * 2;
+      ringPts.push(new THREE.Vector3(Math.cos(th) * rRing, yRing, Math.sin(th) * rRing));
+    }
+    const ringGeo = new THREE.BufferGeometry().setFromPoints(ringPts);
+    group.add(new THREE.Line(ringGeo, new THREE.LineBasicMaterial({ color: col })));
+  }
+
+  // Meridian & Azimuth hour arcs
+  for (let h = 0; h < 12; h++) {
+    const angle = (h * Math.PI) / 6;
+    const arcPts: THREE.Vector3[] = [];
+    for (let s = 0; s <= 20; s++) {
+      const t = (s / 20) * (Math.PI / 2);
+      arcPts.push(new THREE.Vector3(
+        Math.cos(angle) * R * Math.cos(t) * 0.98,
+        drumH - R * Math.sin(t),
+        Math.sin(angle) * R * Math.cos(t) * 0.98
+      ));
+    }
+    const arcGeo = new THREE.BufferGeometry().setFromPoints(arcPts);
+    group.add(new THREE.Line(arcGeo, new THREE.LineBasicMaterial({ color: 0xcb8e3e, transparent: true, opacity: 0.5 })));
+  }
+
+  // 5. Taut bronze meridian and prime-vertical crosswires across the top rim
+  const wireMat = new THREE.MeshStandardMaterial({ color: 0xd4963f, roughness: 0.15, metalness: 0.9 });
+  for (const rotY of [0, Math.PI / 2]) {
+    const wire = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.012, R * 2, 8),
+      wireMat
+    );
+    wire.rotateZ(Math.PI / 2);
+    wire.rotateY(rotY);
+    wire.position.y = drumH;
     wire.castShadow = true;
     group.add(wire);
   }
 
-  // Central sighting ring (larger for visibility)
-  const centerRingGeo = new THREE.TorusGeometry(0.08, 0.018, 10, 24);
-  centerRingGeo.rotateX(Math.PI / 2);
-  const centerRing = new THREE.Mesh(centerRingGeo, bronze);
-  centerRing.position.y = platformH;
+  // 6. Central bronze sighting ring (sun-disk aperture) suspended at the wire intersection
+  const centerRing = new THREE.Mesh(
+    new THREE.TorusGeometry(0.09, 0.018, 12, 32),
+    bronze
+  );
+  centerRing.rotateX(Math.PI / 2);
+  centerRing.position.y = drumH;
+  centerRing.castShadow = true;
   group.add(centerRing);
 
-  // Walkway indications (small notch-cut markers on rim)
-  for (const angle of [Math.PI / 4, Math.PI * 3 / 4, Math.PI * 5 / 4, Math.PI * 7 / 4]) {
-    const notchGeo = new THREE.BoxGeometry(0.3, 0.12, 0.08);
-    const notch = new THREE.Mesh(notchGeo, createWeatheredSandstoneMaterial());
-    notch.position.set(Math.cos(angle) * R, platformH - 0.02, Math.sin(angle) * R);
-    notch.rotation.y = -angle;
-    group.add(notch);
+  // 7. Marble top rim ring with bronze calibration pins
+  const rim = new THREE.Mesh(
+    new THREE.TorusGeometry(R, 0.12, 16, 72),
+    marble
+  );
+  rim.rotateX(Math.PI / 2);
+  rim.position.y = drumH;
+  rim.castShadow = true;
+  group.add(rim);
+
+  for (let i = 0; i < 24; i++) {
+    const a = (i * Math.PI * 2) / 24;
+    const pin = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 6), bronze);
+    pin.position.set(Math.cos(a) * (R + 0.02), drumH + 0.06, Math.sin(a) * (R + 0.02));
+    group.add(pin);
+  }
+
+  // 8. Exterior stone entrance stairs leading to the observation rim
+  for (let st = 0; st < 5; st++) {
+    const step = new THREE.Mesh(
+      new THREE.BoxGeometry(0.65, drumH / 5, 0.22),
+      weathered
+    );
+    step.position.set(0, (st + 0.5) * (drumH / 5), R + 0.45 + (4 - st) * 0.2);
+    step.castShadow = true;
+    group.add(step);
   }
 
   return group;
@@ -659,66 +894,113 @@ function buildDigamsa(latRad: number): THREE.Group {
   const sandstone = createSandstoneMaterial();
   const marble = createMarbleMaterial();
   const bronze = createBronzeMaterial();
+  const weathered = createWeatheredSandstoneMaterial();
 
-  const outerR = 2.5;
+  const outerR = 2.6;
   const innerR = 1.5;
-  const wallH = 0.85;
+  const wallH = 1.0;
 
-  // Outer cylindrical wall sitting on ground at y = 0
-  const outerGeo = new THREE.CylinderGeometry(outerR, outerR + 0.15, wallH, 64, 1, true);
-  const outerWall = new THREE.Mesh(outerGeo, sandstone);
-  outerWall.position.y = wallH / 2;
-  outerWall.castShadow = true;
-  group.add(outerWall);
+  // 1. Foundation ring plinth
+  const plinth = new THREE.Mesh(new THREE.CylinderGeometry(outerR + 0.35, outerR + 0.5, 0.2, 64), weathered);
+  plinth.position.y = 0.1;
+  plinth.receiveShadow = true;
+  group.add(plinth);
 
-  // Outer top coping
-  const outerCopingGeo = new THREE.TorusGeometry(outerR + 0.07, 0.09, 8, 64);
-  outerCopingGeo.rotateX(Math.PI / 2);
-  const outerCoping = new THREE.Mesh(outerCopingGeo, marble);
-  outerCoping.position.y = wallH;
-  group.add(outerCoping);
+  // 2. Outer cylindrical wall with 4 arched cardinal doorways (N, S, E, W)
+  for (let q = 0; q < 4; q++) {
+    const startAngle = q * (Math.PI / 2) + 0.12;
+    const arcAngle = Math.PI / 2 - 0.24; // leaves doorway gap
+    const wallGeo = new THREE.CylinderGeometry(outerR, outerR + 0.15, wallH, 32, 1, true, startAngle, arcAngle);
+    const wallMesh = new THREE.Mesh(wallGeo, sandstone);
+    wallMesh.position.y = 0.2 + wallH / 2;
+    wallMesh.castShadow = true;
+    wallMesh.receiveShadow = true;
+    group.add(wallMesh);
 
-  // Inner cylindrical wall sitting on ground at y = 0
-  const innerGeo = new THREE.CylinderGeometry(innerR, innerR + 0.1, wallH, 48, 1, true);
-  const innerWall = new THREE.Mesh(innerGeo, createWeatheredSandstoneMaterial());
-  innerWall.position.y = wallH / 2;
+    // Marble coping on each wall quadrant
+    const copingGeo = new THREE.TorusGeometry(outerR + 0.07, 0.08, 8, 32, arcAngle);
+    copingGeo.rotateX(Math.PI / 2);
+    copingGeo.rotateZ(startAngle);
+    const copingMesh = new THREE.Mesh(copingGeo, marble);
+    copingMesh.position.y = 0.2 + wallH;
+    copingMesh.castShadow = true;
+    group.add(copingMesh);
+
+    // Doorway stone architrave pilasters
+    for (const dEnd of [startAngle, startAngle + arcAngle]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.18, wallH + 0.08, 0.22), marble);
+      post.position.set(Math.cos(dEnd) * outerR, 0.2 + wallH / 2, Math.sin(dEnd) * outerR);
+      post.rotation.y = -dEnd;
+      post.castShadow = true;
+      group.add(post);
+    }
+  }
+
+  // 3. Inner cylindrical wall
+  const innerWallGeo = new THREE.CylinderGeometry(innerR, innerR + 0.12, wallH * 0.85, 48, 1, true);
+  const innerWall = new THREE.Mesh(innerWallGeo, sandstone);
+  innerWall.position.y = 0.2 + (wallH * 0.85) / 2;
   innerWall.castShadow = true;
   group.add(innerWall);
 
-  // Annular floor between walls
-  const annularGeo = new THREE.RingGeometry(innerR + 0.1, outerR, 64);
+  const innerCoping = new THREE.Mesh(new THREE.TorusGeometry(innerR + 0.06, 0.07, 8, 48), marble);
+  innerCoping.rotateX(Math.PI / 2);
+  innerCoping.position.y = 0.2 + wallH * 0.85;
+  group.add(innerCoping);
+
+  // 4. Annular floor walkway between walls
+  const annularGeo = new THREE.RingGeometry(innerR + 0.12, outerR - 0.02, 64);
   annularGeo.rotateX(-Math.PI / 2);
-  const annular = new THREE.Mesh(annularGeo, createWeatheredSandstoneMaterial());
-  annular.position.y = 0.02;
+  const annular = new THREE.Mesh(annularGeo, weathered);
+  annular.position.y = 0.205;
   annular.receiveShadow = true;
   group.add(annular);
 
-  // Degree markings on outer rim
+  // 5. 360-degree graduated bronze & marble azimuth markers on the outer wall top
   for (let i = 0; i < 36; i++) {
     const angle = (i * Math.PI * 2) / 36;
-    const markGeo = new THREE.BoxGeometry(0.04, i % 9 === 0 ? 0.3 : 0.15, 0.04);
-    const mark = new THREE.Mesh(markGeo, bronze);
-    mark.position.set(Math.cos(angle) * outerR, wallH, Math.sin(angle) * outerR);
+    const isCardinal = i % 9 === 0;
+    const markGeo = new THREE.BoxGeometry(0.035, isCardinal ? 0.08 : 0.04, isCardinal ? 0.14 : 0.08);
+    const mark = new THREE.Mesh(markGeo, isCardinal ? marble : bronze);
+    mark.position.set(Math.cos(angle) * (outerR + 0.06), 0.2 + wallH + 0.04, Math.sin(angle) * (outerR + 0.06));
     mark.rotation.y = -angle;
     group.add(mark);
   }
 
-  // Central gnomon pillar sitting on ground at y = 0
-  const pillarH = 1.3;
-  const pillarGeo = new THREE.CylinderGeometry(0.12, 0.15, pillarH, 20);
-  const pillar = new THREE.Mesh(pillarGeo, bronze);
-  pillar.position.y = pillarH / 2;
+  // 6. Central pillar with bronze sighting pin
+  const pillarH = 1.45;
+  const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, pillarH, 24), bronze);
+  pillar.position.y = 0.2 + pillarH / 2;
   pillar.castShadow = true;
   group.add(pillar);
 
-  // Crosshair wires
+  const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.4, 12), marble);
+  pin.position.y = 0.2 + pillarH + 0.2;
+  group.add(pin);
+
+  // 7. Stretched crosshair sighting wires
   for (const angle of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
     const wirePts = [
-      new THREE.Vector3(Math.cos(angle) * 0.2, wallH + 0.01, Math.sin(angle) * 0.2),
-      new THREE.Vector3(Math.cos(angle) * (outerR - 0.2), wallH + 0.01, Math.sin(angle) * (outerR - 0.2)),
+      new THREE.Vector3(Math.cos(angle) * 0.2, 0.2 + wallH * 0.86, Math.sin(angle) * 0.2),
+      new THREE.Vector3(Math.cos(angle) * (outerR - 0.1), 0.2 + wallH * 0.86, Math.sin(angle) * (outerR - 0.1)),
     ];
     const wireGeo = new THREE.BufferGeometry().setFromPoints(wirePts);
-    group.add(new THREE.Line(wireGeo, new THREE.LineBasicMaterial({ color: 0xcb8e3e, transparent: true, opacity: 0.7 })));
+    group.add(new THREE.Line(wireGeo, new THREE.LineBasicMaterial({ color: 0xd4963f, linewidth: 2 })));
+  }
+
+  // Entrance steps on 4 cardinal directions
+  for (let c = 0; c < 4; c++) {
+    const cAngle = c * (Math.PI / 2);
+    for (let st = 0; st < 2; st++) {
+      const step = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.1, 0.2), weathered);
+      step.position.set(
+        Math.cos(cAngle) * (outerR + 0.2 + st * 0.18),
+        0.05 + (1 - st) * 0.1,
+        Math.sin(cAngle) * (outerR + 0.2 + st * 0.18)
+      );
+      step.rotation.y = -cAngle + Math.PI / 2;
+      group.add(step);
+    }
   }
 
   return group;
@@ -864,61 +1146,203 @@ function buildBhitti(): THREE.Group {
   const sandstone = createSandstoneMaterial();
   const marble = createMarbleMaterial();
   const bronze = createBronzeMaterial();
+  const weathered = createWeatheredSandstoneMaterial();
 
-  const W = 4.0;
-  const H = 2.4;
-  const D = 0.45;
+  const W = 4.4;
+  const H = 2.6;
+  const D = 0.5;
 
-  // Main wall body sitting on ground at y = 0
-  const wallGeo = new THREE.BoxGeometry(W, H, D);
-  const wall = new THREE.Mesh(wallGeo, sandstone);
-  wall.position.y = H / 2;
+  // Foundation plinth
+  const plinth = new THREE.Mesh(new THREE.BoxGeometry(W + 0.4, 0.24, D + 0.3), weathered);
+  plinth.position.y = 0.12;
+  plinth.receiveShadow = true;
+  group.add(plinth);
+
+  // Main wall body
+  const wall = new THREE.Mesh(new THREE.BoxGeometry(W, H, D), sandstone);
+  wall.position.y = 0.24 + H / 2;
   wall.castShadow = true;
   wall.receiveShadow = true;
   group.add(wall);
 
-  // Marble face cladding (front)
-  const faceGeo = new THREE.BoxGeometry(W * 0.92, H * 0.9, 0.04);
-  const face = new THREE.Mesh(faceGeo, marble);
-  face.position.set(0, H / 2, D / 2 + 0.02);
+  // Front marble cladding face
+  const face = new THREE.Mesh(new THREE.BoxGeometry(W * 0.94, H * 0.92, 0.04), marble);
+  face.position.set(0, 0.24 + H / 2, D / 2 + 0.02);
+  face.castShadow = true;
   group.add(face);
 
-  // Buttress supports (left & right)
+  // Heavy stepped buttresses supporting wall
   for (const side of [-1, 1]) {
-    const buttressGeo = new THREE.BoxGeometry(0.35, H, 1.2);
-    const buttress = new THREE.Mesh(buttressGeo, createWeatheredSandstoneMaterial());
-    buttress.position.set(side * (W / 2 + 0.17), H / 2, -0.38);
+    const buttress = new THREE.Mesh(new THREE.BoxGeometry(0.35, H, 1.1), weathered);
+    buttress.position.set(side * (W / 2 + 0.16), 0.24 + H / 2, -0.32);
     buttress.castShadow = true;
     group.add(buttress);
   }
 
-  // Meridian arc on wall face
-  const arcGeo = new THREE.TorusGeometry(0.9, 0.04, 10, 48, Math.PI * 0.55);
-  arcGeo.rotateZ(-Math.PI * 0.05);
+  // Meridian quadrant arc on marble face
+  const arcR = 1.6;
+  const arcGeo = new THREE.TorusGeometry(arcR, 0.04, 12, 64, Math.PI * 0.52);
   const arc = new THREE.Mesh(arcGeo, bronze);
-  arc.position.set(0.3, H * 0.5, D / 2 + 0.06);
+  arc.position.set(0.4, 0.24 + H * 0.72, D / 2 + 0.05);
+  arc.castShadow = true;
   group.add(arc);
 
-  // Degree marks on arc
-  for (let i = 0; i <= 6; i++) {
-    const angle = (i / 6) * Math.PI * 0.55 - Math.PI * 0.05;
-    const markGeo = new THREE.BoxGeometry(0.04, i === 0 || i === 6 ? 0.14 : 0.08, 0.03);
-    const mark = new THREE.Mesh(markGeo, bronze);
-    mark.position.set(
-      0.3 + Math.cos(angle + Math.PI) * 0.92,
-      H * 0.5 + Math.sin(angle + Math.PI) * 0.92,
-      D / 2 + 0.07
+  // Degree graduations
+  for (let i = 0; i <= 15; i++) {
+    const angle = (i / 15) * Math.PI * 0.52;
+    const mark = new THREE.Mesh(
+      new THREE.BoxGeometry(i % 3 === 0 ? 0.12 : 0.06, 0.025, 0.02),
+      bronze
     );
-    mark.rotation.z = angle;
+    mark.position.set(
+      0.4 - Math.sin(angle) * arcR,
+      0.24 + H * 0.72 - Math.cos(angle) * arcR,
+      D / 2 + 0.06
+    );
     group.add(mark);
   }
 
-  // Top coping course sitting on wall top
-  const copingH = 0.18;
-  const copingGeo = new THREE.BoxGeometry(W + 0.1, copingH, D + 0.1);
-  const coping = new THREE.Mesh(copingGeo, marble);
-  coping.position.y = H + copingH / 2;
+  // Pinhole solar gnomon aperture plate at center of arc
+  const pinhole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.04, 16), bronze);
+  pinhole.rotation.x = Math.PI / 2;
+  pinhole.position.set(0.4, 0.24 + H * 0.72, D / 2 + 0.05);
+  group.add(pinhole);
+
+  // Top coping course
+  const coping = new THREE.Mesh(new THREE.BoxGeometry(W + 0.12, 0.18, D + 0.12), marble);
+  coping.position.y = 0.24 + H + 0.09;
+  coping.castShadow = true;
   group.add(coping);
+
+  // Side inspection ladder / stairs
+  for (let st = 0; st < 8; st++) {
+    const step = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.04, 0.14), weathered);
+    step.position.set(-W / 2 - 0.25, 0.24 + st * 0.3, 0);
+    group.add(step);
+  }
+
+  return group;
+}
+
+function buildDakshinottaraBhitti(latRad: number): THREE.Group {
+  const group = new THREE.Group();
+  const sandstone = createSandstoneMaterial();
+  const marble = createMarbleMaterial();
+  const bronze = createBronzeMaterial();
+  const weathered = createWeatheredSandstoneMaterial();
+
+  const wallL = 5.2;
+  const wallH = 3.0;
+  const wallThick = 0.75;
+  const arcR = 2.1;
+
+  // 1. Plinth foundation
+  const plinth = new THREE.Mesh(
+    new THREE.BoxGeometry(wallL + 0.6, 0.28, wallThick + 0.4),
+    weathered
+  );
+  plinth.position.y = 0.14;
+  plinth.receiveShadow = true;
+  group.add(plinth);
+
+  // 2. Colossal Meridian Wall aligned strictly North-South (along Z axis)
+  const wallGeo = new THREE.BoxGeometry(wallThick, wallH, wallL);
+  const wall = new THREE.Mesh(wallGeo, sandstone);
+  wall.position.y = 0.28 + wallH / 2;
+  wall.castShadow = true;
+  wall.receiveShadow = true;
+  group.add(wall);
+
+  // 3. Dual Marble Quadrant Scales: Eastern Face (+X) and Western Face (-X)
+  for (const side of [-1, 1]) {
+    const faceX = side * (wallThick / 2 + 0.02);
+
+    // Marble veneer cladding on both wall faces
+    const veneer = new THREE.Mesh(
+      new THREE.BoxGeometry(0.03, wallH * 0.92, wallL * 0.94),
+      marble
+    );
+    veneer.position.set(faceX, 0.28 + wallH / 2, 0);
+    veneer.castShadow = true;
+    group.add(veneer);
+
+    // Bronze Quadrant Arc on each face (centered at upper observation aperture)
+    const arcGeo = new THREE.TorusGeometry(arcR, 0.045, 12, 64, Math.PI * 0.52);
+    arcGeo.rotateY(Math.PI / 2);
+    arcGeo.rotateX(side > 0 ? 0 : Math.PI);
+    const arc = new THREE.Mesh(arcGeo, bronze);
+    arc.position.set(side * (wallThick / 2 + 0.05), 0.28 + wallH * 0.72, 0.4);
+    arc.castShadow = true;
+    group.add(arc);
+
+    // Scale degree graduations along the quadrant arc
+    for (let d = 0; d <= 18; d++) {
+      const angle = (d / 18) * (Math.PI * 0.52);
+      const dy = -Math.sin(angle) * arcR;
+      const dz = -Math.cos(angle) * arcR;
+      const tick = new THREE.Mesh(
+        new THREE.BoxGeometry(0.02, d % 3 === 0 ? 0.08 : 0.04, 0.015),
+        bronze
+      );
+      tick.position.set(side * (wallThick / 2 + 0.06), 0.28 + wallH * 0.72 + dy, 0.4 + dz);
+      group.add(tick);
+    }
+
+    // Pinhole gnomon aperture plate at the top of the quadrant
+    const pinholePlate = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.08, 0.04, 16),
+      bronze
+    );
+    pinholePlate.rotation.z = Math.PI / 2;
+    pinholePlate.position.set(side * (wallThick / 2 + 0.05), 0.28 + wallH * 0.72, 0.4);
+    group.add(pinholePlate);
+  }
+
+  // 4. North and South access staircases leading to the upper observation terrace
+  const stairCount = 10;
+  for (const end of [-1, 1]) {
+    for (let s = 0; s < stairCount; s++) {
+      const t = (s + 0.5) / stairCount;
+      const stepH = (wallH / stairCount) * 0.9;
+      const step = new THREE.Mesh(
+        new THREE.BoxGeometry(wallThick * 0.85, stepH, 0.18),
+        marble
+      );
+      const sz = end * (wallL / 2 + (stairCount - s) * 0.16);
+      const sy = 0.28 + t * (wallH * 0.85);
+      step.position.set(0, sy, sz);
+      step.castShadow = true;
+      group.add(step);
+    }
+  }
+
+  // 5. Upper catwalk and coping terrace
+  const coping = new THREE.Mesh(
+    new THREE.BoxGeometry(wallThick + 0.15, 0.16, wallL + 0.15),
+    marble
+  );
+  coping.position.y = 0.28 + wallH + 0.08;
+  coping.castShadow = true;
+  group.add(coping);
+
+  // Parapet balustrades along upper walkway
+  for (const side of [-1, 1]) {
+    const parapet = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.35, wallL * 0.9),
+      marble
+    );
+    parapet.position.set(side * (wallThick / 2 + 0.03), 0.28 + wallH + 0.16 + 0.175, 0);
+    parapet.castShadow = true;
+    group.add(parapet);
+  }
+
+  // Zenith observation sighting vane on top terrace
+  const zenithSight = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.04, 0.45, 12),
+    bronze
+  );
+  zenithSight.position.set(0, 0.28 + wallH + 0.4, 0);
+  group.add(zenithSight);
 
   return group;
 }
@@ -1076,13 +1500,15 @@ function buildSamratCombo(latRad: number): THREE.Group {
   const sandstone = createSandstoneMaterial();
   const marble = createMarbleMaterial();
   const bronze = createBronzeMaterial();
+  const weathered = createWeatheredSandstoneMaterial();
 
   const baseL = 3.2;
   const gH = baseL * Math.tan(latRad);
+  const foundationY = 0.44;
 
   // Foundation
   [3.6, 3.2].forEach((w, i) => {
-    const step = new THREE.Mesh(new THREE.BoxGeometry(w, 0.22, 1.4 - i * 0.2), sandstone);
+    const step = new THREE.Mesh(new THREE.BoxGeometry(w, 0.22, 1.4 - i * 0.2), weathered);
     step.position.y = 0.11 + i * 0.22;
     step.castShadow = true;
     group.add(step);
@@ -1095,44 +1521,94 @@ function buildSamratCombo(latRad: number): THREE.Group {
   gnomonShape.lineTo(-baseL / 2, gH);
   gnomonShape.closePath();
 
-  const gnomonGeo = new THREE.ExtrudeGeometry(gnomonShape, { depth: 0.3, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03 });
-  gnomonGeo.translate(0, 0, -0.15);
+  const gnomonGeo = new THREE.ExtrudeGeometry(gnomonShape, { depth: 0.32, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03 });
+  gnomonGeo.translate(0, 0, -0.16);
   const gnomon = new THREE.Mesh(gnomonGeo, sandstone);
-  gnomon.position.set(0, 0.44, 0);
+  gnomon.position.set(0, foundationY, 0);
   gnomon.castShadow = true;
+  gnomon.receiveShadow = true;
   group.add(gnomon);
 
   // Marble hypotenuse ramp
   const hypoLen = Math.sqrt(baseL * baseL + gH * gH);
-  const hypo = new THREE.Mesh(new THREE.BoxGeometry(hypoLen, 0.06, 0.34), marble);
-  hypo.position.set(0, 0.44 + gH * 0.5, 0);
-  hypo.rotation.z = -Math.atan2(gH, baseL);
+  const hypoAngle = Math.atan2(gH, baseL);
+  const hypo = new THREE.Mesh(new THREE.BoxGeometry(hypoLen, 0.06, 0.36), marble);
+  hypo.position.set(0, foundationY + gH * 0.5, 0);
+  hypo.rotation.z = -hypoAngle;
+  hypo.castShadow = true;
   group.add(hypo);
 
-  // Dual quadrant arcs
-  const arcR = Math.max(1.8, gH * 0.9);
+  // Steps along hypotenuse
+  const stairCount = 10;
+  for (let s = 0; s < stairCount; s++) {
+    const t = (s + 0.5) / stairCount;
+    const sx = baseL / 2 - t * baseL;
+    const sy = foundationY + t * gH;
+    const step = new THREE.Mesh(new THREE.BoxGeometry((hypoLen / stairCount) * 0.85, 0.025, 0.34), marble);
+    step.position.set(sx, sy + 0.04, 0);
+    step.rotation.z = -hypoAngle;
+    step.castShadow = true;
+    group.add(step);
+  }
+
+  // Apex chhatri
+  const chhatri = new THREE.Group();
+  chhatri.position.set(-baseL / 2, foundationY + gH, 0);
+  const chhatriBase = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.05, 0.48), marble);
+  chhatri.add(chhatriBase);
+  [[-0.18, -0.18], [0.18, -0.18], [-0.18, 0.18], [0.18, 0.18]].forEach(([px, pz]) => {
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.36, 10), sandstone);
+    col.position.set(px, 0.05 + 0.18, pz);
+    chhatri.add(col);
+  });
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), sandstone);
+  dome.position.y = 0.05 + 0.36;
+  dome.castShadow = true;
+  chhatri.add(dome);
+  const finial = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.12, 8), bronze);
+  finial.position.y = 0.05 + 0.36 + 0.22 + 0.06;
+  chhatri.add(finial);
+  group.add(chhatri);
+
+  // Dual quadrant arcs with graduations
+  const arcR = Math.max(1.9, gH * 0.95);
   for (const side of [-1, 1]) {
-    const arcGeo = new THREE.CylinderGeometry(arcR, arcR + 0.1, 0.4, 36, 1, true, 0, Math.PI * 0.5);
+    const arcGeo = new THREE.CylinderGeometry(arcR, arcR + 0.12, 0.44, 48, 1, true, 0, Math.PI * 0.52);
     arcGeo.rotateX(Math.PI / 2);
     arcGeo.rotateZ(latRad - Math.PI / 2 + 0.05);
     const arcMesh = new THREE.Mesh(arcGeo, marble);
-    arcMesh.position.set(side * 0.6, 0.44 + gH * 0.38, 0);
+    arcMesh.position.set(side * 0.65, foundationY + gH * 0.38, 0);
     arcMesh.scale.x = side;
     arcMesh.castShadow = true;
     group.add(arcMesh);
+
+    // Supporting pier
+    const pier = new THREE.Mesh(new THREE.BoxGeometry(0.2, gH * 0.35, 0.35), weathered);
+    pier.position.set(side * 0.65, foundationY + gH * 0.18, 0);
+    pier.castShadow = true;
+    group.add(pier);
   }
 
   // Integrated southern sighting chakra ring (the "combo" celestial unit)
   const chakraGroup = new THREE.Group();
-  chakraGroup.position.set(-baseL / 2 - 0.5, 0.44 + 0.4, 0);
-  const chakraRing = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.04, 12, 48), bronze);
+  chakraGroup.position.set(baseL / 2 + 0.6, foundationY + 0.4, 0);
+  const chakraRing = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.045, 12, 48), bronze);
   chakraRing.rotation.y = Math.PI / 2;
   chakraRing.rotation.x = latRad;
   chakraRing.castShadow = true;
   chakraGroup.add(chakraRing);
 
-  const chakraPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.8, 16), createWeatheredSandstoneMaterial());
-  chakraPillar.position.y = -0.4;
+  // Cross spokes on chakra
+  for (const a of [0, Math.PI / 2]) {
+    const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.36, 8), bronze);
+    spoke.rotation.x = latRad;
+    spoke.rotation.z = a;
+    chakraGroup.add(spoke);
+  }
+
+  const chakraPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 0.85, 16), weathered);
+  chakraPillar.position.y = -0.42;
+  chakraPillar.castShadow = true;
   chakraGroup.add(chakraPillar);
 
   group.add(chakraGroup);
@@ -1440,7 +1916,8 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
         case 'dhruva-protha-chakra': object = buildDhruvaProthaChakra(latRad); break;
         case 'yantra-samrat-combo': object = buildSamratCombo(latRad); break;
         case 'golayantra-chakra': object = buildGolayantra(latRad); break;
-        case 'bhitti': case 'dakshinottara-bhitti': object = buildBhitti(); break;
+        case 'bhitti': object = buildBhitti(); break;
+        case 'dakshinottara-bhitti': object = buildDakshinottaraBhitti(latRad); break;
         case 'nadi-valaya': object = buildNadiValaya(latRad); break;
         case 'palaka': object = buildPalaka(); break;
         case 'chaapa': object = buildChaapa(latRad); break;
