@@ -345,17 +345,139 @@ export default function YantraDetails({ data }: { data: YantraData }) {
 
             {/* ABOUT TAB */}
             {activeTab === 'description' && (
-              <div className="space-y-4 animate-tab-fade">
-                <div className="flex items-center gap-2">
-                  <Info className="h-4 w-4" style={{ color: 'hsl(24, 90%, 58%)' }} />
-                  <h3 className="font-headline text-sm tracking-wider" style={{ color: 'hsla(38, 25%, 85%, 0.85)' }}>
-                    Historical & Astronomical Significance
-                  </h3>
+              <div className="space-y-5 animate-tab-fade">
+                {/* Primary description */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Info className="h-4 w-4" style={{ color: 'hsl(24, 90%, 58%)' }} />
+                    <h3 className="font-headline text-sm tracking-wider" style={{ color: 'hsla(38, 25%, 85%, 0.85)' }}>
+                      About This Instrument
+                    </h3>
+                  </div>
+                  <div
+                    className="yantra-description"
+                    dangerouslySetInnerHTML={{ __html: data.description }}
+                  />
                 </div>
-                <div
-                  className="yantra-description"
-                  dangerouslySetInnerHTML={{ __html: data.description }}
-                />
+
+                {/* Rich knowledge section */}
+                {YANTRA_KNOWLEDGE[data.yantraId] && (() => {
+                  const knowledge = YANTRA_KNOWLEDGE[data.yantraId];
+                  return (
+                    <>
+                      {/* Key Facts Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <div className="p-3 rounded-xl" style={{ background: 'hsla(24, 90%, 55%, 0.06)', border: '1px solid hsla(24, 90%, 55%, 0.12)' }}>
+                          <p className="text-[9px] font-medium uppercase tracking-widest text-muted-foreground mb-1">Inventor</p>
+                          <p className="text-xs font-medium" style={{ color: 'hsla(38, 25%, 85%, 0.9)' }}>{knowledge.inventor}</p>
+                        </div>
+                        <div className="p-3 rounded-xl" style={{ background: 'hsla(43, 100%, 52%, 0.05)', border: '1px solid hsla(43, 100%, 52%, 0.12)' }}>
+                          <p className="text-[9px] font-medium uppercase tracking-widest text-muted-foreground mb-1">Era</p>
+                          <p className="text-xs font-medium" style={{ color: 'hsla(38, 25%, 85%, 0.9)' }}>{knowledge.era}</p>
+                        </div>
+                        <div className="p-3 rounded-xl" style={{ background: 'hsla(145, 60%, 48%, 0.05)', border: '1px solid hsla(145, 60%, 48%, 0.12)' }}>
+                          <p className="text-[9px] font-medium uppercase tracking-widest text-muted-foreground mb-1">Accuracy</p>
+                          <p className="text-xs font-medium" style={{ color: 'hsl(145, 60%, 65%)' }}>{knowledge.accuracy}</p>
+                        </div>
+                      </div>
+
+                      {/* Working Principle */}
+                      <SectionDivider label="Working Principle" />
+                      <div className="p-4 rounded-xl space-y-2" style={{ background: 'hsla(225, 35%, 6%, 0.6)', border: '1px solid hsla(225, 22%, 14%, 0.6)' }}>
+                        <p className="text-[9px] font-medium uppercase tracking-widest" style={{ color: 'hsl(24, 90%, 58%)' }}>Scientific Basis</p>
+                        <p className="text-sm leading-relaxed" style={{ color: 'hsla(38, 25%, 80%, 0.8)' }}>{knowledge.workingPrinciple}</p>
+                      </div>
+
+                      {/* Astronomical Coordinates */}
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {knowledge.astronomicalCoordinates.map((coord) => (
+                          <span key={coord} className="px-2.5 py-1 rounded-full text-[10px] font-medium"
+                            style={{ background: 'hsla(43, 100%, 52%, 0.06)', border: '1px solid hsla(43, 100%, 52%, 0.15)', color: 'hsl(43, 100%, 62%)' }}>
+                            {coord}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* How to Read Steps */}
+                      <SectionDivider label="How to Read" />
+                      <div className="space-y-2">
+                        {knowledge.howToRead.map((item, idx) => (
+                          <div key={idx} className="flex gap-3 p-3.5 rounded-xl group transition-all duration-200"
+                            style={{ background: 'hsla(225, 35%, 6%, 0.5)', border: '1px solid hsla(225, 22%, 12%, 0.5)' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'hsla(24, 90%, 55%, 0.2)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'hsla(225, 22%, 12%, 0.5)'; }}
+                          >
+                            <div className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold"
+                              style={{ background: 'hsla(24, 90%, 55%, 0.1)', border: '1px solid hsla(24, 90%, 55%, 0.2)', color: 'hsl(24, 90%, 62%)' }}>
+                              {idx + 1}
+                            </div>
+                            <div className="space-y-0.5 min-w-0">
+                              <p className="text-xs font-semibold" style={{ color: 'hsla(38, 25%, 88%, 0.9)' }}>{item.step.replace(/^\d+\.\s*/, '')}</p>
+                              <p className="text-[11px] leading-relaxed text-muted-foreground">{item.description}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Architectural Details */}
+                      <SectionDivider label="Architecture & Materials" />
+                      <div className="space-y-3">
+                        <div className="p-4 rounded-xl" style={{ background: 'hsla(225, 35%, 6%, 0.6)', border: '1px solid hsla(225, 22%, 14%, 0.6)' }}>
+                          <p className="text-[9px] font-medium uppercase tracking-widest text-muted-foreground mb-2">Construction Materials</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {knowledge.architecturalDetails.materials.map((mat) => (
+                              <span key={mat} className="px-2 py-0.5 rounded-full text-[10px] font-medium"
+                                style={{ background: 'hsla(24, 90%, 55%, 0.06)', border: '1px solid hsla(24, 90%, 55%, 0.12)', color: 'hsl(24, 90%, 65%)' }}>
+                                {mat}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div className="p-3.5 rounded-xl" style={{ background: 'hsla(225, 35%, 6%, 0.5)', border: '1px solid hsla(225, 22%, 12%, 0.5)' }}>
+                            <p className="text-[9px] font-medium uppercase tracking-widest text-muted-foreground mb-1.5">Geometric Principles</p>
+                            <p className="text-[11px] leading-relaxed" style={{ color: 'hsla(38, 25%, 80%, 0.75)' }}>{knowledge.architecturalDetails.geometricPrinciples}</p>
+                          </div>
+                          <div className="p-3.5 rounded-xl" style={{ background: 'hsla(43, 100%, 52%, 0.03)', border: '1px solid hsla(43, 100%, 52%, 0.1)' }}>
+                            <p className="text-[9px] font-medium uppercase tracking-widest text-muted-foreground mb-1.5">Unique Features</p>
+                            <p className="text-[11px] leading-relaxed" style={{ color: 'hsla(38, 25%, 80%, 0.75)' }}>{knowledge.architecturalDetails.uniqueFeatures}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Vedic Significance */}
+                      <SectionDivider label="Cultural & Vedic Significance" />
+                      <div className="flex gap-3 p-4 rounded-xl" style={{
+                        background: 'linear-gradient(135deg, hsla(43, 100%, 52%, 0.04), hsla(24, 90%, 55%, 0.03))',
+                        border: '1px solid hsla(43, 100%, 52%, 0.12)',
+                      }}>
+                        <Globe className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: 'hsl(43, 100%, 58%)' }} />
+                        <p className="text-xs leading-relaxed italic" style={{ color: 'hsla(38, 60%, 75%, 0.8)' }}>{knowledge.vedicSignificance}</p>
+                      </div>
+
+                      {/* Observatory Locations */}
+                      {knowledge.observatoryLocations.length > 0 && (
+                        <>
+                          <SectionDivider label="Where to See" />
+                          <div className="space-y-2">
+                            {knowledge.observatoryLocations.map((loc, i) => (
+                              <div key={i} className="flex gap-3 p-3 rounded-xl transition-all duration-200"
+                                style={{ background: 'hsla(225, 35%, 6%, 0.5)', border: '1px solid hsla(225, 22%, 12%, 0.5)' }}>
+                                <MapPin className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: 'hsl(24, 90%, 60%)' }} />
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold" style={{ color: 'hsla(38, 25%, 88%, 0.9)' }}>
+                                    {loc.site} — {loc.city}, {loc.state}
+                                  </p>
+                                  <p className="text-[11px] text-muted-foreground leading-relaxed">{loc.details}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             )}
 
