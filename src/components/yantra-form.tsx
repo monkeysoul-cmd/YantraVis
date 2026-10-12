@@ -271,6 +271,13 @@ export default function YantraForm({
                     setLat(e.target.value);
                     setActivePreset('');
                   }}
+                  onBlur={() => {
+                    const nLat = Number(lat);
+                    const nLon = Number(lon);
+                    if (!isNaN(nLat) && !isNaN(nLon) && onCoordinatesChange) {
+                      onCoordinatesChange(nLat, nLon);
+                    }
+                  }}
                   className="h-10 text-sm input-premium transition-all duration-300"
                   style={{
                     background: 'hsla(225, 35%, 6%, 0.8)',
@@ -298,6 +305,13 @@ export default function YantraForm({
                   onChange={(e) => {
                     setLon(e.target.value);
                     setActivePreset('');
+                  }}
+                  onBlur={() => {
+                    const nLat = Number(lat);
+                    const nLon = Number(lon);
+                    if (!isNaN(nLat) && !isNaN(nLon) && onCoordinatesChange) {
+                      onCoordinatesChange(nLat, nLon);
+                    }
                   }}
                   className="h-10 text-sm input-premium transition-all duration-300"
                   style={{

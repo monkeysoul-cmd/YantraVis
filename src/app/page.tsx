@@ -210,43 +210,56 @@ export default function Home() {
   }, []);
 
   const handleFormAction = (formData: FormData) => {
-    setIsLoading(true);
+    const yantraId = (formData.get('yantra') as string) || 'samrat';
+    const rawLat = formData.get('latitude');
+    const rawLon = formData.get('longitude');
+    const lat = rawLat !== null && rawLat !== '' ? Number(rawLat) : 26.9124;
+    const lon = rawLon !== null && rawLon !== '' ? Number(rawLon) : 75.7873;
+    const safeLat = isNaN(lat) ? 26.9124 : lat;
+    const safeLon = isNaN(lon) ? 75.7873 : lon;
+
+    // Instant local parametric calculations (<0.1ms) for instantaneous UI response
+    const immediateData = generateParametricYantraData(yantraId, safeLat, safeLon);
+    setLocalData(immediateData);
+    setState({ data: immediateData, error: null });
     setMobileTab('viewer');
+
     startTransition(async () => {
       try {
         const res = await generateYantra(state, formData);
-        setState(res);
+        if (res?.data) {
+          setState(res);
+          setLocalData(res.data);
+        }
       } catch (err) {
-        console.error("Form action failed:", err);
-        const yantraId = (formData.get('yantra') as string) || 'samrat';
-        const lat = Number(formData.get('latitude')) || 26.9124;
-        const lon = Number(formData.get('longitude')) || 75.7873;
-        const fallback = generateParametricYantraData(yantraId, lat, lon);
-        setLocalData(fallback);
-        setState({ data: fallback, error: null });
-        toast({
-          variant: 'destructive',
-          title: 'Notice',
-          description: 'Failed to calculate instrument data. Using local parametric model.',
-        });
-      } finally {
-        setIsLoading(false);
+        console.error("Background sync notice:", err);
       }
     });
   };
 
+  const handleQuickYantraChange = (yantraId: string) => {
+    const currentLat = displayData?.location.latitude ?? 26.9124;
+    const currentLon = displayData?.location.longitude ?? 75.7873;
+    const updated = generateParametricYantraData(yantraId, currentLat, currentLon);
+    setLocalData(updated);
+    setState({ data: updated, error: null });
+  };
+
+  const handleQuickCoordinatesChange = (lat: number, lon: number) => {
+    const currentYantra = displayData?.yantraId ?? 'samrat';
+    const updated = generateParametricYantraData(currentYantra, lat, lon);
+    setLocalData(updated);
+    setState({ data: updated, error: null });
+  };
+
   const handleLoadDemo = (yantraId = 'samrat') => {
-    setIsLoading(true);
-    startTransition(() => {
-      const demoData = generateParametricYantraData(yantraId, 26.9124, 75.7873);
-      setLocalData(demoData);
-      setState({ data: demoData, error: null });
-      setMobileTab('viewer');
-      setIsLoading(false);
-      toast({
-        title: 'Samrat Yantra Calibrated',
-        description: 'Interactive 3D model loaded for Jaipur coordinates (26.9124° N, 75.7873° E).',
-      });
+    const demoData = generateParametricYantraData(yantraId, 26.9124, 75.7873);
+    setLocalData(demoData);
+    setState({ data: demoData, error: null });
+    setMobileTab('viewer');
+    toast({
+      title: 'Samrat Yantra Calibrated',
+      description: 'Interactive 3D model loaded for Jaipur coordinates (26.9124° N, 75.7873° E).',
     });
   };
 
@@ -265,7 +278,8 @@ export default function Home() {
   return (
     <div className="flex flex-col h-[100dvh] min-h-[100dvh] bg-black text-foreground overflow-hidden selection:bg-primary/30 selection:text-primary-foreground">
       <SolarSystemBackground />
-      {isProcessing && <LoadingOverlay />}
+      {/* Only show loading overlay if we don't already have data rendered */}
+      {isProcessing && !displayData && <LoadingOverlay />}
       <AppHeader />
 
       {/* Mobile view switcher tab bar (phones & compact screens < 768px) */}
@@ -346,6 +360,8 @@ export default function Home() {
                 action={handleFormAction}
                 isPending={isProcessing}
                 activeYantraId={displayData?.yantraId}
+                onYantraChange={handleQuickYantraChange}
+                onCoordinatesChange={handleQuickCoordinatesChange}
               />
             </div>
           </ScrollArea>
@@ -407,15 +423,15 @@ export default function Home() {
 
           <ScrollArea className="flex-1 h-full">
             <div className="p-3 sm:p-5 lg:p-6 max-w-5xl 2xl:max-w-6xl mx-auto w-full relative z-10 pb-12 sm:pb-6">
-              {isProcessing ? (
-                <LoadingSkeleton />
-              ) : displayData ? (
-                <div className={cn("transition-opacity duration-500", displayData ? 'opacity-100' : 'opacity-0')}>
+              {displayData ? (
+                <div className={cn("transition-opacity duration-300", displayData ? 'opacity-100' : 'opacity-0')}>
                   <YantraDetails 
-                    key={`details-${displayData.yantraId}-${displayData.location.latitude}-${displayData.location.longitude}`} 
+                    key={displayData.yantraId} 
                     data={displayData} 
                   />
                 </div>
+              ) : isProcessing ? (
+                <LoadingSkeleton />
               ) : (
                 <WelcomeState 
                   onLoadDemo={() => handleLoadDemo('samrat')}

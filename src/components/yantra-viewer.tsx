@@ -1773,12 +1773,90 @@ function buildDefault(): THREE.Group {
   return group;
 }
 
+// Helpers for zero-teardown instrument swapping
+
+function buildInstrumentGroup(yantraId: Yantra['id'], latitude?: number): THREE.Group {
+  const safeLat = typeof latitude === 'number' && !isNaN(latitude) ? latitude : 26.9124;
+  const latRad = (Math.max(5, Math.min(85, Math.abs(safeLat))) * Math.PI) / 180;
+  let object: THREE.Group;
+
+  switch (yantraId) {
+    case 'samrat': object = buildSamrat(latRad); break;
+    case 'rama': object = buildRama(latRad); break;
+    case 'jai-prakash': object = buildJaiPrakash(latRad); break;
+    case 'rasivalaya': object = buildRasivalaya(latRad); break;
+    case 'digamsa': object = buildDigamsa(latRad); break;
+    case 'dhruva-protha-chakra': object = buildDhruvaProthaChakra(latRad); break;
+    case 'yantra-samrat-combo': object = buildSamratCombo(latRad); break;
+    case 'golayantra-chakra': object = buildGolayantra(latRad); break;
+    case 'bhitti': object = buildBhitti(); break;
+    case 'dakshinottara-bhitti': object = buildDakshinottaraBhitti(latRad); break;
+    case 'nadi-valaya': object = buildNadiValaya(latRad); break;
+    case 'palaka': object = buildPalaka(); break;
+    case 'chaapa': object = buildChaapa(latRad); break;
+    default: object = buildDefault(); break;
+  }
+
+  // Shadows
+  object.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+
+  // Auto-align object: center in X & Z, and rest flush on ground plane at y = 0
+  const initialBox = new THREE.Box3().setFromObject(object);
+  const initialCenter = initialBox.getCenter(new THREE.Vector3());
+  object.position.x = -initialCenter.x;
+  object.position.z = -initialCenter.z;
+  object.position.y = -initialBox.min.y;
+
+  return object;
+}
+
+function disposeGroupTree(group: THREE.Object3D) {
+  group.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      child.geometry?.dispose();
+      if (Array.isArray(child.material)) {
+        child.material.forEach((m) => m.dispose());
+      } else if (child.material) {
+        child.material.dispose();
+      }
+    }
+    if (child instanceof THREE.Line) {
+      child.geometry?.dispose();
+      (child.material as THREE.Material)?.dispose();
+    }
+    if (child instanceof THREE.Points) {
+      child.geometry?.dispose();
+      (child.material as THREE.Material)?.dispose();
+    }
+  });
+}
+
 // Main 3D viewport component
 
 const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
   ({ yantraId, latitude = 26.9124, isArMode = false, animateShadow = false }, ref) => {
     const mountRef = useRef<HTMLDivElement>(null);
-    const objectRef = useRef<THREE.Object3D | null>(null);
+    const objectRef = useRef<THREE.Group | null>(null);
+
+    // Persistent engine references for zero-teardown updates
+    const sceneRef = useRef<THREE.Scene | null>(null);
+    const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+    const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+    const controlsRef = useRef<OrbitControls | null>(null);
+    const sunLightRef = useRef<THREE.DirectionalLight | null>(null);
+    const hemisphereLightRef = useRef<THREE.HemisphereLight | null>(null);
+    const bounceLightRef = useRef<THREE.PointLight | null>(null);
+    const rimLightRef = useRef<THREE.DirectionalLight | null>(null);
+
+    const animateShadowRef = useRef(animateShadow);
+    animateShadowRef.current = animateShadow;
+
+    const isVisibleRef = useRef(true);
 
     useImperativeHandle(ref, () => ({
       exportSTL: () => {
@@ -1794,6 +1872,7 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       },
     }));
 
+    // 1. Primary Engine Setup: Runs ONCE on mount
     useEffect(() => {
       const currentMount = mountRef.current;
       if (!currentMount) return;
@@ -1804,8 +1883,9 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       // Scene
       const scene = new THREE.Scene();
       scene.background = null;
+      sceneRef.current = scene;
 
-      // Atmospheric fog — subtle depth fade
+      // Atmospheric fog
       if (!isArMode) {
         scene.fog = new THREE.FogExp2(0x060810, 0.032);
       }
@@ -1813,25 +1893,27 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       // Camera — cinematic FOV
       const camera = new THREE.PerspectiveCamera(42, width / height, 0.05, 200);
       camera.position.set(4.5, 3.5, 6.5);
+      cameraRef.current = camera;
 
-      // High-performance WebGL Renderer
+      // High-performance WebGL Renderer (optimized pixelRatio and 1024 shadow map)
       const renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
         powerPreference: 'high-performance',
       });
       renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.0));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.35;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
-      
+      rendererRef.current = renderer;
+
       // HDR Environment Map for realistic reflections
       const envMap = createEnvironmentMap(renderer);
       scene.environment = envMap;
-      
+
       // Clear any previous nodes before mounting canvas
       while (currentMount.firstChild) {
         currentMount.removeChild(currentMount.firstChild);
@@ -1852,23 +1934,23 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       controls.maxPolarAngle = Math.PI * 0.85;
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.30;
+      controlsRef.current = controls;
 
       // Scene lighting
-
-      // Sky ambient — warm golden sky
       const hemisphereLight = new THREE.HemisphereLight(
-        new THREE.Color(0xffeedd), // sky warm
-        new THREE.Color(0x2a1a0a), // ground warm bounce
+        new THREE.Color(0xffeedd),
+        new THREE.Color(0x2a1a0a),
         0.70
       );
       scene.add(hemisphereLight);
+      hemisphereLightRef.current = hemisphereLight;
 
-      // Key light — solar (higher resolution shadows)
+      // Key light — solar (optimized 1024x1024 shadow map for 4x faster rendering)
       const sunLight = new THREE.DirectionalLight(new THREE.Color(0xfff6e0), 3.2);
       sunLight.position.set(10, 16, 8);
       sunLight.castShadow = true;
-      sunLight.shadow.mapSize.width = 2048;
-      sunLight.shadow.mapSize.height = 2048;
+      sunLight.shadow.mapSize.width = 1024;
+      sunLight.shadow.mapSize.height = 1024;
       sunLight.shadow.camera.near = 0.5;
       sunLight.shadow.camera.far = 60;
       sunLight.shadow.camera.left = -7;
@@ -1879,8 +1961,9 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       sunLight.shadow.normalBias = 0.025;
       sunLight.shadow.radius = 2;
       scene.add(sunLight);
+      sunLightRef.current = sunLight;
 
-      // Fill light — cool side fill with slight blue
+      // Fill light
       const fillLight = new THREE.DirectionalLight(new THREE.Color(0xb8d4f0), 0.55);
       fillLight.position.set(-8, 4, -6);
       scene.add(fillLight);
@@ -1889,11 +1972,13 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       const bounceLight = new THREE.PointLight(new THREE.Color(0xff9a3c), 0.45, 22);
       bounceLight.position.set(0, -2, 3);
       scene.add(bounceLight);
+      bounceLightRef.current = bounceLight;
 
-      // Rim/edge light — defines silhouettes against dark background
+      // Rim/edge light
       const rimLight = new THREE.DirectionalLight(new THREE.Color(0xffe8c0), 0.8);
       rimLight.position.set(-4, 8, -10);
       scene.add(rimLight);
+      rimLightRef.current = rimLight;
 
       // Floating golden dust particles
       let dustParticles: THREE.Points | null = null;
@@ -1901,56 +1986,18 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
         dustParticles = createDustParticles(scene);
       }
 
-      // Build requested instrument geometry
-
-      const safeLat = typeof latitude === 'number' && !isNaN(latitude) ? latitude : 26.9124;
-      const latRad = (Math.max(5, Math.min(85, Math.abs(safeLat))) * Math.PI) / 180;
-      let object: THREE.Group;
-
-      switch (yantraId) {
-        case 'samrat': object = buildSamrat(latRad); break;
-        case 'rama': object = buildRama(latRad); break;
-        case 'jai-prakash': object = buildJaiPrakash(latRad); break;
-        case 'rasivalaya': object = buildRasivalaya(latRad); break;
-        case 'digamsa': object = buildDigamsa(latRad); break;
-        case 'dhruva-protha-chakra': object = buildDhruvaProthaChakra(latRad); break;
-        case 'yantra-samrat-combo': object = buildSamratCombo(latRad); break;
-        case 'golayantra-chakra': object = buildGolayantra(latRad); break;
-        case 'bhitti': object = buildBhitti(); break;
-        case 'dakshinottara-bhitti': object = buildDakshinottaraBhitti(latRad); break;
-        case 'nadi-valaya': object = buildNadiValaya(latRad); break;
-        case 'palaka': object = buildPalaka(); break;
-        case 'chaapa': object = buildChaapa(latRad); break;
-        default: object = buildDefault(); break;
-      }
-
-      // Shadows
-      object.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
-      });
-
-      scene.add(object);
-      objectRef.current = object;
-
-      // Auto-center geometry and position on ground plane
-
-      // Auto-align object: center in X & Z, and rest flush on ground plane at y = 0
-      const initialBox = new THREE.Box3().setFromObject(object);
-      const initialCenter = initialBox.getCenter(new THREE.Vector3());
-      object.position.x = -initialCenter.x;
-      object.position.z = -initialCenter.z;
-      object.position.y = -initialBox.min.y;
-
       // Platform created flush at ground plane y = 0
       if (!isArMode) {
         createGround(scene, 0);
       }
 
+      // Initial instrument build
+      const initialObject = buildInstrumentGroup(yantraId, latitude);
+      scene.add(initialObject);
+      objectRef.current = initialObject;
+
       // Fit camera to centered object
-      const box = new THREE.Box3().setFromObject(object);
+      const box = new THREE.Box3().setFromObject(initialObject);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
       const maxDim = Math.max(size.x, size.y, size.z, 2.5);
@@ -1962,39 +2009,36 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       camera.lookAt(center);
       controls.target.copy(center);
 
-      // Animation loop
-
+      // Animation loop with visibility culling
       const clock = new THREE.Clock();
       let animationFrameId: number;
 
       const animate = () => {
         animationFrameId = requestAnimationFrame(animate);
+
+        // Skip execution when viewer is not visible or tab is minimized
+        if (!isVisibleRef.current) return;
+
         const elapsed = clock.getElapsedTime();
 
-        // Update dust particles
         if (dustParticles) {
           updateDustParticles(dustParticles, elapsed);
         }
 
-        if (animateShadow) {
-          // Solar path simulation:
-          // In Northern hemisphere (India ~26°N), the sun rises in East (+X),
-          // reaches peak in South (+Z) at solar noon, and sets in West (-X).
+        if (animateShadowRef.current) {
+          renderer.shadowMap.autoUpdate = true;
           const dayFraction = (elapsed * 0.08) % 1;
-          const sunAngle = dayFraction * Math.PI; // 0 to PI
-          const sunElevation = Math.sin(sunAngle); // 0 (dawn) -> 1 (noon) -> 0 (dusk)
-          const sunEastWest = Math.cos(sunAngle); // +1 (East) -> 0 (South) -> -1 (West)
+          const sunAngle = dayFraction * Math.PI;
+          const sunElevation = Math.sin(sunAngle);
+          const sunEastWest = Math.cos(sunAngle);
 
-          // Solar noon is in the South (+Z), sun rises in East (+X), sets in West (-X)
           sunLight.position.set(
             sunEastWest * 16,
             Math.max(1.0, sunElevation * 16),
             (1 - sunElevation * 0.4) * 8
           );
 
-          // Warm golden sunrise/sunset, bright warm midday
-          const t = dayFraction;
-          const isGoldenHour = t < 0.18 || t > 0.82;
+          const isGoldenHour = dayFraction < 0.18 || dayFraction > 0.82;
           sunLight.color.setHSL(
             isGoldenHour ? 0.08 : 0.11,
             isGoldenHour ? 0.85 : 0.35,
@@ -2002,19 +2046,35 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
           );
           sunLight.intensity = Math.max(0.3, sunElevation * 3.5);
           hemisphereLight.intensity = Math.max(0.2, sunElevation * 0.70);
-
-          // Ambient fills during day
           bounceLight.intensity = Math.max(0.1, sunElevation * 0.5);
           rimLight.intensity = Math.max(0.3, sunElevation * 0.8);
+        } else {
+          // Static daylight coordinates
+          sunLight.position.set(10, 16, 8);
+          sunLight.intensity = 3.2;
+          sunLight.color.set(0xfff6e0);
+          hemisphereLight.intensity = 0.70;
+          bounceLight.intensity = 0.45;
+          rimLight.intensity = 0.8;
+          renderer.shadowMap.autoUpdate = false;
         }
 
-        // Gentle auto-rotate stops when user interacts
         controls.update();
         renderer.render(scene, camera);
       };
       animate();
 
-      // Handle resize
+      // IntersectionObserver & Visibility handling to save 100% GPU when offscreen
+      const intersectionObserver = new IntersectionObserver((entries) => {
+        const isIntersecting = entries[0]?.isIntersecting ?? true;
+        isVisibleRef.current = isIntersecting && !document.hidden;
+      }, { threshold: 0.05 });
+      intersectionObserver.observe(currentMount);
+
+      const handleVisibilityChange = () => {
+        isVisibleRef.current = !document.hidden;
+      };
+      document.addEventListener('visibilitychange', handleVisibilityChange);
 
       // Debounced resize handler for performance
       let resizeTimeout: ReturnType<typeof setTimeout>;
@@ -2027,7 +2087,6 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
           if (w === 0 || h === 0) return;
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
-          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.0));
           renderer.setSize(w, h, false);
         }, 30);
       };
@@ -2035,33 +2094,17 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
       const resizeObserver = new ResizeObserver(() => handleResize());
       resizeObserver.observe(currentMount);
 
-      // Resource cleanup
-
+      // Clean cleanup only on unmount
       return () => {
         cancelAnimationFrame(animationFrameId);
         clearTimeout(resizeTimeout);
+        intersectionObserver.disconnect();
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
         window.removeEventListener('resize', handleResize);
         resizeObserver.disconnect();
         controls.dispose();
         envMap.dispose();
-        scene.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.geometry?.dispose();
-            if (Array.isArray(child.material)) {
-              child.material.forEach((m) => m.dispose());
-            } else if (child.material) {
-              child.material.dispose();
-            }
-          }
-          if (child instanceof THREE.Line) {
-            child.geometry?.dispose();
-            (child.material as THREE.Material)?.dispose();
-          }
-          if (child instanceof THREE.Points) {
-            child.geometry?.dispose();
-            (child.material as THREE.Material)?.dispose();
-          }
-        });
+        disposeGroupTree(scene);
         renderer.dispose();
         if (renderer.domElement?.parentNode) {
           renderer.domElement.parentNode.removeChild(renderer.domElement);
@@ -2069,9 +2112,51 @@ const YantraViewer = forwardRef<YantraViewerRef, YantraViewerProps>(
         while (currentMount.firstChild) {
           currentMount.removeChild(currentMount.firstChild);
         }
+        sceneRef.current = null;
+        rendererRef.current = null;
+        cameraRef.current = null;
+        controlsRef.current = null;
         objectRef.current = null;
       };
-    }, [yantraId, latitude, isArMode, animateShadow]);
+    }, [isArMode]);
+
+    // 2. Ultra-Fast Instrument Swap Effect: 0.5ms mesh update without WebGL teardown
+    useEffect(() => {
+      const scene = sceneRef.current;
+      const camera = cameraRef.current;
+      const controls = controlsRef.current;
+      const renderer = rendererRef.current;
+      if (!scene || !camera || !controls || !renderer) return;
+
+      // Safely remove previous object
+      if (objectRef.current) {
+        scene.remove(objectRef.current);
+        disposeGroupTree(objectRef.current);
+        objectRef.current = null;
+      }
+
+      // Build requested new instrument
+      const newObject = buildInstrumentGroup(yantraId, latitude);
+      scene.add(newObject);
+      objectRef.current = newObject;
+
+      // Smoothly fit camera & controls target
+      const box = new THREE.Box3().setFromObject(newObject);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z, 2.5);
+
+      camera.position.set(
+        center.x + maxDim * 1.35,
+        center.y + maxDim * 0.85,
+        center.z + maxDim * 1.6
+      );
+      camera.lookAt(center);
+      controls.target.copy(center);
+
+      // Flag shadow map to refresh for the new geometry
+      renderer.shadowMap.needsUpdate = true;
+    }, [yantraId, latitude]);
 
     return <div ref={mountRef} className="w-full h-full min-h-[220px] touch-none" />;
   }

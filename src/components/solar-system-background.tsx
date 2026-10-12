@@ -50,86 +50,96 @@ export default function SolarSystemBackground() {
     let targetMouseY = 0;
     let currentMouseX = 0;
     let currentMouseY = 0;
+    let mouseTicking = false;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const halfW = window.innerWidth / 2;
-      const halfH = window.innerHeight / 2;
-      targetMouseX = (e.clientX - halfW) / halfW;
-      targetMouseY = (e.clientY - halfH) / halfH;
+      if (mouseTicking) return;
+      mouseTicking = true;
+      requestAnimationFrame(() => {
+        const halfW = window.innerWidth / 2;
+        const halfH = window.innerHeight / 2;
+        targetMouseX = (e.clientX - halfW) / halfW;
+        targetMouseY = (e.clientY - halfH) / halfH;
+        mouseTicking = false;
+      });
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
     let stars: Star[] = [];
     let meteors: Meteor[] = [];
+    const margin = 24;
 
-    // Initialize stars with realistic astronomical distribution
+    // Offscreen canvas for pre-rendered static stars (65% stardust + 23% steady stars)
+    let staticCanvas: HTMLCanvasElement | null = null;
+    let staticCtx: CanvasRenderingContext2D | null = null;
+
+    // Initialize stars with high efficiency: static stars cached once, only sparkling diamond stars animated
     const initStars = () => {
       stars = [];
       const totalArea = width * height;
-      // High-density crisp star count calibrated for real night sky
-      const count = Math.min(650, Math.max(300, Math.floor(totalArea / 2800)));
+      const count = Math.min(420, Math.max(200, Math.floor(totalArea / 3200)));
+
+      if (!staticCanvas) {
+        staticCanvas = document.createElement('canvas');
+      }
+      staticCanvas.width = Math.ceil(width + margin * 2);
+      staticCanvas.height = Math.ceil(height + margin * 2);
+      staticCtx = staticCanvas.getContext('2d');
+      if (staticCtx) {
+        staticCtx.clearRect(0, 0, staticCanvas.width, staticCanvas.height);
+      }
 
       for (let i = 0; i < count; i++) {
         const rand = Math.random();
-        
+        const sx = Math.random() * (width + margin * 2);
+        const sy = Math.random() * (height + margin * 2);
+
         if (rand < 0.65) {
-          // 65% Distant Celestial Stardust (pin-point sharp, steady, 0.35px - 0.75px)
-          stars.push({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            radius: 0.35 + Math.random() * 0.45,
-            baseAlpha: 0.45 + Math.random() * 0.45,
-            alpha: 0.5,
-            depth: 2.5,
-            type: 'dust',
-            sparkleActive: false,
-            sparkleTimer: 0,
-            sparkleDuration: 0,
-            sparkleElapsed: 0,
-            sparklePeak: 0,
-          });
+          // Distant Celestial Stardust (baked into static texture)
+          const radius = 0.35 + Math.random() * 0.45;
+          const alpha = 0.45 + Math.random() * 0.45;
+          if (staticCtx) {
+            staticCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            staticCtx.beginPath();
+            staticCtx.arc(sx, sy, radius, 0, Math.PI * 2);
+            staticCtx.fill();
+          }
         } else if (rand < 0.88) {
-          // 23% Clear Mid-Field Stars (crisp, steady white points, 0.8px - 1.25px)
-          stars.push({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            radius: 0.8 + Math.random() * 0.45,
-            baseAlpha: 0.75 + Math.random() * 0.22,
-            alpha: 0.85,
-            depth: 5.5,
-            type: 'steady',
-            sparkleActive: false,
-            sparkleTimer: 0,
-            sparkleDuration: 0,
-            sparkleElapsed: 0,
-            sparklePeak: 0,
-          });
+          // Mid-Field Stars (baked into static texture)
+          const radius = 0.75 + Math.random() * 0.45;
+          const alpha = 0.75 + Math.random() * 0.22;
+          if (staticCtx) {
+            staticCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            staticCtx.beginPath();
+            staticCtx.arc(sx, sy, radius, 0, Math.PI * 2);
+            staticCtx.fill();
+          }
         } else {
-          // 12% Prominent Diamond Stars (brilliant white with realistic intermittent sparkle)
-          const radius = 1.35 + Math.random() * 0.75;
+          // Prominent Diamond Stars (only ~12% = ~25 stars animated for scintillation)
+          const radius = 1.3 + Math.random() * 0.65;
           stars.push({
             x: Math.random() * width,
             y: Math.random() * height,
             radius,
             baseAlpha: 0.9 + Math.random() * 0.1,
             alpha: 0.95,
-            depth: 10 + Math.random() * 6,
+            depth: 8 + Math.random() * 5,
             type: 'diamond',
             sparkleActive: false,
-            sparkleTimer: 0.5 + Math.random() * 3.5, // staggered first sparkles
+            sparkleTimer: 0.5 + Math.random() * 3.5,
             sparkleDuration: 0.4 + Math.random() * 0.4,
             sparkleElapsed: 0,
-            sparklePeak: 5.0 + Math.random() * 5.5, // needle spike length
+            sparklePeak: 4.5 + Math.random() * 5.0,
           });
         }
       }
     };
 
-    // Handle high-definition canvas scaling
+    // Debounced and DPR-capped canvas scaling (1.5 max for performance)
     const handleResize = () => {
       if (!canvas) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = Math.floor(width * dpr);
@@ -138,7 +148,6 @@ export default function SolarSystemBackground() {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
       initStars();
     };
 
@@ -153,15 +162,16 @@ export default function SolarSystemBackground() {
         x: startX,
         y: startY,
         length: 90 + Math.random() * 110,
-        speed: 24 + Math.random() * 12, // ultra fast
+        speed: 24 + Math.random() * 12,
         angle: (Math.PI / 4) + (Math.random() * 0.15 - 0.075),
         life: 0,
-        maxLife: 0.5 + Math.random() * 0.35, // 0.5s - 0.85s quick lifespan
+        maxLife: 0.5 + Math.random() * 0.35,
         thickness: 1.0 + Math.random() * 0.8,
       });
     };
 
     let lastTime = performance.now();
+    let isRunning = true;
 
     const render = (time: number) => {
       const delta = Math.min((time - lastTime) / 1000, 0.1);
@@ -176,19 +186,14 @@ export default function SolarSystemBackground() {
       ctx.fillRect(0, 0, width, height);
 
       // ──────────────────────────────────────────────────────────
-      // 1. DISTANT STARDUST & STEADY MID-FIELD STARS (Crisp & Steady)
+      // 1. FAST SINGLE BLIT OF CACHED STATIC STARFIELD
       // ──────────────────────────────────────────────────────────
-      for (let i = 0; i < stars.length; i++) {
-        const star = stars[i];
-        if (star.type === 'diamond') continue;
-
-        const px = star.x + currentMouseX * star.depth;
-        const py = star.y + currentMouseY * star.depth;
-
-        ctx.fillStyle = `rgba(255, 255, 255, ${star.baseAlpha})`;
-        ctx.beginPath();
-        ctx.arc(px, py, star.radius, 0, Math.PI * 2);
-        ctx.fill();
+      if (staticCanvas) {
+        ctx.drawImage(
+          staticCanvas,
+          -margin + currentMouseX * 3.5,
+          -margin + currentMouseY * 3.5
+        );
       }
 
       // ──────────────────────────────────────────────────────────
@@ -208,13 +213,11 @@ export default function SolarSystemBackground() {
           star.sparkleElapsed += delta;
           const t = star.sparkleElapsed / star.sparkleDuration;
           if (t >= 1) {
-            // Sparkle finished, set next random interval (2s to 6s)
             star.sparkleActive = false;
             star.sparkleTimer = 1.5 + Math.random() * 4.5;
             star.sparkleElapsed = 0;
             flareProgress = 0;
           } else {
-            // Realistic bell-curve scintillation pulse
             flareProgress = Math.sin(t * Math.PI);
           }
         } else {
@@ -231,35 +234,21 @@ export default function SolarSystemBackground() {
         const currentRadius = star.radius + flareProgress * 0.45;
         const currentAlpha = Math.min(1.0, star.baseAlpha + flareProgress * 0.15);
 
-        // Core star
         ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha})`;
         ctx.beginPath();
         ctx.arc(px, py, currentRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Subtle micro-halo during sparkle glint
+        // Needle spikes during sparkle flare
         if (flareProgress > 0.05) {
-          const haloRadius = currentRadius * (2.5 + flareProgress * 2.0);
-          const haloGrad = ctx.createRadialGradient(px, py, 0, px, py, haloRadius);
-          haloGrad.addColorStop(0, `rgba(255, 255, 255, ${flareProgress * 0.5})`);
-          haloGrad.addColorStop(0.5, `rgba(255, 255, 255, ${flareProgress * 0.18})`);
-          haloGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
-          ctx.fillStyle = haloGrad;
-          ctx.beginPath();
-          ctx.arc(px, py, haloRadius, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Razor-thin needle diffraction spikes (Hubble/DSLR diamond glint)
           const spikeLen = star.sparklePeak * flareProgress;
           const spikeAlpha = flareProgress * 0.85;
 
           ctx.save();
           ctx.strokeStyle = `rgba(255, 255, 255, ${spikeAlpha})`;
-          ctx.lineWidth = 0.5; // Razor sharp needle line
+          ctx.lineWidth = 0.5;
           ctx.lineCap = 'round';
 
-          // Primary 4-point cross (+ axis)
           ctx.beginPath();
           ctx.moveTo(px - spikeLen, py);
           ctx.lineTo(px + spikeLen, py);
@@ -267,7 +256,6 @@ export default function SolarSystemBackground() {
           ctx.lineTo(px, py + spikeLen);
           ctx.stroke();
 
-          // Secondary subtle 45-degree diagonal needle glint (× axis)
           if (flareProgress > 0.4) {
             const diagLen = spikeLen * 0.55;
             ctx.strokeStyle = `rgba(255, 255, 255, ${spikeAlpha * 0.55})`;
@@ -306,9 +294,7 @@ export default function SolarSystemBackground() {
         m.x += Math.cos(m.angle) * m.speed;
         m.y += Math.sin(m.angle) * m.speed;
 
-        // Fade in rapidly, fade out smoothly
         const opacity = Math.sin(lifeNorm * Math.PI) * 0.95;
-
         const tailX = m.x - Math.cos(m.angle) * m.length;
         const tailY = m.y - Math.sin(m.angle) * m.length;
 
@@ -326,7 +312,6 @@ export default function SolarSystemBackground() {
         ctx.lineTo(tailX, tailY);
         ctx.stroke();
 
-        // Pin-point meteor head
         ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
         ctx.beginPath();
         ctx.arc(m.x, m.y, m.thickness * 1.1, 0, Math.PI * 2);
@@ -334,16 +319,42 @@ export default function SolarSystemBackground() {
         ctx.restore();
       }
 
-      animationFrameId = requestAnimationFrame(render);
+      if (isRunning) {
+        animationFrameId = requestAnimationFrame(render);
+      }
     };
 
-    window.addEventListener('resize', handleResize);
+    // Pause RAF loop when tab is hidden to save 100% background GPU/CPU
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        isRunning = false;
+        cancelAnimationFrame(animationFrameId);
+      } else if (!isRunning) {
+        isRunning = true;
+        lastTime = performance.now();
+        animationFrameId = requestAnimationFrame(render);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Debounced window resize
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const onWindowResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(handleResize, 50);
+    };
+
+    window.addEventListener('resize', onWindowResize);
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
+      isRunning = false;
       cancelAnimationFrame(animationFrameId);
+      clearTimeout(resizeTimer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', onWindowResize);
     };
   }, []);
 

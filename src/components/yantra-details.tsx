@@ -402,10 +402,8 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                       <SectionDivider label="How to Read" />
                       <div className="space-y-2">
                         {knowledge.howToRead.map((item, idx) => (
-                          <div key={idx} className="flex gap-3 p-3.5 rounded-xl group transition-all duration-200"
-                            style={{ background: 'hsla(225, 35%, 6%, 0.5)', border: '1px solid hsla(225, 22%, 12%, 0.5)' }}
-                            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'hsla(24, 90%, 55%, 0.2)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'hsla(225, 22%, 12%, 0.5)'; }}
+                          <div key={idx} className="flex gap-3 p-3.5 rounded-xl group transition-colors duration-200 hover:border-primary/25 border border-white/5"
+                            style={{ background: 'hsla(225, 35%, 6%, 0.5)' }}
                           >
                             <div className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold"
                               style={{ background: 'hsla(24, 90%, 55%, 0.1)', border: '1px solid hsla(24, 90%, 55%, 0.2)', color: 'hsl(24, 90%, 62%)' }}>
@@ -597,18 +595,9 @@ export default function YantraDetails({ data }: { data: YantraData }) {
                     { icon: HardHat, label: 'Foundation Engineering', value: data.analysis?.orientation?.foundationNotes || '', color: 'hsl(180, 65%, 50%)' },
                     { icon: Scale, label: 'Tolerance & Calibration Guidance', value: data.analysis?.orientation?.toleranceGuidance || '', color: 'hsl(145, 60%, 48%)' },
                   ].map(({ icon: Icon, label, value, color }) => (
-                    <div key={label} className="flex gap-3 p-4 rounded-xl transition-all duration-300 group"
+                    <div key={label} className="flex gap-3 p-4 rounded-xl transition-colors duration-200 group hover:border-primary/20 border border-white/5"
                       style={{
                         background: 'hsla(225, 35%, 6%, 0.6)',
-                        border: '1px solid hsla(225, 22%, 12%, 0.6)',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = 'hsla(24, 90%, 55%, 0.15)';
-                        e.currentTarget.style.background = 'hsla(225, 35%, 7%, 0.8)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = 'hsla(225, 22%, 12%, 0.6)';
-                        e.currentTarget.style.background = 'hsla(225, 35%, 6%, 0.6)';
                       }}>
                       <div className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center mt-0.5"
                         style={{ 

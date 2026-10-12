@@ -163,21 +163,7 @@ export default function AppHeader() {
               <DialogTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all duration-300 cursor-pointer group relative overflow-hidden"
-                  style={{
-                    color: 'hsla(38, 25%, 80%, 0.8)',
-                    border: '1px solid transparent',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'hsl(38, 100%, 85%)';
-                    e.currentTarget.style.background = 'hsla(24, 90%, 55%, 0.06)';
-                    e.currentTarget.style.borderColor = 'hsla(24, 90%, 55%, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'hsla(38, 25%, 80%, 0.8)';
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.borderColor = 'transparent';
-                  }}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors duration-200 cursor-pointer group text-amber-200/80 hover:text-amber-100 hover:bg-primary/10 border border-transparent hover:border-primary/20"
                 >
                   <Layers className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 58%)' }} />
                   <span>Instruments</span>
@@ -219,20 +205,9 @@ export default function AppHeader() {
                         key={yantra.id}
                         type="button"
                         onClick={() => handleSelectYantra(yantra.id)}
-                        className="instrument-card p-3.5 rounded-xl transition-all flex flex-col gap-1.5 text-left group cursor-pointer"
+                        className="instrument-card p-3.5 rounded-xl transition-all duration-200 flex flex-col gap-1.5 text-left group cursor-pointer border border-white/5 hover:border-accent/35 hover:bg-card/90"
                         style={{
                           background: 'hsla(225, 35%, 7%, 0.8)',
-                          border: '1px solid hsla(225, 22%, 14%, 0.6)',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = 'hsla(43, 100%, 52%, 0.35)';
-                          e.currentTarget.style.background = 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.06), hsla(43, 100%, 52%, 0.04))';
-                          e.currentTarget.style.boxShadow = '0 8px 25px hsla(0, 0%, 0%, 0.2), 0 0 15px hsla(24, 90%, 55%, 0.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = 'hsla(225, 22%, 14%, 0.6)';
-                          e.currentTarget.style.background = 'hsla(225, 35%, 7%, 0.8)';
-                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
                         <div className="flex items-center justify-between w-full">
@@ -264,21 +239,7 @@ export default function AppHeader() {
               <DialogTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all duration-300 cursor-pointer"
-                  style={{
-                    color: 'hsla(38, 25%, 80%, 0.8)',
-                    border: '1px solid transparent',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'hsl(38, 100%, 85%)';
-                    e.currentTarget.style.background = 'hsla(24, 90%, 55%, 0.06)';
-                    e.currentTarget.style.borderColor = 'hsla(24, 90%, 55%, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'hsla(38, 25%, 80%, 0.8)';
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.borderColor = 'transparent';
-                  }}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors duration-200 cursor-pointer text-amber-200/80 hover:text-amber-100 hover:bg-primary/10 border border-transparent hover:border-primary/20"
                 >
                   <Landmark className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 58%)' }} />
                   <span>Observatories</span>
@@ -320,22 +281,9 @@ export default function AppHeader() {
                         key={obs.name}
                         type="button"
                         onClick={() => handleSelectObservatory(obs)}
-                        className="w-full text-left p-4 rounded-xl transition-all duration-300 space-y-1.5 group cursor-pointer"
+                        className="w-full text-left p-4 rounded-xl transition-all duration-200 space-y-1.5 group cursor-pointer border border-white/5 hover:border-accent/35 hover:bg-card/90"
                         style={{
                           background: 'hsla(225, 35%, 7%, 0.8)',
-                          border: '1px solid hsla(225, 22%, 14%, 0.6)',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = 'hsla(43, 100%, 52%, 0.3)';
-                          e.currentTarget.style.background = 'linear-gradient(135deg, hsla(24, 90%, 55%, 0.06), hsla(43, 100%, 52%, 0.04))';
-                          e.currentTarget.style.transform = 'translateY(-1px)';
-                          e.currentTarget.style.boxShadow = '0 6px 20px hsla(0, 0%, 0%, 0.2)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = 'hsla(225, 22%, 14%, 0.6)';
-                          e.currentTarget.style.background = 'hsla(225, 35%, 7%, 0.8)';
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
                         <div className="flex items-center justify-between">
@@ -367,21 +315,7 @@ export default function AppHeader() {
               <DialogTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all duration-300 cursor-pointer"
-                  style={{
-                    color: 'hsla(38, 25%, 80%, 0.8)',
-                    border: '1px solid transparent',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'hsl(38, 100%, 85%)';
-                    e.currentTarget.style.background = 'hsla(24, 90%, 55%, 0.06)';
-                    e.currentTarget.style.borderColor = 'hsla(24, 90%, 55%, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'hsla(38, 25%, 80%, 0.8)';
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.borderColor = 'transparent';
-                  }}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors duration-200 cursor-pointer text-amber-200/80 hover:text-amber-100 hover:bg-primary/10 border border-transparent hover:border-primary/20"
                 >
                   <BookOpen className="h-3.5 w-3.5" style={{ color: 'hsl(43, 100%, 58%)' }} />
                   <span>Heritage & Math</span>
@@ -468,21 +402,9 @@ export default function AppHeader() {
               href="https://github.com/monkeysoul-cmd/YantraVis"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200 border border-white/5 hover:border-primary/25 text-amber-200/70 hover:text-amber-100 hover:bg-primary/10"
               style={{
-                color: 'hsla(38, 25%, 75%, 0.7)',
                 background: 'hsla(225, 28%, 8%, 0.5)',
-                border: '1px solid hsla(225, 22%, 14%, 0.6)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'hsl(38, 100%, 85%)';
-                e.currentTarget.style.borderColor = 'hsla(24, 90%, 55%, 0.2)';
-                e.currentTarget.style.background = 'hsla(24, 90%, 55%, 0.06)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'hsla(38, 25%, 75%, 0.7)';
-                e.currentTarget.style.borderColor = 'hsla(225, 22%, 14%, 0.6)';
-                e.currentTarget.style.background = 'hsla(225, 28%, 8%, 0.5)';
               }}
             >
               <ExternalLink className="h-3 w-3" />

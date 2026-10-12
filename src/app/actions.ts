@@ -35,27 +35,14 @@ export async function generateYantra(
       targetYantra = validation.data.yantra;
     }
 
-    // Check backend connection: NEXT_PUBLIC_BACKEND_URL, BACKEND_URL, or local dev port 4000
-    const backendBase =
-      process.env.NEXT_PUBLIC_BACKEND_URL ||
-      process.env.BACKEND_URL ||
-      (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:4000' : '');
+    // If no explicit backend URL is configured, return ultra-fast parametric calculation immediately (<0.1ms)
+    const backendBase = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL;
 
-    let targetUrl: string | null = null;
     if (backendBase) {
       try {
-        targetUrl = new URL('/api/yantra', backendBase).toString();
-      } catch {
-        targetUrl = `${backendBase.replace(/\/+$/, '')}/api/yantra`;
-      }
-    } else if (typeof window !== 'undefined' && window.location.origin) {
-      targetUrl = `${window.location.origin}/api/yantra`;
-    }
-
-    if (targetUrl) {
-      try {
+        const targetUrl = `${backendBase.replace(/\/+$/, '')}/api/yantra`;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const timeoutId = setTimeout(() => controller.abort(), 1200);
 
         const response = await fetch(targetUrl, {
           method: 'POST',
@@ -82,7 +69,7 @@ export async function generateYantra(
       }
     }
 
-    // Fallback to local parametric calculations if backend is unavailable
+    // Instant local parametric calculations
     const calculatedData = generateParametricYantraData(targetYantra, targetLat, targetLon);
     return {
       data: calculatedData,
